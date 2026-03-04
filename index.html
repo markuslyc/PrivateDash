@@ -555,27 +555,23 @@ What would you like to work on?</div></div>
   </main>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // ============================================================
-// FLOW DASHBOARD — Full JavaScript
-// Google Calendar + Persistent Tasks + Claude + GPT-4
+// FLOW DASHBOARD — Complete JavaScript
+// Google Calendar + Persistent Tasks + Claude + GPT-4 + Kimi
 // ============================================================
 
-// ── CONFIG ──
 const GOOGLE_CLIENT_ID = '387362798277-gvadscn8if9m6i3r78tm641tmnmtkd4e.apps.googleusercontent.com';
 const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
-const LIVE_URL = 'https://maspaceship.netlify.app';
 
-// ── STATE ──
 let tasks = [];
 let nextTaskId = 1;
 let calYear, calMonth;
-let calEvents = []; // from Google Calendar
+let calEvents = [];
 let gcalConnected = false;
 let googleTokenClient = null;
 let focusSeconds = 0, timerRunning = false, focusTimerInterval = null;
 let fontSize = 18;
-let aiConversationHistory = [];
 
 const businesses = [
   { name: 'TechVenture Ltd', emoji: '⚡', tag: 'SaaS', tagColor: '#5ab4f0', kpis: [{l:'MRR',v:'£42k'},{l:'Users',v:'1,240'},{l:'Churn',v:'2.1%'}] },
@@ -602,14 +598,12 @@ const aiIntegrationsList = [
 ];
 
 // ── INIT ──
-document.addEventListener('DOMContentLoaded', () => {
-  const now = new Date();
+document.addEventListener('DOMContentLoaded', function() {
+  var now = new Date();
   calYear = now.getFullYear();
   calMonth = now.getMonth();
-
   updateDateTime();
   setInterval(updateDateTime, 60000);
-
   loadTasksFromStorage();
   renderTasks();
   renderCalendar();
@@ -619,28 +613,31 @@ document.addEventListener('DOMContentLoaded', () => {
   checkSavedKeys();
   initGoogleCalendar();
   updatePaShareLink();
-  setInterval(updateDateTime, 60000);
+  var sf = localStorage.getItem('flow_fontsize');
+  if (sf) { fontSize = parseInt(sf); document.documentElement.style.fontSize = fontSize + 'px'; var fsl = document.getElementById('fontSizeLabel'); if (fsl) fsl.textContent = fontSize; }
 });
 
 // ── DATETIME ──
 function updateDateTime() {
-  const now = new Date();
-  const h = now.getHours();
-  document.getElementById('timeOfDay').textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
-  document.getElementById('currentDate').textContent = now.toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  var now = new Date();
+  var h = now.getHours();
+  var tod = document.getElementById('timeOfDay');
+  if (tod) tod.textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  var cd = document.getElementById('currentDate');
+  if (cd) cd.textContent = now.toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 }
 
-// ── TASKS (PERSISTENT) ──
+// ── TASKS ──
 function loadTasksFromStorage() {
   try {
-    const saved = localStorage.getItem('flow_tasks');
+    var saved = localStorage.getItem('flow_tasks');
     if (saved) {
       tasks = JSON.parse(saved);
-      nextTaskId = tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+      nextTaskId = tasks.length ? Math.max.apply(null, tasks.map(function(t){ return t.id; })) + 1 : 1;
     } else {
       tasks = [
         { id:1, text:'Review Q3 business reports', done:false, priority:'high', date:'Today', source:'dashboard' },
-        { id:2, text:'Respond to 3 HubSpot leads', done:false, priority:'med', date:'Today', source:'hubspot' },
+        { id:2, text:'Respond to HubSpot leads', done:false, priority:'med', date:'Today', source:'dashboard' },
         { id:3, text:'Send weekly update to team', done:false, priority:'low', date:'EOD', source:'dashboard' },
       ];
       nextTaskId = 4;
@@ -650,67 +647,66 @@ function loadTasksFromStorage() {
 }
 
 function saveTasks() {
-  localStorage.setItem('flow_tasks', JSON.stringify(tasks));
+  try { localStorage.setItem('flow_tasks', JSON.stringify(tasks)); } catch(e) {}
   updateTaskStats();
 }
 
 function updateTaskStats() {
-  const pending = tasks.filter(t => !t.done).length;
-  const done = tasks.filter(t => t.done).length;
-  const el = document.getElementById('stat-tasks');
-  if (el) el.textContent = pending;
-  const sub = document.getElementById('stat-tasks-sub');
-  if (sub) sub.textContent = done + ' completed';
-  const counter = document.getElementById('task-counter');
-  if (counter) counter.textContent = pending + ' pending';
-  const full = document.getElementById('full-task-counter');
-  if (full) full.textContent = pending + ' pending';
+  var pending = tasks.filter(function(t){ return !t.done; }).length;
+  var done = tasks.filter(function(t){ return t.done; }).length;
+  var el;
+  el = document.getElementById('stat-tasks'); if (el) el.textContent = pending;
+  el = document.getElementById('stat-tasks-sub'); if (el) el.textContent = done + ' completed';
+  el = document.getElementById('task-counter'); if (el) el.textContent = pending + ' pending';
+  el = document.getElementById('full-task-counter'); if (el) el.textContent = pending + ' pending';
 }
 
 function renderTasks() {
-  ['task-list', 'full-task-list'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = tasks.length ? tasks.map(t => taskHtml(t)).join('') : '<div class="empty-state"><div class="icon">✅</div>All done! Add a task above.</div>';
+  ['task-list','full-task-list'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = tasks.length ? tasks.map(taskHtml).join('') : '<div class="empty-state"><div class="icon">✅</div>All done! Add a task above.</div>';
   });
   updateTaskStats();
 }
 
 function taskHtml(t) {
-  return `<div class="task-item" id="task-${t.id}">
-    <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})"></div>
-    <div class="task-text">
-      <div class="task-name ${t.done?'done':''}">${escHtml(t.text)}</div>
-      <div class="task-meta">${t.date}${t.source!=='dashboard'?' · via '+t.source:''}</div>
-    </div>
-    <span class="task-priority priority-${t.priority}">${t.priority.toUpperCase()}</span>
-    <button class="task-del" onclick="deleteTask(${t.id})" title="Delete">✕</button>
-  </div>`;
+  return '<div class="task-item" id="task-' + t.id + '">' +
+    '<div class="task-check ' + (t.done ? 'done' : '') + '" onclick="toggleTask(' + t.id + ')"></div>' +
+    '<div class="task-text">' +
+    '<div class="task-name ' + (t.done ? 'done' : '') + '">' + escHtml(t.text) + '</div>' +
+    '<div class="task-meta">' + t.date + '</div>' +
+    '</div>' +
+    '<span class="task-priority priority-' + t.priority + '">' + t.priority.toUpperCase() + '</span>' +
+    '<button class="task-del" onclick="deleteTask(' + t.id + ')" title="Delete">✕</button>' +
+    '</div>';
 }
 
 function toggleTask(id) {
-  const t = tasks.find(t => t.id === id);
+  var t = tasks.find(function(t){ return t.id === id; });
   if (t) { t.done = !t.done; saveTasks(); renderTasks(); }
 }
 
 function deleteTask(id) {
-  tasks = tasks.filter(t => t.id !== id);
+  tasks = tasks.filter(function(t){ return t.id !== id; });
   saveTasks(); renderTasks();
 }
 
 function clearDoneTasks() {
-  tasks = tasks.filter(t => !t.done);
+  tasks = tasks.filter(function(t){ return !t.done; });
   saveTasks(); renderTasks();
   showToast('Completed tasks cleared ✓');
 }
 
 function addTask(fromFull) {
-  const inputId = fromFull ? 'fullNewTaskInput' : 'newTaskInput';
-  const el = document.getElementById(inputId);
-  const text = el.value.trim();
+  var inputId = fromFull ? 'fullNewTaskInput' : 'newTaskInput';
+  var el = document.getElementById(inputId);
+  if (!el) return;
+  var text = el.value.trim();
   if (!text) return;
-  const prioEl = document.getElementById('newTaskPriority');
-  const prio = (fromFull && prioEl) ? prioEl.value : 'med';
-  tasks.unshift({ id: nextTaskId++, text, done: false, priority: prio, date: 'Today', source: 'dashboard' });
+  var prioEl = document.getElementById('newTaskPriority');
+  var prio = (fromFull && prioEl) ? prioEl.value : 'med';
+  tasks.unshift({ id: nextTaskId++, text: text, done: false, priority: prio, date: 'Today', source: 'dashboard' });
   el.value = '';
   saveTasks(); renderTasks();
 }
@@ -724,55 +720,49 @@ function changeMonth(delta) {
 }
 
 function renderCalendar() {
-  const now = new Date();
-  const monthName = new Date(calYear, calMonth, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
-  ['calMonthLabel','calMonthLabelFull'].forEach(id => { const e = document.getElementById(id); if(e) e.textContent = monthName; });
-
-  ['calGrid','calGridFull'].forEach(id => {
-    const container = document.getElementById(id);
+  var now = new Date();
+  var monthName = new Date(calYear, calMonth, 1).toLocaleDateString('en-GB', { month:'long', year:'numeric' });
+  ['calMonthLabel','calMonthLabelFull'].forEach(function(id) { var e = document.getElementById(id); if (e) e.textContent = monthName; });
+  ['calGrid','calGridFull'].forEach(function(id) {
+    var container = document.getElementById(id);
     if (!container) return;
-    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    let html = days.map(d => `<div class="cal-dow">${d}</div>`).join('');
-    const firstDay = new Date(calYear, calMonth, 1);
-    let startDow = firstDay.getDay() - 1; if (startDow < 0) startDow = 6;
-    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    const prevDays = new Date(calYear, calMonth, 0).getDate();
-    for (let i = startDow - 1; i >= 0; i--) html += `<div class="cal-day other-month">${prevDays - i}</div>`;
-    for (let d = 1; d <= daysInMonth; d++) {
-      const isToday = d === now.getDate() && calMonth === now.getMonth() && calYear === now.getFullYear();
-      const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      const hasEvent = calEvents.some(e => e.date === dateStr);
-      html += `<div class="cal-day ${isToday?'today':''} ${hasEvent?'has-event':''}" onclick="showDayEvents('${dateStr}')">${d}</div>`;
+    var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var html = days.map(function(d){ return '<div class="cal-dow">' + d + '</div>'; }).join('');
+    var firstDay = new Date(calYear, calMonth, 1);
+    var startDow = firstDay.getDay() - 1; if (startDow < 0) startDow = 6;
+    var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    var prevDays = new Date(calYear, calMonth, 0).getDate();
+    for (var i = startDow - 1; i >= 0; i--) html += '<div class="cal-day other-month">' + (prevDays - i) + '</div>';
+    for (var d = 1; d <= daysInMonth; d++) {
+      var isToday = d === now.getDate() && calMonth === now.getMonth() && calYear === now.getFullYear();
+      var dateStr = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+      var hasEvent = calEvents.some(function(e){ return e.date === dateStr; });
+      html += '<div class="cal-day' + (isToday?' today':'') + (hasEvent?' has-event':'') + '">' + d + '</div>';
     }
     container.innerHTML = html;
   });
 }
 
-function showDayEvents(dateStr) {
-  const dayEvents = calEvents.filter(e => e.date === dateStr);
-  if (dayEvents.length === 0) return;
-  showToast(`${dayEvents.length} event${dayEvents.length>1?'s':''} on ${dateStr}`);
-}
-
 function renderEvents(events, containerId) {
-  const el = document.getElementById(containerId);
+  var el = document.getElementById(containerId);
   if (!el) return;
   if (!events || events.length === 0) {
-    el.innerHTML = '<div class="empty-state"><div class="icon">📅</div>No upcoming events</div>';
+    el.innerHTML = '<div class="empty-state"><div class="icon">📅</div>No upcoming events. Connect Google Calendar above.</div>';
     return;
   }
-  el.innerHTML = events.slice(0, 10).map(e => `
-    <div class="event-item" style="border-left-color:${e.color||'var(--accent-blue)'}">
-      <div class="event-time">${e.time || ''}</div>
-      <div class="event-name">${escHtml(e.title)}</div>
-      <div class="event-cal">${e.calendar || 'Google'}</div>
-    </div>`).join('');
+  el.innerHTML = events.slice(0,10).map(function(e) {
+    return '<div class="event-item" style="border-left-color:' + (e.color||'var(--accent-blue)') + '">' +
+      '<div class="event-time">' + (e.time||'') + '</div>' +
+      '<div class="event-name">' + escHtml(e.title) + '</div>' +
+      '<div class="event-cal">' + (e.calendar||'Google') + '</div>' +
+      '</div>';
+  }).join('');
 }
 
 // ── GOOGLE CALENDAR ──
 function initGoogleCalendar() {
-  let attempts = 0;
-  const tryInit = () => {
+  var attempts = 0;
+  function tryInit() {
     attempts++;
     if (typeof google !== 'undefined' && typeof gapi !== 'undefined') {
       try {
@@ -781,10 +771,10 @@ function initGoogleCalendar() {
           scope: GCAL_SCOPES,
           callback: handleGCalToken,
         });
-        const token = localStorage.getItem('flow_gcal_token');
-        const expiry = localStorage.getItem('flow_gcal_expiry');
+        var token = localStorage.getItem('flow_gcal_token');
+        var expiry = localStorage.getItem('flow_gcal_expiry');
         if (token && expiry && Date.now() < parseInt(expiry)) {
-          gapi.load('client', () => {
+          gapi.load('client', function() {
             gapi.client.setToken({ access_token: token });
             fetchCalendarEvents();
           });
@@ -793,35 +783,14 @@ function initGoogleCalendar() {
     } else if (attempts < 15) {
       setTimeout(tryInit, 600);
     }
-  };
+  }
   setTimeout(tryInit, 800);
 }
 
 function connectGoogleCalendar() {
   if (!googleTokenClient) {
-    // Try to init again then connect
-    let attempts = 0;
-    const tryConnect = () => {
-      attempts++;
-      if (typeof google !== 'undefined' && typeof gapi !== 'undefined') {
-        try {
-          googleTokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: GOOGLE_CLIENT_ID,
-            scope: GCAL_SCOPES,
-            callback: handleGCalToken,
-          });
-          googleTokenClient.requestAccessToken();
-        } catch(e) {
-          showToast('Google error: ' + e.message + ' — make sure you are on the live site, not a local file.');
-        }
-      } else if (attempts < 5) {
-        showToast('Loading Google… please try again in a moment');
-        setTimeout(tryConnect, 800);
-      } else {
-        showToast('Google failed to load. Are you on maspaceship.netlify.app?');
-      }
-    };
-    tryConnect();
+    showToast('Still loading Google… please wait a moment and try again');
+    initGoogleCalendar();
     return;
   }
   try {
@@ -833,13 +802,13 @@ function connectGoogleCalendar() {
 
 function handleGCalToken(tokenResponse) {
   if (tokenResponse.error) {
-    showToast('Google Calendar connection failed: ' + tokenResponse.error);
+    showToast('Google Calendar error: ' + tokenResponse.error);
     return;
   }
-  const expiry = Date.now() + (tokenResponse.expires_in * 1000);
+  var expiry = Date.now() + (tokenResponse.expires_in * 1000);
   localStorage.setItem('flow_gcal_token', tokenResponse.access_token);
   localStorage.setItem('flow_gcal_expiry', expiry.toString());
-  gapi.load('client', () => {
+  gapi.load('client', function() {
     gapi.client.setToken(tokenResponse);
     fetchCalendarEvents();
   });
@@ -848,20 +817,18 @@ function handleGCalToken(tokenResponse) {
 async function fetchCalendarEvents() {
   try {
     await gapi.client.load('calendar', 'v3');
-    const now = new Date();
-    const timeMin = now.toISOString();
-    const timeMax = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
-    const response = await gapi.client.calendar.events.list({
+    var now = new Date();
+    var timeMin = now.toISOString();
+    var timeMax = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    var response = await gapi.client.calendar.events.list({
       calendarId: 'primary',
-      timeMin, timeMax,
-      singleEvents: true,
-      orderBy: 'startTime',
-      maxResults: 50,
+      timeMin: timeMin, timeMax: timeMax,
+      singleEvents: true, orderBy: 'startTime', maxResults: 50,
     });
-    const items = response.result.items || [];
-    calEvents = items.map(ev => {
-      const start = ev.start.dateTime || ev.start.date;
-      const d = new Date(start);
+    var items = response.result.items || [];
+    calEvents = items.map(function(ev) {
+      var start = ev.start.dateTime || ev.start.date;
+      var d = new Date(start);
       return {
         title: ev.summary || '(No title)',
         date: start.substring(0, 10),
@@ -873,54 +840,53 @@ async function fetchCalendarEvents() {
     gcalConnected = true;
     updateGCalUI();
     renderCalendar();
-    const upcoming = calEvents.slice(0, 10);
-    renderEvents(upcoming, 'eventList');
-    renderEvents(upcoming, 'fullEventList');
-    const todayEvents = calEvents.filter(e => e.date === new Date().toISOString().substring(0,10));
-    const statM = document.getElementById('stat-meetings');
+    renderEvents(calEvents.slice(0,10), 'eventList');
+    renderEvents(calEvents.slice(0,10), 'fullEventList');
+    var todayStr = now.toISOString().substring(0,10);
+    var todayEvents = calEvents.filter(function(e){ return e.date === todayStr; });
+    var statM = document.getElementById('stat-meetings');
     if (statM) statM.textContent = todayEvents.length;
-    const nextM = document.getElementById('stat-next-meeting');
-    if (nextM && todayEvents.length > 0) nextM.textContent = 'Next: ' + todayEvents[0].time;
-    else if (nextM) nextM.textContent = 'None today';
+    var nextM = document.getElementById('stat-next-meeting');
+    if (nextM) nextM.textContent = todayEvents.length > 0 ? 'Next: ' + todayEvents[0].time : 'None today';
     showToast('Google Calendar connected ✓ — ' + items.length + ' events loaded');
   } catch(e) {
     console.error('Calendar fetch error:', e);
-    showToast('Could not load calendar events. Check console.');
+    showToast('Calendar error: ' + (e.message || JSON.stringify(e)));
   }
 }
 
 function updateGCalUI() {
-  const badges = ['gcal-badge','gcal-badge-full'];
-  badges.forEach(id => {
-    const el = document.getElementById(id);
+  ['gcal-badge','gcal-badge-full'].forEach(function(id) {
+    var el = document.getElementById(id);
     if (!el) return;
     el.className = 'card-badge ' + (gcalConnected ? 'gcal-connected' : 'gcal-disconnected');
     el.textContent = gcalConnected ? '● Google Connected' : 'Not connected';
   });
-  const btn = document.getElementById('gcal-connect-btn');
+  var btn = document.getElementById('gcal-connect-btn');
   if (btn) { btn.textContent = gcalConnected ? '✓ Connected' : 'Connect Google'; btn.disabled = gcalConnected; }
-  const mainBtn = document.getElementById('gcal-main-btn');
-  if (mainBtn) { mainBtn.textContent = gcalConnected ? '✓ Google Calendar Connected' : '🔗 Connect Google Calendar'; mainBtn.disabled = gcalConnected; }
-  const mainStatus = document.getElementById('gcal-main-status');
-  if (mainStatus) mainStatus.textContent = gcalConnected ? '● Connected — events loaded' : 'Not connected';
+  var mainBtn = document.getElementById('gcal-main-btn');
+  if (mainBtn) { mainBtn.textContent = gcalConnected ? '✓ Connected' : '🔗 Connect Google Calendar'; mainBtn.disabled = gcalConnected; }
+  var mainStatus = document.getElementById('gcal-main-status');
+  if (mainStatus) mainStatus.textContent = gcalConnected ? '● Connected' : 'Not connected';
   renderIntegrations();
 }
 
-// ── AI ASSISTANT ──
+// ── AI ──
 async function sendAiMessage(chatAreaId, inputId, modelSelectId) {
-  const input = document.getElementById(inputId);
-  const model = document.getElementById(modelSelectId)?.value || 'claude';
-  const msg = input.value.trim();
+  var input = document.getElementById(inputId);
+  var modelEl = document.getElementById(modelSelectId);
+  var model = modelEl ? modelEl.value : 'claude';
+  var msg = input.value.trim();
   if (!msg) return;
   input.value = '';
   addAiMsg(chatAreaId, msg, true);
-  const thinkingEl = addThinkingMsg(chatAreaId);
-  let reply;
+  var thinkingEl = addThinkingMsg(chatAreaId);
+  var reply;
   try {
     if (model === 'claude') reply = await callClaude(msg);
     else if (model === 'gpt4') reply = await callOpenAI(msg);
     else if (model === 'kimi') reply = await callKimi(msg);
-    else reply = 'Model not configured.';
+    else reply = 'Model not set up.';
   } catch(e) {
     reply = 'Error: ' + e.message;
   }
@@ -929,279 +895,289 @@ async function sendAiMessage(chatAreaId, inputId, modelSelectId) {
 }
 
 async function callClaude(message) {
-  const key = localStorage.getItem('flow_claude_key');
-  if (!key) return '⚠️ No Claude API key found.\n\nGo to Integrations → AI Tools → paste your Claude key and click Save.';
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  var key = localStorage.getItem('flow_claude_key');
+  if (!key) return 'No Claude key saved yet.\n\nGo to Integrations tab → paste your Claude API key → click Save. Then come back here and try again.';
+  var res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      system: 'You are a helpful personal assistant built into the FLOW dashboard. The user has dyslexia — always be clear, concise and well-structured. Use short paragraphs. Be practical and actionable. Never use unnecessary jargon.',
-      messages: [{ role: 'user', content: message }]
-    })
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1024,
+      system: 'You are a helpful personal assistant in the FLOW dashboard. The user has dyslexia — be clear, concise, use short paragraphs. Be practical.',
+      messages: [{ role: 'user', content: message }] })
   });
-  const data = await res.json();
+  var data = await res.json();
   if (data.error) throw new Error(data.error.message);
-  return data.content?.[0]?.text || 'No response.';
+  return (data.content && data.content[0]) ? data.content[0].text : 'No response.';
 }
 
 async function callOpenAI(message) {
-  const key = localStorage.getItem('flow_openai_key');
-  if (!key) return '⚠️ No OpenAI API key found.\n\nGo to Integrations → AI Tools → paste your GPT-4 key and click Save.';
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  var key = localStorage.getItem('flow_openai_key');
+  if (!key) return 'No GPT-4 key saved yet.\n\nGo to Integrations tab → paste your OpenAI API key → click Save.';
+  var res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-    body: JSON.stringify({
-      model: 'gpt-4o',
-      messages: [
-        { role: 'system', content: 'You are a helpful personal assistant in the FLOW dashboard. The user has dyslexia — be clear, concise and structured. Use short paragraphs.' },
-        { role: 'user', content: message }
-      ],
-      max_tokens: 1024
-    })
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  return data.choices?.[0]?.message?.content || 'No response.';
-}
-
-async function callKimi(message) {
-  const key = localStorage.getItem('flow_kimi_key');
-  if (!key) return '⚠️ No Kimi API key found.\n\nGo to Integrations → AI Tools → paste your Kimi key and click Save.';
-  const res = await fetch('https://api.moonshot.cn/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-    body: JSON.stringify({
-      model: 'moonshot-v1-8k',
+    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 1024,
       messages: [
         { role: 'system', content: 'You are a helpful personal assistant. Be clear and concise.' },
         { role: 'user', content: message }
-      ],
-      max_tokens: 1024
-    })
+      ] })
   });
-  const data = await res.json();
+  var data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return (data.choices && data.choices[0]) ? data.choices[0].message.content : 'No response.';
+}
+
+async function callKimi(message) {
+  var key = localStorage.getItem('flow_kimi_key');
+  if (!key) return 'No Kimi key saved yet.\n\nGo to Integrations tab → paste your Kimi API key → click Save.';
+  var res = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({ model: 'moonshot-v1-8k', max_tokens: 1024,
+      messages: [
+        { role: 'system', content: 'You are a helpful personal assistant. Be clear and concise.' },
+        { role: 'user', content: message }
+      ] })
+  });
+  var data = await res.json();
   if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-  return data.choices?.[0]?.message?.content || 'No response.';
+  return (data.choices && data.choices[0]) ? data.choices[0].message.content : 'No response.';
 }
 
 function addAiMsg(containerId, text, isUser) {
-  const container = document.getElementById(containerId);
+  var container = document.getElementById(containerId);
   if (!container) return null;
-  const div = document.createElement('div');
+  var div = document.createElement('div');
   div.className = 'ai-msg' + (isUser ? ' user' : '');
-  div.innerHTML = `<div class="ai-avatar ${isUser?'user-av':''}">${isUser?'Y':'✦'}</div><div class="ai-bubble">${escHtml(text)}</div>`;
+  div.innerHTML = '<div class="ai-avatar ' + (isUser ? 'user-av' : '') + '">' + (isUser ? 'Y' : '✦') + '</div><div class="ai-bubble">' + escHtml(text) + '</div>';
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
   return div;
 }
 
 function addThinkingMsg(containerId) {
-  const container = document.getElementById(containerId);
-  const div = document.createElement('div');
+  var container = document.getElementById(containerId);
+  var div = document.createElement('div');
   div.className = 'ai-msg';
-  div.innerHTML = `<div class="ai-avatar">✦</div><div class="ai-bubble ai-thinking"><span></span><span></span><span></span></div>`;
+  div.innerHTML = '<div class="ai-avatar">✦</div><div class="ai-bubble"><div class="ai-thinking"><span></span><span></span><span></span></div></div>';
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
   return div;
 }
 
 function clearAiChat() {
-  const el = document.getElementById('fullAiChat');
-  if (el) el.innerHTML = `<div class="ai-msg"><div class="ai-avatar">✦</div><div class="ai-bubble">Chat cleared. What can I help you with?</div></div>`;
+  var el = document.getElementById('fullAiChat');
+  if (el) el.innerHTML = '<div class="ai-msg"><div class="ai-avatar">✦</div><div class="ai-bubble">Chat cleared. What can I help with?</div></div>';
 }
 
 function checkSavedKeys() {
-  const statusEl = document.getElementById('ai-key-status');
+  var statusEl = document.getElementById('ai-key-status');
   if (!statusEl) return;
-  const keys = [];
+  var keys = [];
   if (localStorage.getItem('flow_claude_key')) keys.push('✦ Claude');
   if (localStorage.getItem('flow_openai_key')) keys.push('● GPT-4');
   if (localStorage.getItem('flow_kimi_key')) keys.push('🌙 Kimi');
-  statusEl.textContent = keys.length ? 'Connected: ' + keys.join(' · ') : 'No AI keys saved yet. Go to Integrations to add them.';
+  statusEl.textContent = keys.length ? 'Connected: ' + keys.join(' · ') : 'No AI keys saved yet — add them below.';
   statusEl.style.color = keys.length ? 'var(--accent-green)' : 'var(--text-muted)';
 }
 
 // ── API KEYS ──
 function saveApiKey(service) {
-  const inputMap = { claude:'claudeApiKey', openai:'openaiApiKey', kimi:'kimiApiKey', hubspot:'hubspotKey' };
-  const storageMap = { claude:'flow_claude_key', openai:'flow_openai_key', kimi:'flow_kimi_key', hubspot:'flow_hubspot_key' };
-  const el = document.getElementById(inputMap[service]);
+  var inputMap = { claude:'claudeApiKey', openai:'openaiApiKey', kimi:'kimiApiKey', hubspot:'hubspotKey' };
+  var storageMap = { claude:'flow_claude_key', openai:'flow_openai_key', kimi:'flow_kimi_key', hubspot:'flow_hubspot_key' };
+  var el = document.getElementById(inputMap[service]);
   if (!el || !el.value.trim()) { showToast('Please enter a key first'); return; }
   localStorage.setItem(storageMap[service], el.value.trim());
   el.value = '';
-  const statusEl = document.getElementById(service + '-key-status');
-  if (statusEl) { statusEl.style.display = 'inline-flex'; setTimeout(() => statusEl.style.display = 'none', 3000); }
+  var statusEl = document.getElementById(service + '-key-status');
+  if (statusEl) { statusEl.style.display = 'inline-flex'; setTimeout(function(){ statusEl.style.display = 'none'; }, 3000); }
   checkSavedKeys();
   renderIntegrations();
   showToast(service + ' API key saved ✓');
 }
 
-// ── INTEGRATIONS RENDER ──
+// ── INTEGRATIONS ──
 function integStatus(key) {
   if (key === 'gcal') return gcalConnected ? 'connected' : 'connect';
-  const storageMap = { claude:'flow_claude_key', openai:'flow_openai_key', kimi:'flow_kimi_key', hubspot:'flow_hubspot_key' };
-  const noKey = ['gdrive','slack','notion','zapier','gemini','mistral','custom'];
-  if (noKey.includes(key)) return 'coming';
+  var storageMap = { claude:'flow_claude_key', openai:'flow_openai_key', kimi:'flow_kimi_key', hubspot:'flow_hubspot_key' };
+  var noKey = ['gdrive','slack','notion','zapier','gemini','mistral','custom'];
+  if (noKey.indexOf(key) >= 0) return 'coming';
   return localStorage.getItem(storageMap[key]) ? 'connected' : 'connect';
 }
 
 function integHtml(i) {
-  const s = integStatus(i.key);
-  const labels = { connected:'● Connected', connect:'+ Connect', coming:'Coming soon' };
-  const cls = { connected:'status-connected', connect:'status-connect', coming:'status-coming' };
-  return `<div class="integ-card ${s}" onclick="handleIntegClick('${i.key}')">
-    <div class="integ-logo">${i.emoji}</div>
-    <div class="integ-name">${i.name}</div>
-    <div class="integ-status ${cls[s]}">${labels[s]}</div>
-  </div>`;
+  var s = integStatus(i.key);
+  var labels = { connected:'● Connected', connect:'+ Connect', coming:'Coming soon' };
+  var cls = { connected:'status-connected', connect:'status-connect', coming:'status-coming' };
+  return '<div class="integ-card ' + s + '" onclick="handleIntegClick(\'' + i.key + '\')">' +
+    '<div class="integ-logo">' + i.emoji + '</div>' +
+    '<div class="integ-name">' + i.name + '</div>' +
+    '<div class="integ-status ' + cls[s] + '">' + labels[s] + '</div>' +
+    '</div>';
 }
 
 function handleIntegClick(key) {
   if (key === 'gcal') { connectGoogleCalendar(); return; }
-  if (['claude','openai','kimi','hubspot'].includes(key)) { showView('integrations'); showToast('Add your ' + key + ' key in the API Keys section below ↓'); return; }
-  showToast('Coming soon — more integrations being built!');
+  if (['claude','openai','kimi','hubspot'].indexOf(key) >= 0) { showView('integrations'); return; }
+  showToast('Coming soon!');
 }
 
 function renderIntegrations() {
-  const crmEl = document.getElementById('crmIntegrations');
+  var crmEl = document.getElementById('crmIntegrations');
   if (crmEl) crmEl.innerHTML = crmIntegrationsList.map(integHtml).join('');
-  const aiEl = document.getElementById('aiIntegrations');
+  var aiEl = document.getElementById('aiIntegrations');
   if (aiEl) aiEl.innerHTML = aiIntegrationsList.map(integHtml).join('');
 }
 
 // ── BUSINESSES ──
-function bizMiniHtml(b) {
-  return `<div class="biz-card" onclick="showView('businesses')">
-    <div class="biz-name">${b.emoji} ${b.name} <span class="biz-tag" style="background:${b.tagColor}22;color:${b.tagColor}">${b.tag}</span></div>
-    <div class="biz-kpi-row">${b.kpis.map(k=>`<div class="biz-kpi"><div class="biz-kpi-label">${k.l}</div><div class="biz-kpi-val">${k.v}</div></div>`).join('')}</div>
-  </div>`;
-}
-
 function renderBusinesses() {
-  const mini = document.getElementById('bizMiniList');
-  if (mini) mini.innerHTML = businesses.map(bizMiniHtml).join('');
+  var mini = document.getElementById('bizMiniList');
+  if (mini) mini.innerHTML = businesses.map(function(b) {
+    return '<div class="biz-card" onclick="showView(\'businesses\')">' +
+      '<div class="biz-name">' + b.emoji + ' ' + b.name + ' <span class="biz-tag" style="background:' + b.tagColor + '22;color:' + b.tagColor + '">' + b.tag + '</span></div>' +
+      '<div class="biz-kpi-row">' + b.kpis.map(function(k){ return '<div class="biz-kpi"><div class="biz-kpi-label">' + k.l + '</div><div class="biz-kpi-val">' + k.v + '</div></div>'; }).join('') + '</div>' +
+      '</div>';
+  }).join('');
 }
 
 function renderFullBusinesses() {
-  const el = document.getElementById('fullBizList');
-  if (el) el.innerHTML = businesses.map(b => `
-    <div class="card" style="cursor:pointer;">
-      <div class="card-header">
-        <div style="font-size:28px;">${b.emoji}</div>
-        <div><div style="font-size:17px;font-weight:600;">${b.name}</div>
-        <span class="biz-tag" style="background:${b.tagColor}22;color:${b.tagColor};font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600;">${b.tag}</span></div>
-      </div>
-      <div class="card-body">
-        <div class="biz-kpi-row">${b.kpis.map(k=>`<div class="biz-kpi"><div class="biz-kpi-label">${k.l}</div><div class="biz-kpi-val" style="font-size:22px;">${k.v}</div></div>`).join('')}</div>
-        <div class="progress-bar" style="margin-top:16px;"><div class="progress-fill" style="width:${Math.floor(Math.random()*40)+40}%;background:${b.tagColor};"></div></div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Q3 target progress</div>
-      </div>
-    </div>`).join('');
+  var el = document.getElementById('fullBizList');
+  if (!el) return;
+  el.innerHTML = businesses.map(function(b) {
+    return '<div class="card">' +
+      '<div class="card-header"><div style="font-size:28px;">' + b.emoji + '</div>' +
+      '<div><div style="font-size:17px;font-weight:600;">' + b.name + '</div>' +
+      '<span class="biz-tag" style="background:' + b.tagColor + '22;color:' + b.tagColor + ';font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600;">' + b.tag + '</span></div></div>' +
+      '<div class="card-body">' +
+      '<div class="biz-kpi-row">' + b.kpis.map(function(k){ return '<div class="biz-kpi"><div class="biz-kpi-label">' + k.l + '</div><div class="biz-kpi-val" style="font-size:22px;">' + k.v + '</div></div>'; }).join('') + '</div>' +
+      '<div class="progress-bar" style="margin-top:16px;"><div class="progress-fill" style="width:65%;background:' + b.tagColor + ';"></div></div>' +
+      '<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Q3 progress</div>' +
+      '</div></div>';
+  }).join('');
 }
 
 // ── NOTES ──
 function loadNotes() {
-  const saved = localStorage.getItem('flow_notes');
-  const el = document.getElementById('quickNotes');
+  var saved = localStorage.getItem('flow_notes');
+  var el = document.getElementById('quickNotes');
   if (saved && el) el.value = saved;
 }
-let notesSaveTimeout;
+
+var notesSaveTimeout;
 function saveNotes() {
   clearTimeout(notesSaveTimeout);
-  notesSaveTimeout = setTimeout(() => {
-    localStorage.setItem('flow_notes', document.getElementById('quickNotes').value);
-    const s = document.getElementById('notes-saved');
-    if (s) { s.textContent = '✓ Saved'; setTimeout(() => { s.textContent = ''; }, 1500); }
+  notesSaveTimeout = setTimeout(function() {
+    var el = document.getElementById('quickNotes');
+    if (el) localStorage.setItem('flow_notes', el.value);
+    var s = document.getElementById('notes-saved');
+    if (s) { s.textContent = '✓ Saved'; setTimeout(function(){ s.textContent = ''; }, 1500); }
   }, 600);
 }
 
 // ── WIDGET TOGGLES ──
 function toggleWidget(id, btn) {
-  const el = document.getElementById(id);
+  var el = document.getElementById(id);
   if (!el) return;
   el.classList.toggle('hidden');
   btn.classList.toggle('on');
 }
 
 function setLayout(mode, btn) {
-  document.querySelectorAll('.focus-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.focus-btn').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
-  const all = ['tasks-widget','cal-widget','ai-widget','biz-widget','notes-widget'];
-  const show = mode === 'all' ? all : mode === 'work' ? ['tasks-widget','cal-widget','biz-widget'] : mode === 'personal' ? ['tasks-widget','cal-widget','notes-widget'] : ['biz-widget','tasks-widget','ai-widget'];
-  all.forEach(w => { const el = document.getElementById(w); if (el) el.classList.toggle('hidden', !show.includes(w)); });
-  document.querySelectorAll('.widget-toggle').forEach(t => {
-    const m = t.getAttribute('onclick')?.match(/'([^']+)'/);
-    if (m) t.classList.toggle('on', show.includes(m[1]));
+  var all = ['tasks-widget','cal-widget','ai-widget','biz-widget','notes-widget'];
+  var show = mode === 'all' ? all : mode === 'work' ? ['tasks-widget','cal-widget','biz-widget'] : mode === 'personal' ? ['tasks-widget','cal-widget','notes-widget'] : ['biz-widget','tasks-widget','ai-widget'];
+  all.forEach(function(w) {
+    var el = document.getElementById(w);
+    if (el) el.classList.toggle('hidden', show.indexOf(w) < 0);
   });
+  document.querySelectorAll('.widget-toggle').forEach(function(t) {
+    var m = t.getAttribute('onclick') ? t.getAttribute('onclick').match(/'([^']+)'/) : null;
+    if (m) t.classList.toggle('on', show.indexOf(m[1]) >= 0);
+  });
+}
+
+// ── VIEW SWITCHING ──
+function showView(name) {
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
+  var view = document.getElementById('view-' + name);
+  var nav = document.getElementById('nav-' + name);
+  if (view) view.classList.add('active');
+  if (nav) nav.classList.add('active');
+  if (name === 'tasks') renderTasks();
+  if (name === 'businesses') renderFullBusinesses();
+  if (name === 'integrations') { renderIntegrations(); checkSavedKeys(); }
+  if (name === 'calendar') { renderCalendar(); renderEvents(calEvents.slice(0,10), 'fullEventList'); }
 }
 
 // ── FOCUS MODE ──
 function openFocusMode() {
-  const activeTask = tasks.find(t => !t.done);
-  document.getElementById('focusTaskDisplay').textContent = activeTask ? '🎯 ' + activeTask.text : 'No pending tasks — enjoy the moment!';
-  document.getElementById('focusOverlay').classList.add('active');
+  var activeTask = tasks.find(function(t){ return !t.done; });
+  var ftd = document.getElementById('focusTaskDisplay');
+  if (ftd) ftd.textContent = activeTask ? '🎯 ' + activeTask.text : 'No pending tasks — enjoy the moment!';
+  var fo = document.getElementById('focusOverlay');
+  if (fo) fo.classList.add('active');
   updateFocusClock();
 }
+
 function closeFocusMode() {
-  document.getElementById('focusOverlay').classList.remove('active');
+  var fo = document.getElementById('focusOverlay');
+  if (fo) fo.classList.remove('active');
   clearInterval(focusTimerInterval); focusTimerInterval = null; timerRunning = false;
 }
+
 function toggleFocusTimer() {
-  const btn = document.getElementById('focusStartBtn');
+  var btn = document.getElementById('focusStartBtn');
   if (!timerRunning) {
-    timerRunning = true; btn.textContent = 'Pause';
-    focusTimerInterval = setInterval(() => { focusSeconds++; updateFocusClock(); }, 1000);
+    timerRunning = true; if (btn) btn.textContent = 'Pause';
+    focusTimerInterval = setInterval(function(){ focusSeconds++; updateFocusClock(); }, 1000);
   } else {
-    timerRunning = false; btn.textContent = 'Resume'; clearInterval(focusTimerInterval);
+    timerRunning = false; if (btn) btn.textContent = 'Resume';
+    clearInterval(focusTimerInterval);
   }
 }
+
 function resetFocusTimer() {
-  clearInterval(focusTimerInterval); focusTimerInterval = null; timerRunning = false;
-  focusSeconds = 0; updateFocusClock();
-  document.getElementById('focusStartBtn').textContent = 'Start';
+  clearInterval(focusTimerInterval); focusTimerInterval = null;
+  timerRunning = false; focusSeconds = 0; updateFocusClock();
+  var btn = document.getElementById('focusStartBtn');
+  if (btn) btn.textContent = 'Start';
 }
+
 function updateFocusClock() {
-  const m = String(Math.floor(focusSeconds/60)).padStart(2,'0');
-  const s = String(focusSeconds%60).padStart(2,'0');
-  document.getElementById('focusClock').textContent = m+':'+s;
+  var m = String(Math.floor(focusSeconds/60)).padStart(2,'0');
+  var s = String(focusSeconds%60).padStart(2,'0');
+  var fc = document.getElementById('focusClock');
+  if (fc) fc.textContent = m + ':' + s;
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFocusMode(); });
+
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeFocusMode(); });
 
 // ── FONT SIZE ──
 function changeFontSize(delta) {
   fontSize = Math.max(14, Math.min(26, fontSize + delta));
   document.documentElement.style.fontSize = fontSize + 'px';
-  document.getElementById('fontSizeLabel').textContent = fontSize;
+  var fsl = document.getElementById('fontSizeLabel');
+  if (fsl) fsl.textContent = fontSize;
   localStorage.setItem('flow_fontsize', fontSize);
 }
 
-// ── VIEW SWITCHING ──
-function showView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'tasks') renderTasks();
-  if (name === 'businesses') renderFullBusinesses();
-  if (name === 'integrations') { renderIntegrations(); checkSavedKeys(); }
+// ── PA PANEL ──
+function togglePaPanel() {
+  var pp = document.getElementById('paPanel');
+  if (pp) pp.classList.toggle('open');
 }
 
-// ── PA PANEL ──
-function togglePaPanel() { document.getElementById('paPanel').classList.toggle('open'); }
 function updatePaShareLink() {
-  const el = document.getElementById('paShareLink');
-  if (el) el.textContent = window.location.href.split('?')[0] + '?pa=view&token=abc123';
+  var el = document.getElementById('paShareLink');
+  if (el) el.textContent = 'https://maspaceship.netlify.app/?pa=view&token=abc123';
 }
+
 function copyPaLink() {
-  const link = document.getElementById('paShareLink')?.textContent;
-  if (link) navigator.clipboard.writeText(link).then(() => showToast('PA link copied! ✓')).catch(() => showToast('Copy failed — select the link manually'));
+  var link = 'https://maspaceship.netlify.app/?pa=view&token=abc123';
+  navigator.clipboard.writeText(link)
+    .then(function(){ showToast('PA link copied! ✓'); })
+    .catch(function(){ showToast('Select the link above and copy manually'); });
 }
 
 // ── UTILS ──
@@ -1210,19 +1186,18 @@ function escHtml(str) {
 }
 
 function showToast(msg) {
-  let toast = document.getElementById('toast');
+  var toast = document.getElementById('toast');
   if (!toast) {
     toast = document.createElement('div');
     toast.id = 'toast';
-    toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(10px);background:#1e1b17;color:#f5f0e8;border:1px solid rgba(245,200,66,0.3);border-radius:99px;padding:10px 22px;font-size:13px;font-family:var(--font-main);z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);transition:opacity 0.3s,transform 0.3s;opacity:0;';
+    toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(10px);background:#1e1b17;color:#f5f0e8;border:1px solid rgba(245,200,66,0.3);border-radius:99px;padding:10px 22px;font-size:13px;font-family:Lexend,sans-serif;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);transition:opacity 0.3s,transform 0.3s;opacity:0;';
     document.body.appendChild(toast);
   }
   toast.textContent = msg;
   toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(0)';
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(10px)'; }, 2800);
+  toast._t = setTimeout(function(){ toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(10px)'; }, 2800);
 }
-
-// Load saved font size
-const savedFontSize = localStorage.getItem('flow_fontsize');
-if
+</script>
+</body>
+</html>
