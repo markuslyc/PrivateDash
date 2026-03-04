@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLOW — Personal Command Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Lexend+Mega:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DESIGN SYSTEM — FLOW Dashboard
+     Dyslexia-first: Lexend font family, high contrast, generous
+     spacing, clear visual hierarchy, warm earth + electric accents
+  ============================================================ */
+  :root {
+    --bg-0: #0f0e0c;
+    --bg-1: #181714;
+    --bg-2: #221f1b;
+    --bg-3: #2e2a24;
+    --bg-card: #1e1b17;
+    --border: rgba(255,255,255,0.07);
+    --border-active: rgba(255,220,100,0.4);
+
+    --text-primary: #f5f0e8;
+    --text-secondary: #a89880;
+    --text-muted: #5a5148;
+
+    --accent-gold: #f5c842;
+    --accent-gold-dim: #c89d28;
+    --accent-amber: #f0892a;
+    --accent-green: #5ecb8a;
+    --accent-blue: #5ab4f0;
+    --accent-red: #f06060;
+    --accent-purple: #b07cf0;
+
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+
+    --font-main: 'Lexend', sans-serif;
+    --font-display: 'Lexend Mega', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.04) inset;
+    --shadow-glow: 0 0 40px rgba(245,200,66,0.12);
+    --transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { font-size: 18px; /* Larger base for dyslexia readability */ }
+
+  body {
+    font-family: var(--font-main);
+    background: var(--bg-0);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.7;
+    letter-spacing: 0.02em;
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-1); }
+  ::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 99px; }
+
+  /* ── LAYOUT ── */
+  .shell {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    grid-row: 1 / -1;
+    background: var(--bg-1);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    gap: 6px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 100;
+  }
+
+  .logo-mark {
+    font-family: var(--font-display);
+    font-size: 13px;
+    color: var(--accent-gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 24px;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    padding: 0 4px;
+  }
+
+  .nav-btn {
+    width: 46px; height: 46px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    transition: var(--transition);
+    position: relative;
+  }
+  .nav-btn:hover { background: var(--bg-2); color: var(--text-primary); border-color: var(--border); }
+  .nav-btn.active { background: rgba(245,200,66,0.12); color: var(--accent-gold); border-color: rgba(245,200,66,0.3); }
+  .nav-btn .tooltip {
+    position: absolute;
+    left: calc(100% + 12px);
+    background: var(--bg-3);
+    color: var(--text-primary);
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    border: 1px solid var(--border);
+    font-family: var(--font-main);
+    font-weight: 500;
+  }
+  .nav-btn:hover .tooltip { opacity: 1; }
+
+  .sidebar-spacer { flex: 1; }
+
+  .pa-badge {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    border: 2px solid var(--bg-1);
+    transition: var(--transition);
+    margin-bottom: 8px;
+  }
+  .pa-badge:hover { transform: scale(1.1); }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--bg-1);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+  }
+
+  .topbar-greeting {
+    font-family: var(--font-display);
+    font-size: 15px;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+  }
+
+  .topbar-greeting span { color: var(--accent-gold); }
+
+  .topbar-date {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .topbar-spacer { flex: 1; }
+
+  .focus-toggle {
+    display: flex;
+    background: var(--bg-2);
+    border-radius: 99px;
+    padding: 4px;
+    gap: 2px;
+    border: 1px solid var(--border);
+  }
+  .focus-btn {
+    padding: 5px 14px;
+    border-radius: 99px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-main);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .focus-btn.active {
+    background: var(--accent-gold);
+    color: var(--bg-0);
+  }
+
+  .font-size-ctrl {
+    display: flex; align-items: center; gap: 4px;
+  }
+  .font-size-ctrl button {
+    width: 28px; height: 28px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    transition: var(--transition);
+  }
+  .font-size-ctrl button:hover { background: var(--bg-3); color: var(--text-primary); }
+  .font-size-ctrl span {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    min-width: 28px;
+    text-align: center;
+  }
+
+  .topbar-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--bg-0);
+    cursor: pointer;
+    border: 2px solid rgba(245,200,66,0.3);
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    padding: 28px;
+    overflow-y: auto;
+    background: var(--bg-0);
+    background-image: radial-gradient(ellipse 800px 400px at 60% 0%, rgba(245,200,66,0.03) 0%, transparent 70%);
+  }
+
+  /* ── VIEW PANELS ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── GRID SYSTEM ── */
+  .grid-area {
+    display: grid;
+    gap: 18px;
+  }
+  .cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .cols-1 { grid-template-columns: 1fr; }
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    transition: var(--transition);
+    animation: fadeUp 0.4s ease both;
+  }
+  .card:hover { border-color: rgba(255,255,255,0.11); }
+  .card.glow:hover { box-shadow: var(--shadow-card), var(--shadow-glow); }
+
+  .card-header {
+    padding: 18px 22px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-icon {
+    width: 32px; height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .card-badge {
+    margin-left: auto;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+  .card-body { padding: 18px 22px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    padding-left: 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── TODAY OVERVIEW ── */
+  .quick-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .stat-pill {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    transition: var(--transition);
+    cursor: default;
+  }
+  .stat-pill:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-1px); }
+  .stat-pill-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .stat-pill-value {
+    font-family: var(--font-display);
+    font-size: 26px;
+    line-height: 1;
+    font-weight: 700;
+  }
+  .stat-pill-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  /* ── TASK ITEMS ── */
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    transition: var(--transition);
+  }
+  .task-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .task-item:hover { padding-left: 4px; }
+
+  .task-check {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--border-active);
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 2px;
+  }
+  .task-check:hover { background: rgba(245,200,66,0.1); }
+  .task-check.done { background: var(--accent-green); border-color: var(--accent-green); }
+  .task-check.done::after { content: '✓'; font-size: 11px; color: var(--bg-0); font-weight: 700; }
+
+  .task-text { flex: 1; }
+  .task-name {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .task-name.done { text-decoration: line-through; color: var(--text-muted); }
+  .task-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .task-priority {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    align-self: flex-start;
+    margin-top: 3px;
+  }
+  .priority-high { background: rgba(240,96,96,0.15); color: var(--accent-red); }
+  .priority-med { background: rgba(240,137,42,0.15); color: var(--accent-amber); }
+  .priority-low { background: rgba(94,203,138,0.15); color: var(--accent-green); }
+
+  /* ── ADD TASK INPUT ── */
+  .add-task-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .add-task-input {
+    flex: 1;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 14px;
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    font-size: 14px;
+    outline: none;
+    transition: var(--transition);
+  }
+  .add-task-input:focus { border-color: var(--accent-gold-dim); }
+  .add-task-input::placeholder { color: var(--text-muted); }
+
+  .btn {
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    letter-spacing: 0.03em;
+  }
+  .btn-gold { background: var(--accent-gold); color: var(--bg-0); }
+  .btn-gold:hover { background: var(--accent-amber); transform: translateY(-1px); }
+  .btn-ghost { background: var(--bg-2); color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.15); }
+
+  /* ── CALENDAR ── */
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+  }
+  .cal-dow {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 0;
+    font-weight: 600;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+  }
+  .cal-day:hover { background: var(--bg-3); }
+  .cal-day.other-month { color: var(--text-muted); opacity: 0.4; }
+  .cal-day.today {
+    background: var(--accent-gold);
+    color: var(--bg-0);
+    font-weight: 700;
+  }
+  .cal-day.has-event::after {
+    content: '';
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent-amber);
+    position: absolute;
+    bottom: 3px;
+  }
+  .cal-day.today.has-event::after { background: var(--bg-0); }
+
+  .event-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .event-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg-2);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent-blue);
+    font-size: 13px;
+  }
+  .event-time {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 50px;
+  }
+  .event-name { font-weight: 500; flex: 1; }
+  .event-source { font-size: 10px; color: var(--text-muted); }
+
+  /* ── AI ASSISTANT ── */
+  .ai-chat-area {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 260px;
+    overflow-y: auto;
+    margin-bottom: 14px;
+  }
+  .ai-msg {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .ai-msg.user { flex-direction: row-reverse; }
+  .ai-avatar {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .ai-avatar.user-av {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  }
+  .ai-bubble {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 14px;
+    max-width: 80%;
+    line-height: 1.6;
+  }
+  .ai-msg.user .ai-bubble {
+    background: rgba(245,200,66,0.08);
+    border-color: rgba(245,200,66,0.2);
+  }
+
+  .ai-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .ai-model-select {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-family: var(--font-main);
+    font-size: 12px;
+    padding: 6px 10px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  /* ── INTEGRATION CARDS ── */
+  .integration-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .integ-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  .integ-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+  .integ-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .integ-card.connected::before { background: var(--accent-green); }
+  .integ-card.disconnected::before { background: var(--border); }
+  .integ-card.coming::before { background: var(--accent-gold-dim); }
+
+  .integ-logo { font-size: 22px; }
+  .integ-name { font-size: 13px; font-weight: 600; }
+  .integ-status {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    margin-top: auto;
+  }
+  .status-connected { color: var(--accent-green); }
+  .status-connect { color: var(--accent-amber); }
+  .status-coming { color: var(--text-muted); }
+
+  /* ── BUSINESSES ── */
+  .biz-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    transition: var(--transition);
+    cursor: pointer;
+  }
+  .biz-card:hover { border-color: rgba(255,255,255,0.13); transform: translateY(-1px); }
+  .biz-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .biz-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .biz-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .biz-kpi {
+    background: var(--bg-3);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+  .biz-kpi-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .biz-kpi-val { font-family: var(--font-display); font-size: 18px; font-weight: 700; }
+
+  /* ── FOCUS MODE OVERLAY ── */
+  .focus-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 24px;
+    backdrop-filter: blur(10px);
+  }
+  .focus-overlay.active { display: flex; }
+  .focus-title {
+    font-family: var(--font-display);
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+  }
+  .focus-clock {
+    font-family: var(--font-display);
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+  .focus-task-display {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text-primary);
+    max-width: 500px;
+    text-align: center;
+    line-height: 1.5;
+  }
+  .focus-exit {
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    margin-top: 20px;
+  }
+  .focus-exit:hover { color: var(--text-secondary); }
+
+  /* ── WIDGET TOGGLE BAR ── */
+  .widget-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .widget-toggle {
+    padding: 6px 14px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text-secondary);
+    font-family: var(--font-main);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .widget-toggle:hover { color: var(--text-primary); }
+  .widget-toggle.on { background: rgba(245,200,66,0.1); border-color: rgba(245,200,66,0.3); color: var(--accent-gold); }
+
+  /* ── PA SHARE PANEL ── */
+  .pa-panel {
+    display: none;
+    position: fixed;
+    right: 0; top: 0; bottom: 0;
+    width: 340px;
+    background: var(--bg-1);
+    border-left: 1px solid var(--border);
+    z-index: 200;
+    flex-direction: column;
+    box-shadow: -12px 0 40px rgba(0,0,0,0.5);
+  }
+  .pa-panel.open { display: flex; }
+  .pa-panel-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .pa-panel-title { font-weight: 600; font-size: 15px; flex: 1; }
+  .pa-close { cursor: pointer; color: var(--text-muted); font-size: 18px; line-height: 1; }
+  .pa-panel-body { padding: 20px; flex: 1; overflow-y: auto; }
+  .pa-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .pa-access-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg-2);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .pa-access-icon { font-size: 16px; }
+  .pa-access-label { flex: 1; }
+  .toggle-switch {
+    width: 36px; height: 20px;
+    border-radius: 10px;
+    background: var(--bg-3);
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition);
+    border: 1px solid var(--border);
+  }
+  .toggle-switch.on { background: var(--accent-green); border-color: var(--accent-green); }
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: white;
+    top: 2px; left: 2px;
+    transition: var(--transition);
+  }
+  .toggle-switch.on::after { left: 18px; }
+  .share-link-box {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 12px;
+    word-break: break-all;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    height: 6px;
+    background: var(--bg-3);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.6s ease;
+  }
+
+  /* ── DYSLEXIA FONT TOGGLE ── */
+  body.opendys { font-family: 'Lexend', sans-serif; letter-spacing: 0.05em; word-spacing: 0.15em; line-height: 1.9; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1100px) {
+    .cols-3 { grid-template-columns: repeat(2, 1fr); }
+    .quick-stats { grid-template-columns: repeat(2, 1fr); }
+    .col-span-2 { grid-column: span 1; }
+    .col-span-3 { grid-column: span 2; }
+  }
+
+  /* ── ANIMATIONS FOR WIDGETS ── */
+  .widget { transition: var(--transition); }
+  .widget.hidden { display: none; }
+
+  /* ---- NOTIFICATION DOT ---- */
+  .notif-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent-red);
+    position: absolute;
+    top: 8px; right: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- FOCUS MODE OVERLAY -->
+<div class="focus-overlay" id="focusOverlay">
+  <div class="focus-title">⚡ Focus Mode</div>
+  <div class="focus-clock" id="focusClock">00:00</div>
+  <div class="focus-task-display" id="focusTaskDisplay">Select a task to focus on</div>
+  <div style="display:flex;gap:12px;margin-top:8px;">
+    <button class="btn btn-gold" onclick="toggleFocusTimer()">Start</button>
+    <button class="btn btn-ghost" onclick="resetFocusTimer()">Reset</button>
+  </div>
+  <div class="focus-exit" onclick="closeFocusMode()">Press ESC or click to exit focus mode</div>
+</div>
+
+<!-- PA SHARE PANEL -->
+<div class="pa-panel" id="paPanel">
+  <div class="pa-panel-header">
+    <div style="font-size:20px;">👤</div>
+    <div class="pa-panel-title">PA Access Settings</div>
+    <div class="pa-close" onclick="togglePaPanel()">✕</div>
+  </div>
+  <div class="pa-panel-body">
+    <div class="pa-section-title">Share Modules</div>
+    <div class="pa-access-item"><span class="pa-access-icon">📋</span><span class="pa-access-label">Tasks & To-Dos</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">📅</span><span class="pa-access-label">Calendar</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">🏢</span><span class="pa-access-label">Business Overview</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">📊</span><span class="pa-access-label">HubSpot CRM</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">🤖</span><span class="pa-access-label">AI Assistant</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">💬</span><span class="pa-access-label">Notes</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+
+    <div class="pa-section-title" style="margin-top:24px;">Share Link</div>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Your PA can access their custom view at:</p>
+    <div class="share-link-box">https://flow.dashboard/share/pa-view-abc123xyz</div>
+    <button class="btn btn-gold" style="width:100%;margin-top:10px;" onclick="copyLink()">📋 Copy Link</button>
+
+    <div class="pa-section-title" style="margin-top:24px;">PA Profile</div>
+    <div class="pa-access-item">
+      <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#b07cf0,#5ab4f0);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;">PA</div>
+      <div>
+        <div style="font-size:13px;font-weight:600;">Your PA</div>
+        <div style="font-size:11px;color:var(--text-muted);">pa@yourbusiness.com</div>
+      </div>
+      <div style="margin-left:auto;font-size:11px;color:var(--accent-green);">● Active</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN SHELL -->
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="logo-mark">FLOW</div>
+    <button class="nav-btn active" onclick="showView('home')" id="nav-home">🏠<span class="tooltip">Home</span></button>
+    <button class="nav-btn" onclick="showView('tasks')" id="nav-tasks">📋<span class="tooltip">Tasks</span></button>
+    <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar">📅<span class="tooltip">Calendar</span><div class="notif-dot"></div></button>
+    <button class="nav-btn" onclick="showView('businesses')" id="nav-businesses">🏢<span class="tooltip">Businesses</span></button>
+    <button class="nav-btn" onclick="showView('ai')" id="nav-ai">🤖<span class="tooltip">AI Assistant</span></button>
+    <button class="nav-btn" onclick="showView('integrations')" id="nav-integrations">🔌<span class="tooltip">Integrations</span></button>
+    <div class="sidebar-spacer"></div>
+    <div class="pa-badge" onclick="togglePaPanel()" title="PA Access">PA</div>
+    <button class="nav-btn" onclick="openFocusMode()">⚡<span class="tooltip">Focus Mode</span></button>
+  </nav>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div>
+      <div class="topbar-greeting">Good <span id="timeOfDay">morning</span> ✦</div>
+      <div class="topbar-date" id="currentDate">—</div>
+    </div>
+    <div class="topbar-spacer"></div>
+
+    <!-- Text Size for Dyslexia -->
+    <div class="font-size-ctrl">
+      <span>Aa</span>
+      <button onclick="changeFontSize(-1)">−</button>
+      <span id="fontSizeLabel">18</span>
+      <button onclick="changeFontSize(1)">+</button>
+    </div>
+
+    <!-- Focus Mode Presets -->
+    <div class="focus-toggle">
+      <button class="focus-btn active" onclick="setLayout('all',this)">All</button>
+      <button class="focus-btn" onclick="setLayout('work',this)">Work</button>
+      <button class="focus-btn" onclick="setLayout('personal',this)">Personal</button>
+      <button class="focus-btn" onclick="setLayout('biz',this)">Biz</button>
+    </div>
+
+    <div class="topbar-avatar" title="Your profile">Y</div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ═══════════════════════════════════════
+         HOME VIEW
+    ═══════════════════════════════════════ -->
+    <div class="view active" id="view-home">
+
+      <!-- Quick Stats Row -->
+      <div class="quick-stats">
+        <div class="stat-pill" style="border-color:rgba(245,200,66,0.2);">
+          <div class="stat-pill-label">Tasks Today</div>
+          <div class="stat-pill-value" style="color:var(--accent-gold);" id="stat-tasks">5</div>
+          <div class="stat-pill-sub">2 completed</div>
+        </div>
+        <div class="stat-pill" style="border-color:rgba(94,203,138,0.2);">
+          <div class="stat-pill-label">Meetings</div>
+          <div class="stat-pill-value" style="color:var(--accent-green);" id="stat-meetings">3</div>
+          <div class="stat-pill-sub">Next: 2:00 PM</div>
+        </div>
+        <div class="stat-pill" style="border-color:rgba(90,180,240,0.2);">
+          <div class="stat-pill-label">Open Deals</div>
+          <div class="stat-pill-value" style="color:var(--accent-blue);">12</div>
+          <div class="stat-pill-sub">HubSpot CRM</div>
+        </div>
+        <div class="stat-pill" style="border-color:rgba(176,124,240,0.2);">
+          <div class="stat-pill-label">Businesses</div>
+          <div class="stat-pill-value" style="color:var(--accent-purple);">3</div>
+          <div class="stat-pill-sub">All active</div>
+        </div>
+      </div>
+
+      <!-- Widget Toggle Bar -->
+      <div class="widget-bar">
+        <span style="font-size:12px;color:var(--text-muted);line-height:30px;">Show:</span>
+        <button class="widget-toggle on" onclick="toggleWidget('tasks-widget',this)">📋 Tasks</button>
+        <button class="widget-toggle on" onclick="toggleWidget('cal-widget',this)">📅 Calendar</button>
+        <button class="widget-toggle on" onclick="toggleWidget('ai-widget',this)">🤖 AI Quick Ask</button>
+        <button class="widget-toggle on" onclick="toggleWidget('biz-widget',this)">🏢 Businesses</button>
+        <button class="widget-toggle on" onclick="toggleWidget('notes-widget',this)">📝 Notes</button>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="grid-area cols-3">
+
+        <!-- TASKS WIDGET -->
+        <div class="card glow widget col-span-2" id="tasks-widget">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(245,200,66,0.1);">📋</div>
+            <div class="card-title">Today's Tasks</div>
+            <div class="card-badge" style="background:rgba(245,200,66,0.1);color:var(--accent-gold);" id="task-counter">5 tasks</div>
+            <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;margin-left:8px;" onclick="openFocusMode()">⚡ Focus</button>
+          </div>
+          <div class="card-body">
+            <div id="task-list">
+              <!-- Tasks rendered by JS -->
+            </div>
+            <div class="add-task-row">
+              <input class="add-task-input" id="newTaskInput" type="text" placeholder="Add a task… (press Enter)" onkeydown="if(event.key==='Enter')addTask()">
+              <button class="btn btn-gold" onclick="addTask()">+ Add</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CALENDAR WIDGET -->
+        <div class="card widget" id="cal-widget">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(94,203,138,0.1);">📅</div>
+            <div class="card-title">Calendar</div>
+            <div class="card-badge" style="background:rgba(94,203,138,0.1);color:var(--accent-green);">Google ●</div>
+          </div>
+          <div class="card-body">
+            <div class="cal-grid" id="calGrid"></div>
+            <div class="event-list" id="eventList"></div>
+          </div>
+        </div>
+
+        <!-- AI QUICK ASK -->
+        <div class="card widget" id="ai-widget">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(176,124,240,0.1);">🤖</div>
+            <div class="card-title">AI Assistant</div>
+            <select class="ai-model-select" id="aiModelSelect">
+              <option value="claude">Claude</option>
+              <option value="kimi">Kimi</option>
+              <option value="gpt4">GPT-4</option>
+            </select>
+          </div>
+          <div class="card-body">
+            <div class="ai-chat-area" id="aiChatArea">
+              <div class="ai-msg">
+                <div class="ai-avatar">✦</div>
+                <div class="ai-bubble">Hi! I'm your AI assistant. Ask me anything — draft an email, summarise your day, prepare for a meeting, or help with any task. 🚀</div>
+              </div>
+            </div>
+            <div class="ai-input-row">
+              <input class="add-task-input" id="aiInput" type="text" placeholder="Ask anything…" style="flex:1;" onkeydown="if(event.key==='Enter')sendAiMessage()">
+              <button class="btn btn-gold" onclick="sendAiMessage()">→</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- BUSINESSES OVERVIEW -->
+        <div class="card widget col-span-2" id="biz-widget">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(90,180,240,0.1);">🏢</div>
+            <div class="card-title">Businesses</div>
+            <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;margin-left:auto;" onclick="showView('businesses')">View all →</button>
+          </div>
+          <div class="card-body">
+            <div class="grid-area cols-3" id="bizMiniList"></div>
+          </div>
+        </div>
+
+        <!-- QUICK NOTES -->
+        <div class="card widget" id="notes-widget">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(240,137,42,0.1);">📝</div>
+            <div class="card-title">Quick Notes</div>
+          </div>
+          <div class="card-body">
+            <textarea id="quickNotes" style="width:100%;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font-main);font-size:14px;padding:12px;resize:vertical;min-height:120px;outline:none;line-height:1.7;" placeholder="Type a note… auto-saved"
+              oninput="localStorage.setItem('flow_notes',this.value)"></textarea>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════
+         TASKS VIEW (full)
+    ═══════════════════════════════════════ -->
+    <div class="view" id="view-tasks">
+      <div class="section-label">All Tasks</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(245,200,66,0.1);">📋</div>
+          <div class="card-title">Task Manager</div>
+          <div class="card-badge" style="background:rgba(245,200,66,0.1);color:var(--accent-gold);" id="full-task-counter">5 tasks</div>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;margin-left:8px;" onclick="openFocusMode()">⚡ Focus Mode</button>
+        </div>
+        <div class="card-body">
+          <div id="full-task-list"></div>
+          <div class="add-task-row">
+            <input class="add-task-input" id="fullNewTaskInput" type="text" placeholder="Add a new task… (Enter to add)" onkeydown="if(event.key==='Enter')addTask(true)">
+            <select class="ai-model-select" id="newTaskPriority" style="padding:9px 10px;">
+              <option value="high">High 🔴</option>
+              <option value="med" selected>Med 🟡</option>
+              <option value="low">Low 🟢</option>
+            </select>
+            <button class="btn btn-gold" onclick="addTask(true)">+ Add Task</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════
+         CALENDAR VIEW (full)
+    ═══════════════════════════════════════ -->
+    <div class="view" id="view-calendar">
+      <div class="section-label">Calendar & Meetings</div>
+      <div class="grid-area cols-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(94,203,138,0.1);">📅</div>
+            <div class="card-title">This Month</div>
+            <div class="card-badge" style="background:rgba(94,203,138,0.1);color:var(--accent-green);">Google Calendar ●</div>
+          </div>
+          <div class="card-body">
+            <div class="cal-grid" id="calGridFull"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(90,180,240,0.1);">🕐</div>
+            <div class="card-title">Upcoming Events</div>
+          </div>
+          <div class="card-body">
+            <div class="event-list" id="fullEventList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════
+         BUSINESSES VIEW
+    ═══════════════════════════════════════ -->
+    <div class="view" id="view-businesses">
+      <div class="section-label">Business Portfolio</div>
+      <div class="grid-area cols-2" id="fullBizList"></div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════
+         AI ASSISTANT VIEW
+    ═══════════════════════════════════════ -->
+    <div class="view" id="view-ai">
+      <div class="section-label">AI Assistant</div>
+      <div class="card" style="max-width:800px;">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(176,124,240,0.1);">🤖</div>
+          <div class="card-title">AI Assistant</div>
+          <select class="ai-model-select" id="aiModelSelectFull" style="margin-left:auto;">
+            <option value="claude">Claude (Anthropic)</option>
+            <option value="kimi">Kimi Claw</option>
+            <option value="gpt4">GPT-4</option>
+          </select>
+        </div>
+        <div class="card-body">
+          <div class="ai-chat-area" id="fullAiChat" style="max-height:500px;">
+            <div class="ai-msg">
+              <div class="ai-avatar">✦</div>
+              <div class="ai-bubble">Hello! I'm connected to Claude via the Anthropic API. I can help you draft emails, summarise meetings, analyse your business data, or assist with any task. What would you like to do today?</div>
+            </div>
+          </div>
+          <div class="ai-input-row" style="margin-top:16px;">
+            <input class="add-task-input" id="fullAiInput" type="text" placeholder="Ask me anything — I can help with tasks, emails, analysis…" style="flex:1;" onkeydown="if(event.key==='Enter')sendFullAiMessage()">
+            <button class="btn btn-gold" onclick="sendFullAiMessage()">Send →</button>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-muted);">
+            To connect: Add your API key in Integrations → AI Tools. Supports Claude, Kimi, GPT-4, and custom endpoints.
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════
+         INTEGRATIONS VIEW
+    ═══════════════════════════════════════ -->
+    <div class="view" id="view-integrations">
+      <div class="section-label">Integrations & API Connections</div>
+      <div class="grid-area cols-2">
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(240,137,42,0.1);">🔗</div>
+            <div class="card-title">CRM & Productivity</div>
+          </div>
+          <div class="card-body">
+            <div class="integration-grid" id="crmIntegrations"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(176,124,240,0.1);">🤖</div>
+            <div class="card-title">AI Tools</div>
+          </div>
+          <div class="card-body">
+            <div class="integration-grid" id="aiIntegrations"></div>
+          </div>
+        </div>
+
+        <div class="card col-span-2">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(94,203,138,0.1);">🔑</div>
+            <div class="card-title">API Configuration</div>
+          </div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em;">Claude (Anthropic) API Key</div>
+                <div style="display:flex;gap:8px;">
+                  <input type="password" class="add-task-input" id="claudeApiKey" placeholder="sk-ant-api03-…" style="flex:1;">
+                  <button class="btn btn-gold" onclick="saveApiKey('claude')">Save</button>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em;">Kimi API Key</div>
+                <div style="display:flex;gap:8px;">
+                  <input type="password" class="add-task-input" id="kimiApiKey" placeholder="kimi-api-…" style="flex:1;">
+                  <button class="btn btn-gold" onclick="saveApiKey('kimi')">Save</button>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em;">HubSpot API Key</div>
+                <div style="display:flex;gap:8px;">
+                  <input type="password" class="add-task-input" id="hubspotKey" placeholder="pat-na1-…" style="flex:1;">
+                  <button class="btn btn-gold" onclick="saveApiKey('hubspot')">Save</button>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em;">Google Calendar OAuth</div>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn btn-gold" style="width:100%;" onclick="connectGoogle()">🔗 Connect Google</button>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:16px;padding:12px 16px;background:var(--bg-2);border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);border:1px solid var(--border);">
+              <strong style="color:var(--accent-gold);">🔒 Security note:</strong> API keys are stored locally in your browser only. They are never sent to any server other than the respective service's official API endpoint.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ============================================================
+// FLOW DASHBOARD — JavaScript
+// ============================================================
+
+// ── DATA ──
+let tasks = [
+  { id:1, text: 'Review Q3 business reports', done: false, priority: 'high', date: 'Today', source: 'dashboard' },
+  { id:2, text: 'Call with investor re: Series A', done: false, priority: 'high', date: 'Today 2:00 PM', source: 'gcal' },
+  { id:3, text: 'Respond to 3 HubSpot leads', done: false, priority: 'med', date: 'Today', source: 'hubspot' },
+  { id:4, text: 'Update website copy for new product', done: true, priority: 'med', date: 'Done', source: 'dashboard' },
+  { id:5, text: 'Send weekly update to team', done: false, priority: 'low', date: 'EOD', source: 'dashboard' },
+];
+
+let nextTaskId = 6;
+
+const businesses = [
+  { name: 'TechVenture Ltd', emoji: '⚡', tag: 'SaaS', tagColor: '#5ab4f0', kpis: [{l:'MRR', v:'£42k'},{l:'Users', v:'1,240'},{l:'Churn', v:'2.1%'}] },
+  { name: 'Green Logistics', emoji: '🌿', tag: 'Ops', tagColor: '#5ecb8a', kpis: [{l:'Revenue', v:'£88k'},{l:'Shipments', v:'340'},{l:'NPS', v:'72'}] },
+  { name: 'Studio Creative', emoji: '🎨', tag: 'Agency', tagColor: '#f5c842', kpis: [{l:'Retainers', v:'8'},{l:'Pipeline', v:'£24k'},{l:'Open', v:'3 proj'}] },
+];
+
+const events = [
+  { time:'09:30', name:'Standup – TechVenture', source:'Google', color:'#5ecb8a' },
+  { time:'11:00', name:'HubSpot Pipeline Review', source:'HubSpot', color:'#f0892a' },
+  { time:'14:00', name:'Investor Call – Series A', source:'Google', color:'#5ab4f0' },
+  { time:'16:30', name:'Team Check-in', source:'Google', color:'#b07cf0' },
+  { time:'Tomorrow 10:00', name:'Product Demo', source:'Google', color:'#5ecb8a' },
+];
+
+const crmIntegrations = [
+  { name: 'HubSpot', emoji: '🟠', status: 'connected' },
+  { name: 'Google Calendar', emoji: '📅', status: 'connected' },
+  { name: 'Google Drive', emoji: '📂', status: 'connect' },
+  { name: 'Slack', emoji: '💬', status: 'connect' },
+  { name: 'Notion', emoji: '📄', status: 'connect' },
+  { name: 'Zapier', emoji: '⚡', status: 'coming' },
+];
+
+const aiIntegrations = [
+  { name: 'Claude', emoji: '✦', status: 'connected' },
+  { name: 'Kimi Claw', emoji: '🌙', status: 'connect' },
+  { name: 'GPT-4', emoji: '🔵', status: 'connect' },
+  { name: 'Gemini', emoji: '♊', status: 'coming' },
+  { name: 'Mistral', emoji: '💨', status: 'coming' },
+  { name: 'Custom API', emoji: '🔧', status: 'connect' },
+];
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  updateDateTime();
+  setInterval(updateDateTime, 60000);
+  renderTasks();
+  renderCalendar('calGrid');
+  renderCalendar('calGridFull');
+  renderEvents('eventList', 3);
+  renderEvents('fullEventList', 10);
+  renderBusinesses();
+  renderIntegrations();
+
+  const saved = localStorage.getItem('flow_notes');
+  if (saved) document.getElementById('quickNotes').value = saved;
+});
+
+// ── DATETIME ──
+function updateDateTime() {
+  const now = new Date();
+  const h = now.getHours();
+  const tod = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  document.getElementById('timeOfDay').textContent = tod;
+  document.getElementById('currentDate').textContent = now.toLocaleDateString('en-GB', {
+    weekday:'long', year:'numeric', month:'long', day:'numeric'
+  });
+}
+
+// ── VIEW SWITCHING ──
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'tasks') renderFullTasks();
+  if (name === 'businesses') renderFullBusinesses();
+}
+
+// ── TASKS ──
+function renderTasks() {
+  const list = document.getElementById('task-list');
+  if (!list) return;
+  list.innerHTML = tasks.map(t => taskHtml(t)).join('');
+  document.getElementById('task-counter').textContent = tasks.filter(t=>!t.done).length + ' tasks';
+}
+
+function renderFullTasks() {
+  const list = document.getElementById('full-task-list');
+  if (!list) return;
+  list.innerHTML = tasks.map(t => taskHtml(t)).join('');
+  const el = document.getElementById('full-task-counter');
+  if (el) el.textContent = tasks.filter(t=>!t.done).length + ' tasks';
+}
+
+function taskHtml(t) {
+  return `<div class="task-item" id="task-item-${t.id}">
+    <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})"></div>
+    <div class="task-text">
+      <div class="task-name ${t.done?'done':''}">${t.text}</div>
+      <div class="task-meta">${t.date}${t.source !== 'dashboard' ? ` · via ${t.source}` : ''}</div>
+    </div>
+    <span class="task-priority priority-${t.priority}">${t.priority.toUpperCase()}</span>
+  </div>`;
+}
+
+function toggleTask(id) {
+  const t = tasks.find(t => t.id === id);
+  if (t) { t.done = !t.done; renderTasks(); renderFullTasks(); }
+}
+
+function addTask(fromFull) {
+  const inputId = fromFull ? 'fullNewTaskInput' : 'newTaskInput';
+  const el = document.getElementById(inputId);
+  const text = el.value.trim();
+  if (!text) return;
+  const prioEl = document.getElementById('newTaskPriority');
+  const prio = prioEl ? prioEl.value : 'med';
+  tasks.unshift({ id: nextTaskId++, text, done: false, priority: prio, date: 'Today', source: 'dashboard' });
+  el.value = '';
+  renderTasks();
+  renderFullTasks();
+}
+
+// ── CALENDAR ──
+function renderCalendar(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const today = now.getDate();
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let html = days.map(d => `<div class="cal-dow">${d}</div>`).join('');
+  const firstDay = new Date(year, month, 1);
+  let startDow = firstDay.getDay() - 1;
+  if (startDow < 0) startDow = 6;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevDays = new Date(year, month, 0).getDate();
+  for (let i = startDow - 1; i >= 0; i--) {
+    html += `<div class="cal-day other-month">${prevDays - i}</div>`;
+  }
+  const eventDays = [3, 8, 14, 21, today];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === today;
+    const hasEvent = eventDays.includes(d);
+    html += `<div class="cal-day ${isToday?'today':''} ${hasEvent?'has-event':''}">${d}</div>`;
+  }
+  container.innerHTML = html;
+}
+
+function renderEvents(containerId, max) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = events.slice(0, max).map(e => `
+    <div class="event-item" style="border-left-color:${e.color}">
+      <div class="event-time">${e.time}</div>
+      <div class="event-name">${e.name}</div>
+      <div class="event-source">${e.source}</div>
+    </div>`).join('');
+}
+
+// ── BUSINESSES ──
+function bizCardHtml(b) {
+  return `<div class="biz-card" onclick="showView('businesses')">
+    <div class="biz-name">${b.emoji} ${b.name} <span class="biz-tag" style="background:${b.tagColor}22;color:${b.tagColor}">${b.tag}</span></div>
+    <div class="biz-kpi-row">${b.kpis.map(k => `<div class="biz-kpi"><div class="biz-kpi-label">${k.l}</div><div class="biz-kpi-val">${k.v}</div></div>`).join('')}</div>
+  </div>`;
+}
+
+function renderBusinesses() {
+  const mini = document.getElementById('bizMiniList');
+  if (mini) mini.innerHTML = businesses.map(b => bizCardHtml(b)).join('');
+}
+
+function renderFullBusinesses() {
+  const el = document.getElementById('fullBizList');
+  if (el) el.innerHTML = businesses.map(b => `
+    <div class="card" style="cursor:pointer;">
+      <div class="card-header">
+        <div style="font-size:28px;">${b.emoji}</div>
+        <div>
+          <div style="font-size:17px;font-weight:600;">${b.name}</div>
+          <span class="biz-tag" style="background:${b.tagColor}22;color:${b.tagColor};font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600;">${b.tag}</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="biz-kpi-row">${b.kpis.map(k => `<div class="biz-kpi"><div class="biz-kpi-label">${k.l}</div><div class="biz-kpi-val" style="font-size:22px;">${k.v}</div></div>`).join('')}</div>
+        <div class="progress-bar" style="margin-top:16px;"><div class="progress-fill" style="width:${Math.floor(Math.random()*50)+40}%;background:${b.tagColor};"></div></div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Q3 Progress</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── INTEGRATIONS ──
+function integHtml(i) {
+  const statusMap = { connected: ['status-connected','● Connected'], connect: ['status-connect','+ Connect'], coming: ['status-coming','Coming soon'] };
+  const [cls, label] = statusMap[i.status];
+  return `<div class="integ-card ${i.status}" onclick="connectIntegration('${i.name}')">
+    <div class="integ-logo">${i.emoji}</div>
+    <div class="integ-name">${i.name}</div>
+    <div class="integ-status ${cls}">${label}</div>
+  </div>`;
+}
+
+function renderIntegrations() {
+  const crmEl = document.getElementById('crmIntegrations');
+  if (crmEl) crmEl.innerHTML = crmIntegrations.map(integHtml).join('');
+  const aiEl = document.getElementById('aiIntegrations');
+  if (aiEl) aiEl.innerHTML = aiIntegrations.map(integHtml).join('');
+}
+
+function connectIntegration(name) {
+  showToast(`Opening ${name} connection flow…`);
+}
+
+// ── AI ASSISTANT ──
+async function sendAiMessage() {
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addAiMsg('aiChatArea', msg, true);
+  const thinking = addAiMsg('aiChatArea', '…thinking', false);
+  const reply = await callClaudeApi(msg);
+  thinking.remove();
+  addAiMsg('aiChatArea', reply, false);
+}
+
+async function sendFullAiMessage() {
+  const input = document.getElementById('fullAiInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addAiMsg('fullAiChat', msg, true);
+  const thinking = addAiMsg('fullAiChat', '…thinking', false);
+  const reply = await callClaudeApi(msg);
+  thinking.remove();
+  addAiMsg('fullAiChat', reply, false);
+}
+
+async function callClaudeApi(message) {
+  const key = localStorage.getItem('flow_claude_key');
+  if (!key) {
+    return 'No Claude API key found. Go to Integrations → AI Tools to add your key. Once connected, I can help with tasks, emails, business analysis, and much more!';
+  }
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: 'You are a helpful personal assistant integrated into the FLOW dashboard. The user may have dyslexia so keep responses clear, concise and well-structured. Be practical and actionable.',
+        messages: [{ role: 'user', content: message }]
+      })
+    });
+    const data = await res.json();
+    return data.content?.[0]?.text || 'No response received.';
+  } catch (e) {
+    return 'Connection error. Please check your API key in Integrations.';
+  }
+}
+
+function addAiMsg(containerId, text, isUser) {
+  const container = document.getElementById(containerId);
+  const div = document.createElement('div');
+  div.className = 'ai-msg' + (isUser ? ' user' : '');
+  div.innerHTML = `
+    <div class="ai-avatar ${isUser?'user-av':''}">${isUser?'Y':'✦'}</div>
+    <div class="ai-bubble">${text}</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+// ── WIDGET TOGGLES ──
+function toggleWidget(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('hidden');
+  btn.classList.toggle('on');
+}
+
+// ── LAYOUT PRESETS ──
+function setLayout(mode, btn) {
+  document.querySelectorAll('.focus-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const widgets = ['tasks-widget','cal-widget','ai-widget','biz-widget','notes-widget'];
+  const toggles = document.querySelectorAll('.widget-toggle');
+  const show = mode === 'all' ? widgets :
+               mode === 'work' ? ['tasks-widget','cal-widget','biz-widget'] :
+               mode === 'personal' ? ['tasks-widget','cal-widget','notes-widget'] :
+               ['biz-widget','tasks-widget','ai-widget'];
+  widgets.forEach(w => {
+    const el = document.getElementById(w);
+    if (el) el.classList.toggle('hidden', !show.includes(w));
+  });
+  toggles.forEach(t => {
+    const target = t.getAttribute('onclick').match(/'([^']+)'/)?.[1];
+    if (target) t.classList.toggle('on', show.includes(target));
+  });
+}
+
+// ── FOCUS MODE ──
+let focusTimerInterval = null;
+let focusSeconds = 0;
+let timerRunning = false;
+
+function openFocusMode() {
+  const activeTask = tasks.find(t => !t.done);
+  document.getElementById('focusTaskDisplay').textContent = activeTask ? `🎯 ${activeTask.text}` : 'No tasks pending';
+  document.getElementById('focusOverlay').classList.add('active');
+  updateFocusClock();
+}
+
+function closeFocusMode() {
+  document.getElementById('focusOverlay').classList.remove('active');
+  clearInterval(focusTimerInterval);
+  focusTimerInterval = null;
+  timerRunning = false;
+}
+
+function toggleFocusTimer() {
+  const btn = event.target;
+  if (!timerRunning) {
+    timerRunning = true;
+    btn.textContent = 'Pause';
+    focusTimerInterval = setInterval(() => { focusSeconds++; updateFocusClock(); }, 1000);
+  } else {
+    timerRunning = false;
+    btn.textContent = 'Resume';
+    clearInterval(focusTimerInterval);
+  }
+}
+
+function resetFocusTimer() {
+  clearInterval(focusTimerInterval);
+  focusTimerInterval = null;
+  timerRunning = false;
+  focusSeconds = 0;
+  updateFocusClock();
+  event.target.previousElementSibling.textContent = 'Start';
+}
+
+function updateFocusClock() {
+  const m = String(Math.floor(focusSeconds / 60)).padStart(2, '0');
+  const s = String(focusSeconds % 60).padStart(2, '0');
+  document.getElementById('focusClock').textContent = `${m}:${s}`;
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFocusMode(); });
+
+// ── FONT SIZE ──
+let fontSize = 18;
+function changeFontSize(delta) {
+  fontSize = Math.max(14, Math.min(26, fontSize + delta));
+  document.documentElement.style.fontSize = fontSize + 'px';
+  document.getElementById('fontSizeLabel').textContent = fontSize;
+}
+
+// ── PA PANEL ──
+function togglePaPanel() {
+  document.getElementById('paPanel').classList.toggle('open');
+}
+
+function copyLink() {
+  navigator.clipboard.writeText('https://flow.dashboard/share/pa-view-abc123xyz').catch(() => {});
+  showToast('Link copied to clipboard!');
+}
+
+// ── API KEY SAVE ──
+function saveApiKey(service) {
+  const keyMap = { claude: 'claudeApiKey', kimi: 'kimiApiKey', hubspot: 'hubspotKey' };
+  const el = document.getElementById(keyMap[service]);
+  if (!el || !el.value.trim()) return;
+  localStorage.setItem(`flow_${service}_key`, el.value.trim());
+  el.value = '';
+  showToast(`${service} API key saved securely ✓`);
+  renderIntegrations();
+}
+
+function connectGoogle() {
+  showToast('Google OAuth flow would open here. Add your OAuth credentials in the config.');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1e1b17;color:#f5f0e8;border:1px solid rgba(245,200,66,0.3);border-radius:99px;padding:10px 22px;font-size:13px;font-family:var(--font-main);z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);transition:opacity 0.3s;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+}
+</script>
+</body>
+</html>
