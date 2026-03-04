@@ -113,6 +113,39 @@
   .cal-day.today { background: var(--accent-gold); color: var(--bg-0); font-weight: 700; }
   .cal-day.has-event::after { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--accent-amber); position: absolute; bottom: 3px; }
   .cal-day.today.has-event::after { background: var(--bg-0); }
+  /* ── CREATE EVENT PANEL ── */
+  .create-panel { display:none; position:fixed; top:0; right:0; bottom:0; width:380px; background:var(--bg-1); border-left:1px solid var(--border); z-index:300; flex-direction:column; box-shadow:-12px 0 40px rgba(0,0,0,0.5); }
+  .create-panel.open { display:flex; }
+  .create-panel-header { padding:20px 20px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .create-panel-title { font-weight:600; font-size:16px; flex:1; }
+  .create-panel-body { padding:20px; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:14px; }
+  .form-field { display:flex; flex-direction:column; gap:6px; }
+  .form-label { font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); font-weight:600; }
+  .form-input { background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; color:var(--text-primary); font-family:var(--font-main); font-size:14px; outline:none; transition:var(--transition); width:100%; }
+  .form-input:focus { border-color:var(--accent-gold-dim); }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .create-panel-footer { padding:16px 20px; border-top:1px solid var(--border); display:flex; gap:8px; }
+  /* ── CONFIRM MODAL ── */
+  .confirm-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:500; align-items:center; justify-content:center; backdrop-filter:blur(6px); }
+  .confirm-modal.open { display:flex; }
+  .confirm-box { background:var(--bg-1); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px; max-width:380px; width:90%; text-align:center; box-shadow:var(--shadow-card); }
+  .confirm-box h3 { font-size:17px; font-weight:600; margin-bottom:8px; }
+  .confirm-box p { font-size:14px; color:var(--text-secondary); margin-bottom:22px; line-height:1.6; }
+  .confirm-actions { display:flex; gap:10px; justify-content:center; }
+  /* ── ACCOUNT BADGES ── */
+  .account-list { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+  .account-item { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg-2); border-radius:var(--radius-sm); border:1px solid var(--border); font-size:13px; }
+  .account-dot { width:8px; height:8px; border-radius:50%; background:var(--accent-green); flex-shrink:0; }
+  .account-dot.inactive { background:var(--text-muted); }
+  .account-color { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+  /* ── RECURRING BADGE ── */
+  .recurring-badge { font-size:10px; padding:2px 7px; border-radius:99px; background:rgba(176,124,240,0.15); color:var(--accent-purple); font-weight:600; letter-spacing:0.04em; flex-shrink:0; }
+  /* ── ICLOUD INFO BOX ── */
+  .info-box { background:var(--bg-2); border:1px solid rgba(90,180,240,0.2); border-radius:var(--radius-md); padding:16px; font-size:13px; color:var(--text-secondary); line-height:1.7; }
+  .info-box strong { color:var(--accent-blue); }
+  .info-step { display:flex; gap:10px; margin-bottom:8px; align-items:flex-start; }
+  .info-step-num { width:22px; height:22px; border-radius:50%; background:var(--accent-blue); color:var(--bg-0); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+
   /* ── EVENT LIST ── */
   .event-list { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
   .event-item { background: var(--bg-2); border-radius: var(--radius-md); border-left: 3px solid var(--accent-blue); font-size: 13px; overflow: hidden; transition: var(--transition); }
@@ -448,6 +481,7 @@
             <div class="card-title">This Month</div>
             <div id="gcal-badge-full" class="card-badge gcal-disconnected">Not connected</div>
             <button class="btn btn-green" style="padding:5px 12px;font-size:11px;" id="gcal-connect-btn" onclick="connectGoogleCalendar()">Connect Google</button>
+            <button class="btn btn-gold" style="padding:5px 12px;font-size:11px;" onclick="openCreatePanel()">+ New Event</button>
           </div>
           <div class="card-body">
             <div class="cal-header">
@@ -461,11 +495,23 @@
         <div class="card">
           <div class="card-header">
             <div class="card-icon" style="background:rgba(90,180,240,0.1);">🕐</div>
-            <div class="card-title">Upcoming Events</div>
+            <div class="card-title" id="events-panel-title">Events</div>
+            <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;margin-left:auto;" onclick="openCreatePanel()">+ New</button>
           </div>
           <div class="card-body">
+            <div id="account-list" style="margin-bottom:12px;"></div>
             <div class="event-list" id="fullEventList">
               <div class="empty-state"><div class="icon">📅</div>Connect Google Calendar to see events</div>
+            </div>
+            <div style="margin-top:20px;">
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:600;margin-bottom:10px;">🍎 Apple iCloud Calendar</div>
+              <div class="info-box">
+                <strong>Sync iCloud → Google in 3 steps:</strong><br><br>
+                <div class="info-step"><div class="info-step-num">1</div><div>On your iPhone/Mac open <strong>Calendar app</strong> → click the calendar you want to share</div></div>
+                <div class="info-step"><div class="info-step-num">2</div><div>Tap <strong>Share Calendar</strong> → add your Google email address as a subscriber</div></div>
+                <div class="info-step"><div class="info-step-num">3</div><div>Open Gmail → accept the invite → it appears in Google Calendar automatically</div></div>
+                It will then show up here automatically next time you connect. 🎉
+              </div>
             </div>
           </div>
         </div>
@@ -580,6 +626,83 @@ What would you like to work on?</div></div>
   </main>
 </div>
 
+<!-- CREATE EVENT PANEL -->
+<div class="create-panel" id="createPanel">
+  <div class="create-panel-header">
+    <div style="font-size:20px;">✨</div>
+    <div class="create-panel-title">New Event</div>
+    <div class="pa-close" onclick="closeCreatePanel()">✕</div>
+  </div>
+  <div class="create-panel-body">
+    <div class="form-field">
+      <div class="form-label">Event Title *</div>
+      <input class="form-input" id="new-ev-title" type="text" placeholder="e.g. Investor Call" onkeydown="if(event.key==='Enter')document.getElementById('new-ev-date').focus()">
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <div class="form-label">Date *</div>
+        <input class="form-input" id="new-ev-date" type="date">
+      </div>
+      <div class="form-field">
+        <div class="form-label">Calendar</div>
+        <select class="form-input" id="new-ev-account">
+          <option value="primary">Primary Account</option>
+          <option value="secondary">Second Account</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <div class="form-label">Start Time</div>
+        <input class="form-input" id="new-ev-start" type="time" value="09:00">
+      </div>
+      <div class="form-field">
+        <div class="form-label">End Time</div>
+        <input class="form-input" id="new-ev-end" type="time" value="10:00">
+      </div>
+    </div>
+    <div class="form-field">
+      <div class="form-label">Location</div>
+      <input class="form-input" id="new-ev-location" type="text" placeholder="e.g. Zoom, Office, Coffee shop">
+    </div>
+    <div class="form-field">
+      <div class="form-label">Invite People (emails, comma separated)</div>
+      <input class="form-input" id="new-ev-attendees" type="text" placeholder="e.g. john@gmail.com, jane@work.com">
+    </div>
+    <div class="form-field">
+      <div class="form-label">Notes / Description</div>
+      <textarea class="form-input" id="new-ev-desc" rows="3" placeholder="Agenda, links, anything relevant…"></textarea>
+    </div>
+    <div class="form-field">
+      <div class="form-label">Repeat</div>
+      <select class="form-input" id="new-ev-recur">
+        <option value="none">Does not repeat</option>
+        <option value="DAILY">Every day</option>
+        <option value="WEEKLY">Every week</option>
+        <option value="BIWEEKLY">Every 2 weeks</option>
+        <option value="MONTHLY">Every month</option>
+      </select>
+    </div>
+    <div id="new-ev-error" style="color:var(--accent-red);font-size:13px;display:none;"></div>
+  </div>
+  <div class="create-panel-footer">
+    <button class="btn btn-gold" style="flex:1;" onclick="createEvent()">✨ Create Event</button>
+    <button class="btn btn-ghost" onclick="closeCreatePanel()">Cancel</button>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="confirm-modal" id="confirmModal">
+  <div class="confirm-box">
+    <h3>🗑 Delete Event?</h3>
+    <p id="confirmModalText">This will permanently delete the event from Google Calendar.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn" style="background:var(--accent-red);color:white;" onclick="confirmDeleteAction()">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // FLOW DASHBOARD — Complete JavaScript
@@ -640,6 +763,7 @@ document.addEventListener('DOMContentLoaded', function() {
   checkSavedKeys();
   initGoogleCalendar();
   updatePaShareLink();
+  updateAccountList();
   var sf = localStorage.getItem('flow_fontsize');
   if (sf) { fontSize = parseInt(sf); document.documentElement.style.fontSize = fontSize + 'px'; var fsl = document.getElementById('fontSizeLabel'); if (fsl) fsl.textContent = fontSize; }
 });
@@ -882,13 +1006,15 @@ async function fetchCalendarEvents() {
         organizer: ev.organizer ? (ev.organizer.displayName || ev.organizer.email) : '',
         color: ev.colorId ? gcalColor(ev.colorId) : '#5ab4f0',
         isAllDay: !ev.start.dateTime,
-        rawStart: start,
-        rawEnd: end,
-        calendar: 'Google',
+        isRecurring: !!ev.recurringEventId,
+        recurrence: ev.recurrence || [],
+        rawStart: start, rawEnd: end,
+        calendar: 'Google', account: 'primary',
       };
     });
     gcalConnected = true;
     updateGCalUI();
+    updateAccountList();
     renderCalendar();
     // Show today's events by default
     var todayStr = now.toISOString().substring(0,10);
@@ -937,11 +1063,13 @@ function eventItemHtml(e) {
     : '<span style="color:var(--text-muted);font-size:12px;">No attendees listed</span>';
   var timeStr = e.isAllDay ? 'All day' : (e.time + (e.endTime ? ' – ' + e.endTime : ''));
   var eid = e.id;
+  var recurBadge = e.isRecurring ? '<span class="recurring-badge">↻ Recurring</span>' : '';
+  var accountDot = e.account === 'second' ? '<span style="width:8px;height:8px;border-radius:50%;background:#b07cf0;display:inline-block;margin-left:4px;" title="' + escHtml(e.calendar) + '"></span>' : '';
   var html = '<div class="event-item" id="evitem-' + eid + '" style="border-left-color:' + e.color + '">';
   html += '<div class="event-row" data-eid="' + eid + '" onclick="toggleEventExpand(this.dataset.eid)">';
   html += '<div class="event-time">' + e.time + '</div>';
-  html += '<div class="event-name">' + escHtml(e.title) + '</div>';
-  html += '<div class="event-cal">Google</div>';
+  html += '<div class="event-name">' + escHtml(e.title) + accountDot + '</div>';
+  html += recurBadge;
   html += '<div class="event-chevron">▼</div>';
   html += '</div>';
   html += '<div class="event-detail">';
@@ -952,18 +1080,22 @@ function eventItemHtml(e) {
   html += '<div class="event-view-mode event-detail-value muted" id="ev-loc-view-' + eid + '">' + escHtml(e.location || 'No location') + '</div>';
   html += '<input class="event-edit-input event-edit-mode" id="ev-loc-edit-' + eid + '" value="' + escHtml(e.location) + '" placeholder="Add location…">';
   html += '</div>';
-  html += '<div class="event-detail-field"><div class="event-detail-label">📝 Notes</div>';
+  html += '<div class="event-detail-field"><div class="event-detail-label">📅 Calendar</div><div class="event-detail-value muted">' + escHtml(e.calendar || 'Google') + '</div></div>';
+  html += '</div>';
+  html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">📝 Notes</div>';
   html += '<div class="event-view-mode event-detail-value muted" id="ev-desc-view-' + eid + '">' + escHtml(e.description || 'No notes') + '</div>';
   html += '<textarea class="event-edit-input event-edit-mode" id="ev-desc-edit-' + eid + '" placeholder="Add notes…" rows="2">' + escHtml(e.description) + '</textarea>';
   html += '</div>';
-  html += '</div>';
-  html += '<div class="event-detail-field" style="margin-bottom:10px;">';
-  html += '<div class="event-detail-label">👥 Attendees (' + e.attendees.length + ')</div>';
+  html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">👥 Attendees (' + e.attendees.length + ')</div>';
   html += '<div class="event-attendees">' + attendeeHtml + '</div></div>';
+  if (e.isRecurring) {
+    html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">↻ Recurring</div><div class="event-detail-value muted">This is a repeating event</div></div>';
+  }
   html += '<div class="event-actions">';
   html += '<button class="btn btn-ghost event-view-mode" style="padding:6px 14px;font-size:12px;" id="ev-edit-btn-' + eid + '" data-eid="' + eid + '" onclick="startEditEvent(this.dataset.eid)">✏️ Edit</button>';
   html += '<button class="btn btn-gold event-edit-mode" style="padding:6px 14px;font-size:12px;" id="ev-save-btn-' + eid + '" data-eid="' + eid + '" onclick="saveEventEdit(this.dataset.eid)">💾 Save to Google</button>';
   html += '<button class="btn btn-ghost event-edit-mode" style="padding:6px 14px;font-size:12px;" data-eid="' + eid + '" onclick="cancelEditEvent(this.dataset.eid)">Cancel</button>';
+  html += '<button class="btn" style="padding:6px 14px;font-size:12px;background:rgba(240,96,96,0.12);color:var(--accent-red);border:1px solid rgba(240,96,96,0.2);margin-left:auto;" data-eid="' + eid + '" onclick="confirmDeleteEvent(this.dataset.eid)">🗑 Delete</button>';
   html += '</div></div></div>';
   return html;
 }
@@ -1265,6 +1397,232 @@ function setLayout(mode, btn) {
     var m = t.getAttribute('onclick') ? t.getAttribute('onclick').match(/'([^']+)'/) : null;
     if (m) t.classList.toggle('on', show.indexOf(m[1]) >= 0);
   });
+}
+
+// ── SECOND GOOGLE ACCOUNT ──
+let secondTokenClient = null;
+let secondCalEvents = [];
+let secondConnected = false;
+let secondAccountEmail = '';
+
+function connectSecondAccount() {
+  if (typeof google === 'undefined') { showToast('Google not loaded yet — try again in a moment'); return; }
+  try {
+    secondTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/calendar',
+      callback: handleSecondToken,
+      hint: '',
+      prompt: 'select_account',
+    });
+    secondTokenClient.requestAccessToken();
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+function handleSecondToken(tokenResponse) {
+  if (tokenResponse.error) { showToast('Second account error: ' + tokenResponse.error); return; }
+  localStorage.setItem('flow_gcal2_token', tokenResponse.access_token);
+  localStorage.setItem('flow_gcal2_expiry', (Date.now() + tokenResponse.expires_in * 1000).toString());
+  fetchSecondAccountEvents(tokenResponse.access_token);
+}
+
+async function fetchSecondAccountEvents(token) {
+  try {
+    var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?singleEvents=true&orderBy=startTime&maxResults=100&timeMin=' + new Date().toISOString() + '&timeMax=' + new Date(Date.now()+90*24*60*60*1000).toISOString(), {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    var data = await res.json();
+    if (data.error) { showToast('Second account error: ' + data.error.message); return; }
+    // Get email
+    var meRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { 'Authorization': 'Bearer ' + token } });
+    var me = await meRes.json();
+    secondAccountEmail = me.email || 'Second Account';
+    secondConnected = true;
+    secondCalEvents = (data.items || []).map(function(ev) {
+      var start = ev.start.dateTime || ev.start.date;
+      var end = ev.end ? (ev.end.dateTime || ev.end.date) : null;
+      var startD = new Date(start);
+      var endD = end ? new Date(end) : null;
+      return {
+        id: ev.id + '_2',
+        title: ev.summary || '(No title)',
+        date: start.substring(0,10),
+        time: ev.start.dateTime ? startD.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : 'All day',
+        endTime: (end && ev.end.dateTime) ? endD.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '',
+        location: ev.location || '',
+        description: ev.description || '',
+        attendees: (ev.attendees||[]).map(function(a){return a.displayName||a.email;}),
+        organizer: ev.organizer ? (ev.organizer.displayName||ev.organizer.email) : '',
+        color: '#b07cf0',
+        isAllDay: !ev.start.dateTime,
+        isRecurring: !!ev.recurringEventId,
+        recurrence: ev.recurrence || [],
+        calendar: secondAccountEmail,
+        account: 'second',
+      };
+    });
+    // Merge into main calEvents, avoid duplicates
+    calEvents = calEvents.filter(function(e){ return e.account !== 'second'; }).concat(secondCalEvents);
+    renderCalendar();
+    if (selectedDate) renderEventsForDate(selectedDate, 'eventList');
+    if (selectedDate) renderEventsForDate(selectedDate, 'fullEventList');
+    updateAccountList();
+    showToast('Second account connected: ' + secondAccountEmail + ' ✓');
+  } catch(e) { showToast('Error: ' + e.message); console.error(e); }
+}
+
+function updateAccountList() {
+  var el = document.getElementById('account-list');
+  if (!el) return;
+  var html = '<div class="account-item"><div class="account-dot"></div><div class="account-color" style="background:#5ab4f0;"></div><div style="flex:1;"><div style="font-weight:600;font-size:13px;">Primary Google Account</div><div style="font-size:11px;color:var(--text-muted);">Connected ●</div></div></div>';
+  if (secondConnected) {
+    html += '<div class="account-item"><div class="account-dot"></div><div class="account-color" style="background:#b07cf0;"></div><div style="flex:1;"><div style="font-weight:600;font-size:13px;">' + escHtml(secondAccountEmail) + '</div><div style="font-size:11px;color:var(--text-muted);">Connected ●</div></div><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="disconnectSecond()">Disconnect</button></div>';
+  } else {
+    html += '<div class="account-item"><div class="account-dot inactive"></div><div class="account-color" style="background:var(--bg-3);"></div><div style="flex:1;"><div style="font-weight:600;font-size:13px;">Second Google Account</div><div style="font-size:11px;color:var(--text-muted);">Not connected</div></div><button class="btn btn-green" style="padding:4px 10px;font-size:11px;" onclick="connectSecondAccount()">+ Connect</button></div>';
+  }
+  el.innerHTML = html;
+}
+
+function disconnectSecond() {
+  secondConnected = false; secondCalEvents = []; secondAccountEmail = '';
+  localStorage.removeItem('flow_gcal2_token'); localStorage.removeItem('flow_gcal2_expiry');
+  calEvents = calEvents.filter(function(e){ return e.account !== 'second'; });
+  renderCalendar();
+  if (selectedDate) renderEventsForDate(selectedDate, 'eventList');
+  if (selectedDate) renderEventsForDate(selectedDate, 'fullEventList');
+  updateAccountList();
+  showToast('Second account disconnected');
+}
+
+// ── CREATE EVENT ──
+function openCreatePanel(dateStr) {
+  var panel = document.getElementById('createPanel');
+  if (!panel) return;
+  if (!gcalConnected) { showToast('Connect Google Calendar first'); return; }
+  var dateInput = document.getElementById('new-ev-date');
+  if (dateInput) dateInput.value = dateStr || (selectedDate || new Date().toISOString().substring(0,10));
+  var errEl = document.getElementById('new-ev-error');
+  if (errEl) errEl.style.display = 'none';
+  panel.classList.add('open');
+  setTimeout(function(){ var t = document.getElementById('new-ev-title'); if(t) t.focus(); }, 100);
+}
+
+function closeCreatePanel() {
+  var panel = document.getElementById('createPanel');
+  if (panel) panel.classList.remove('open');
+  ['new-ev-title','new-ev-location','new-ev-attendees','new-ev-desc'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  var rec = document.getElementById('new-ev-recur'); if (rec) rec.value = 'none';
+}
+
+async function createEvent() {
+  var title = document.getElementById('new-ev-title').value.trim();
+  var date = document.getElementById('new-ev-date').value;
+  var startTime = document.getElementById('new-ev-start').value;
+  var endTime = document.getElementById('new-ev-end').value;
+  var location = document.getElementById('new-ev-location').value.trim();
+  var attendeesRaw = document.getElementById('new-ev-attendees').value.trim();
+  var desc = document.getElementById('new-ev-desc').value.trim();
+  var recur = document.getElementById('new-ev-recur').value;
+  var errEl = document.getElementById('new-ev-error');
+
+  if (!title) { errEl.textContent = 'Please add a title'; errEl.style.display='block'; return; }
+  if (!date) { errEl.textContent = 'Please pick a date'; errEl.style.display='block'; return; }
+  errEl.style.display = 'none';
+
+  var attendees = attendeesRaw ? attendeesRaw.split(',').map(function(e){ return { email: e.trim() }; }).filter(function(a){ return a.email; }) : [];
+
+  var event = {
+    summary: title,
+    location: location,
+    description: desc,
+    start: { dateTime: date + 'T' + startTime + ':00', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+    end: { dateTime: date + 'T' + endTime + ':00', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+    attendees: attendees,
+  };
+
+  if (recur !== 'none') {
+    var ruleMap = { DAILY:'RRULE:FREQ=DAILY', WEEKLY:'RRULE:FREQ=WEEKLY', BIWEEKLY:'RRULE:FREQ=WEEKLY;INTERVAL=2', MONTHLY:'RRULE:FREQ=MONTHLY' };
+    event.recurrence = [ruleMap[recur]];
+  }
+
+  var createBtn = document.querySelector('.create-panel-footer .btn-gold');
+  if (createBtn) { createBtn.textContent = '⏳ Creating…'; createBtn.disabled = true; }
+
+  try {
+    await gapi.client.load('calendar', 'v3');
+    var response = await gapi.client.calendar.events.insert({ calendarId: 'primary', resource: event });
+    var newEv = response.result;
+    var startD = new Date(newEv.start.dateTime || newEv.start.date);
+    calEvents.unshift({
+      id: newEv.id, title: newEv.summary, date: date,
+      time: startD.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+      endTime: endTime, location: location, description: desc,
+      attendees: attendees.map(function(a){ return a.email; }),
+      organizer: 'You', color: '#5ab4f0', isAllDay: false,
+      isRecurring: recur !== 'none', calendar: 'Google', account: 'primary',
+    });
+    closeCreatePanel();
+    selectedDate = date;
+    renderCalendar();
+    renderEventsForDate(date, 'eventList');
+    renderEventsForDate(date, 'fullEventList');
+    showToast('Event created in Google Calendar ✓');
+  } catch(e) {
+    errEl.textContent = 'Error: ' + (e.message || JSON.stringify(e));
+    errEl.style.display = 'block';
+    console.error(e);
+  } finally {
+    if (createBtn) { createBtn.textContent = '✨ Create Event'; createBtn.disabled = false; }
+  }
+}
+
+// ── DELETE EVENT ──
+var pendingDeleteId = null;
+
+function confirmDeleteEvent(eventId) {
+  var ev = calEvents.find(function(e){ return e.id === eventId; });
+  if (!ev) return;
+  pendingDeleteId = eventId;
+  var txt = document.getElementById('confirmModalText');
+  if (txt) txt.textContent = '"' + ev.title + '" will be permanently deleted from Google Calendar. This cannot be undone.';
+  var modal = document.getElementById('confirmModal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeConfirm() {
+  var modal = document.getElementById('confirmModal');
+  if (modal) modal.classList.remove('open');
+  pendingDeleteId = null;
+}
+
+async function confirmDeleteAction() {
+  if (!pendingDeleteId) return;
+  var eventId = pendingDeleteId;
+  closeConfirm();
+  var ev = calEvents.find(function(e){ return e.id === eventId; });
+  var isSecond = ev && ev.account === 'second';
+  try {
+    if (isSecond) {
+      var token = localStorage.getItem('flow_gcal2_token');
+      if (!token) { showToast('Second account token expired — reconnect'); return; }
+      await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/' + eventId.replace('_2',''), {
+        method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
+      });
+    } else {
+      await gapi.client.load('calendar', 'v3');
+      await gapi.client.calendar.events.delete({ calendarId: 'primary', eventId: eventId });
+    }
+    calEvents = calEvents.filter(function(e){ return e.id !== eventId; });
+    renderCalendar();
+    if (selectedDate) renderEventsForDate(selectedDate, 'eventList');
+    if (selectedDate) renderEventsForDate(selectedDate, 'fullEventList');
+    showToast('Event deleted ✓');
+  } catch(e) {
+    showToast('Delete failed: ' + (e.message || 'Unknown error'));
+    console.error(e);
+  }
 }
 
 // ── VIEW SWITCHING ──
