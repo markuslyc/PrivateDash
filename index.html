@@ -686,7 +686,7 @@ What would you like to work on?</div></div>
     <div id="new-ev-error" style="color:var(--accent-red);font-size:13px;display:none;"></div>
   </div>
   <div class="create-panel-footer">
-    <button class="btn btn-gold" style="flex:1;" onclick="createEvent()">✨ Create Event</button>
+    <button class="btn btn-gold" id="create-event-btn" style="flex:1;" onclick="createEvent()">✨ Create Event</button>
     <button class="btn btn-ghost" onclick="closeCreatePanel()">Cancel</button>
   </div>
 </div>
@@ -1405,10 +1405,10 @@ function setLayout(mode, btn) {
 }
 
 // ── SECOND GOOGLE ACCOUNT ──
-let secondTokenClient = null;
-let secondCalEvents = [];
-let secondConnected = false;
-let secondAccountEmail = '';
+var secondTokenClient = null;
+var secondCalEvents = [];
+var secondConnected = false;
+var secondAccountEmail = '';
 
 function connectSecondAccount() {
   if (typeof google === 'undefined') { showToast('Google not loaded yet — try again in a moment'); return; }
@@ -1522,81 +1522,628 @@ function closeCreatePanel() {
 }
 
 async function createEvent() {
-  var title = document.getElementById('new-ev-title').value.trim();
-  var date = document.getElementById('new-ev-date').value;
-  var startTime = document.getElementById('new-ev-start').value;
-  var endTime = document.getElementById('new-ev-end').value;
-  var location = document.getElementById('new-ev-location').value.trim();
-  var attendeesRaw = document.getElementById('new-ev-attendees').value.trim();
-  var desc = document.getElementById('new-ev-desc').value.trim();
-  var recur = document.getElementById('new-ev-recur').value;
   var errEl = document.getElementById('new-ev-error');
+  var createBtn = document.getElementById('create-event-btn');
+  if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
 
-  if (!title) { errEl.textContent = 'Please add a title'; errEl.style.display='block'; return; }
-  if (!date) { errEl.textContent = 'Please pick a date'; errEl.style.display='block'; return; }
-  errEl.style.display = 'none';
+  var title = (document.getElementById('new-ev-title') || {}).value;
+  var date  = (document.getElementById('new-ev-date')  || {}).value;
+  var startTime = (document.getElementById('new-ev-start') || {}).value || '09:00';
+  var endTime   = (document.getElementById('new-ev-end')   || {}).value || '10:00';
+  var location  = (document.getElementById('new-ev-location') || {}).value || '';
+  var attendeesRaw = (document.getElementById('new-ev-attendees') || {}).value || '';
+  var desc   = (document.getElementById('new-ev-desc') || {}).value || '';
+  var recur  = (document.getElementById('new-ev-recur') || {}).value || 'none';
 
-  // Check token is still valid
-  var expiry = localStorage.getItem('flow_gcal_expiry');
-  if (!expiry || Date.now() > parseInt(expiry)) {
-    errEl.innerHTML = '⚠️ Your Google session has expired.<br>Please <strong>disconnect and reconnect Google Calendar</strong> to get write access, then try again.';
-    errEl.style.display = 'block';
+  title = (title || '').trim();
+  date  = (date  || '').trim();
+
+  if (!title) { if (errEl) { errEl.textContent = 'Please enter a title'; errEl.style.display='block'; } return; }
+  if (!date)  { if (errEl) { errEl.textContent = 'Please pick a date';   errEl.style.display='block'; } return; }
+
+  var token = localStorage.getItem('flow_gcal_token');
+  if (!token) {
+    if (errEl) { errEl.textContent = 'Not connected to Google — click Connect Google Calendar first'; errEl.style.display='block'; }
     return;
   }
 
-  var attendees = attendeesRaw
-    ? attendeesRaw.split(',').map(function(e){ return { email: e.trim() }; }).filter(function(a){ return a.email && a.email.includes('@'); })
+  if (createBtn) { createBtn.textContent = '⏳ Saving…'; createBtn.disabled = true; }
+
+  var attendees = attendeesRaw.trim()
+    ? attendeesRaw.split(',').map(function(s){ return { email: s.trim() }; }).filter(function(a){ return a.email.indexOf('@') > 0; })
     : [];
 
   var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  var event = {
+  var body = {
     summary: title,
-    location: location,
-    description: desc,
+    location: location.trim(),
+    description: desc.trim(),
     start: { dateTime: date + 'T' + startTime + ':00', timeZone: tz },
     end:   { dateTime: date + 'T' + endTime   + ':00', timeZone: tz },
     attendees: attendees,
   };
+  if (recur !== 'none') {
+    var rules = { DAILY:'RRULE:FREQ=DAILY', WEEKLY:'RRULE:FREQ=WEEKLY', BIWEEKLY:'RRULE:FREQ=WEEKLY;INTERVAL=2', MONTHLY:'RRULE:FREQ=MONTHLY' };
+    body.recurrence = [rules[recur]];
+  }
+
+  try {
+    var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    var data = await res.json();
+
+    if (!res.ok) {
+      var msg = (data.error && data.error.message) ? data.error.message : ('Error ' + res.status);
+      if (res.status === 401 || res.status === 403) {
+        msg = 'Permission denied (' + res.status + '). Go to myaccount.google.com/permissions, remove this app, then reconnect Google Calendar to grant write access.';
+      }
+      if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+      return;
+    }
+
+    // Add to local list
+    var startD = new Date(data.start.dateTime || data.start.date);
+    calEvents.unshift({
+      id: data.id, title: data.summary || title, date: date,
+      time: startD.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}),
+      endTime: endTime, location: location.trim(), description: desc.trim(),
+      attendees: attendees.map(function(a){ return a.email; }),
+      organizer: 'You', color: '#f5c842', isAllDay: false,
+      isRecurring: recur !== 'none', calendar: 'Google', account: 'primary',
+    });
+
+    closeCreatePanel();
+    selectedDate = date;
+    renderCalendar();
+    renderEventsForDate(date, 'eventList');
+    renderEventsForDate(date, 'fullEventList');
+    showToast('Event created ✓');
+
+  } catch(e) {
+    if (errEl) { errEl.textContent = 'Network error: ' + e.message; errEl.style.display = 'block'; }
+    console.error(e);
+  } finally {
+    if (createBtn) { createBtn.textContent = '✨ Create Event'; createBtn.disabled = false; }
+  }
+}
+
+
+async function fetchCalendarEvents() {
+  try {
+    await gapi.client.load('calendar', 'v3');
+    var now = new Date();
+    var timeMin = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+    var timeMax = new Date(now.getFullYear(), now.getMonth() + 3, 0).toISOString();
+    var response = await gapi.client.calendar.events.list({
+      calendarId: 'primary',
+      timeMin: timeMin, timeMax: timeMax,
+      singleEvents: true, orderBy: 'startTime', maxResults: 200,
+    });
+    var items = response.result.items || [];
+    calEvents = items.map(function(ev) {
+      var start = ev.start.dateTime || ev.start.date;
+      var end = ev.end ? (ev.end.dateTime || ev.end.date) : null;
+      var startD = new Date(start);
+      var endD = end ? new Date(end) : null;
+      var attendees = (ev.attendees || []).map(function(a){ return a.displayName || a.email; });
+      return {
+        id: ev.id,
+        title: ev.summary || '(No title)',
+        date: start.substring(0, 10),
+        time: ev.start.dateTime ? startD.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'}) : 'All day',
+        endTime: (end && ev.end.dateTime) ? endD.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'}) : '',
+        location: ev.location || '',
+        description: ev.description || '',
+        attendees: attendees,
+        organizer: ev.organizer ? (ev.organizer.displayName || ev.organizer.email) : '',
+        color: ev.colorId ? gcalColor(ev.colorId) : '#5ab4f0',
+        isAllDay: !ev.start.dateTime,
+        isRecurring: !!ev.recurringEventId,
+        recurrence: ev.recurrence || [],
+        rawStart: start, rawEnd: end,
+        calendar: 'Google', account: 'primary',
+      };
+    });
+    gcalConnected = true;
+    updateGCalUI();
+    updateAccountList();
+    renderCalendar();
+    // Show today's events by default
+    var todayStr = now.toISOString().substring(0,10);
+    selectedDate = todayStr;
+    renderEventsForDate(todayStr, 'eventList');
+    renderEventsForDate(todayStr, 'fullEventList');
+    var todayEvents = calEvents.filter(function(e){ return e.date === todayStr; });
+    var statM = document.getElementById('stat-meetings');
+    if (statM) statM.textContent = todayEvents.length;
+    var nextM = document.getElementById('stat-next-meeting');
+    if (nextM) nextM.textContent = todayEvents.length > 0 ? 'Next: ' + todayEvents[0].time : 'None today';
+    showToast('Google Calendar connected ✓ — ' + items.length + ' events loaded');
+  } catch(e) {
+    console.error('Calendar fetch error:', e);
+    showToast('Calendar error: ' + (e.message || JSON.stringify(e)));
+  }
+}
+
+function gcalColor(colorId) {
+  var colors = { '1':'#7986cb','2':'#33b679','3':'#8e24aa','4':'#e67c73','5':'#f6c026','6':'#f5511d','7':'#039be5','8':'#616161','9':'#3f51b5','10':'#0b8043','11':'#d60000' };
+  return colors[colorId] || '#5ab4f0';
+}
+
+function renderEventsForDate(dateStr, containerId) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  var events = dateStr ? calEvents.filter(function(e){ return e.date === dateStr; }) : [];
+  var d = dateStr ? new Date(dateStr + 'T12:00:00') : null;
+  var label = d ? d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }) : '';
+  if (!gcalConnected) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Connect Google Calendar to see events</div>';
+    return;
+  }
+  var header = dateStr ? '<div class="day-header">' + label + '</div>' : '';
+  if (events.length === 0) {
+    el.innerHTML = header + '<div class="no-events-msg">Nothing scheduled — enjoy the free time! 🌿</div>';
+    return;
+  }
+  el.innerHTML = header + events.map(function(e){ return eventItemHtml(e); }).join('');
+}
+
+function eventItemHtml(e) {
+  var attendeeHtml = e.attendees.length > 0
+    ? e.attendees.slice(0,5).map(function(a){ return '<span class="attendee-pill">👤 ' + escHtml(a) + '</span>'; }).join('')
+      + (e.attendees.length > 5 ? '<span class="attendee-pill">+' + (e.attendees.length-5) + ' more</span>' : '')
+    : '<span style="color:var(--text-muted);font-size:12px;">No attendees listed</span>';
+  var timeStr = e.isAllDay ? 'All day' : (e.time + (e.endTime ? ' – ' + e.endTime : ''));
+  var eid = e.id;
+  var recurBadge = e.isRecurring ? '<span class="recurring-badge">↻ Recurring</span>' : '';
+  var accountDot = e.account === 'second' ? '<span style="width:8px;height:8px;border-radius:50%;background:#b07cf0;display:inline-block;margin-left:4px;" title="' + escHtml(e.calendar) + '"></span>' : '';
+  var html = '<div class="event-item" id="evitem-' + eid + '" style="border-left-color:' + e.color + '">';
+  html += '<div class="event-row" data-eid="' + eid + '" onclick="toggleEventExpand(this.dataset.eid)">';
+  html += '<div class="event-time">' + e.time + '</div>';
+  html += '<div class="event-name">' + escHtml(e.title) + accountDot + '</div>';
+  html += recurBadge;
+  html += '<div class="event-chevron">▼</div>';
+  html += '</div>';
+  html += '<div class="event-detail">';
+  html += '<div class="event-detail-grid">';
+  html += '<div class="event-detail-field"><div class="event-detail-label">🕐 Time</div><div class="event-detail-value">' + timeStr + '</div></div>';
+  html += '<div class="event-detail-field"><div class="event-detail-label">👤 Organiser</div><div class="event-detail-value muted">' + escHtml(e.organizer || '—') + '</div></div>';
+  html += '<div class="event-detail-field"><div class="event-detail-label">📍 Location</div>';
+  html += '<div class="event-view-mode event-detail-value muted" id="ev-loc-view-' + eid + '">' + escHtml(e.location || 'No location') + '</div>';
+  html += '<input class="event-edit-input event-edit-mode" id="ev-loc-edit-' + eid + '" value="' + escHtml(e.location) + '" placeholder="Add location…">';
+  html += '</div>';
+  html += '<div class="event-detail-field"><div class="event-detail-label">📅 Calendar</div><div class="event-detail-value muted">' + escHtml(e.calendar || 'Google') + '</div></div>';
+  html += '</div>';
+  html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">📝 Notes</div>';
+  html += '<div class="event-view-mode event-detail-value muted" id="ev-desc-view-' + eid + '">' + escHtml(e.description || 'No notes') + '</div>';
+  html += '<textarea class="event-edit-input event-edit-mode" id="ev-desc-edit-' + eid + '" placeholder="Add notes…" rows="2">' + escHtml(e.description) + '</textarea>';
+  html += '</div>';
+  html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">👥 Attendees (' + e.attendees.length + ')</div>';
+  html += '<div class="event-attendees">' + attendeeHtml + '</div></div>';
+  if (e.isRecurring) {
+    html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">↻ Recurring</div><div class="event-detail-value muted">This is a repeating event</div></div>';
+  }
+  html += '<div class="event-actions">';
+  html += '<button class="btn btn-ghost event-view-mode" style="padding:6px 14px;font-size:12px;" id="ev-edit-btn-' + eid + '" data-eid="' + eid + '" onclick="startEditEvent(this.dataset.eid)">✏️ Edit</button>';
+  html += '<button class="btn btn-gold event-edit-mode" style="padding:6px 14px;font-size:12px;" id="ev-save-btn-' + eid + '" data-eid="' + eid + '" onclick="saveEventEdit(this.dataset.eid)">💾 Save to Google</button>';
+  html += '<button class="btn btn-ghost event-edit-mode" style="padding:6px 14px;font-size:12px;" data-eid="' + eid + '" onclick="cancelEditEvent(this.dataset.eid)">Cancel</button>';
+  html += '<button class="btn" style="padding:6px 14px;font-size:12px;background:rgba(240,96,96,0.12);color:var(--accent-red);border:1px solid rgba(240,96,96,0.2);margin-left:auto;" data-eid="' + eid + '" onclick="confirmDeleteEvent(this.dataset.eid)">🗑 Delete</button>';
+  html += '</div></div></div>';
+  return html;
+}
+
+
+function toggleEventExpand(eventId) {
+  var item = document.getElementById('evitem-' + eventId);
+  if (!item) return;
+  var wasExpanded = item.classList.contains('expanded');
+  // Collapse all
+  document.querySelectorAll('.event-item.expanded').forEach(function(el){ el.classList.remove('expanded'); });
+  if (!wasExpanded) item.classList.add('expanded');
+  expandedEventId = wasExpanded ? null : eventId;
+}
+
+function startEditEvent(eventId) {
+  var item = document.getElementById('evitem-' + eventId);
+  if (!item) return;
+  item.querySelectorAll('.event-view-mode').forEach(function(el){ el.style.display = 'none'; });
+  item.querySelectorAll('.event-edit-mode').forEach(function(el){ el.style.display = 'block'; });
+}
+
+function cancelEditEvent(eventId) {
+  var item = document.getElementById('evitem-' + eventId);
+  if (!item) return;
+  item.querySelectorAll('.event-view-mode').forEach(function(el){ el.style.display = ''; });
+  item.querySelectorAll('.event-edit-mode').forEach(function(el){ el.style.display = ''; });
+}
+
+async function saveEventEdit(eventId) {
+  var ev = calEvents.find(function(e){ return e.id === eventId; });
+  if (!ev) return;
+  var locEl = document.getElementById('ev-loc-edit-' + eventId);
+  var descEl = document.getElementById('ev-desc-edit-' + eventId);
+  var newLoc = locEl ? locEl.value : ev.location;
+  var newDesc = descEl ? descEl.value : ev.description;
+  var btn = document.getElementById('ev-save-btn-' + eventId);
+  if (btn) { btn.textContent = '⏳ Saving…'; btn.disabled = true; }
+  try {
+    await gapi.client.load('calendar', 'v3');
+    var patch = { location: newLoc, description: newDesc };
+    var token = localStorage.getItem('flow_gcal_token');
+    var patchRes = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/' + eventId, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch),
+    });
+    if (!patchRes.ok) {
+      var patchData = await patchRes.json();
+      throw new Error(patchData.error ? patchData.error.message : ('HTTP ' + patchRes.status));
+    }
+    // Update local data
+    ev.location = newLoc;
+    ev.description = newDesc;
+    // Re-render
+    cancelEditEvent(eventId);
+    document.getElementById('ev-loc-view-' + eventId).textContent = newLoc || 'No location';
+    document.getElementById('ev-desc-view-' + eventId).textContent = newDesc || 'No notes';
+    if (btn) { btn.textContent = '💾 Save to Google'; btn.disabled = false; }
+    showToast('Event updated in Google Calendar ✓');
+  } catch(e) {
+    if (btn) { btn.textContent = '💾 Save to Google'; btn.disabled = false; }
+    showToast('Save failed: ' + (e.message || 'Check permissions'));
+    console.error('Event patch error:', e);
+  }
+}
+
+function updateGCalUI() {
+  ['gcal-badge','gcal-badge-full'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'card-badge ' + (gcalConnected ? 'gcal-connected' : 'gcal-disconnected');
+    el.textContent = gcalConnected ? '● Google Connected' : 'Not connected';
+  });
+  var btn = document.getElementById('gcal-connect-btn');
+  if (btn) { btn.textContent = gcalConnected ? '✓ Connected' : 'Connect Google'; btn.disabled = gcalConnected; }
+  var mainBtn = document.getElementById('gcal-main-btn');
+  if (mainBtn) { mainBtn.textContent = gcalConnected ? '✓ Connected' : '🔗 Connect Google Calendar'; mainBtn.disabled = gcalConnected; }
+  var mainStatus = document.getElementById('gcal-main-status');
+  if (mainStatus) mainStatus.textContent = gcalConnected ? '● Connected' : 'Not connected';
+  renderIntegrations();
+}
+
+// ── AI ──
+async function sendAiMessage(chatAreaId, inputId, modelSelectId) {
+  var input = document.getElementById(inputId);
+  var modelEl = document.getElementById(modelSelectId);
+  var model = modelEl ? modelEl.value : 'claude';
+  var msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addAiMsg(chatAreaId, msg, true);
+  var thinkingEl = addThinkingMsg(chatAreaId);
+  var reply;
+  try {
+    if (model === 'claude') reply = await callClaude(msg);
+    else if (model === 'gpt4') reply = await callOpenAI(msg);
+    else if (model === 'kimi') reply = await callKimi(msg);
+    else reply = 'Model not set up.';
+  } catch(e) {
+    reply = 'Error: ' + e.message;
+  }
+  thinkingEl.remove();
+  addAiMsg(chatAreaId, reply, false);
+}
+
+async function callClaude(message) {
+  var key = localStorage.getItem('flow_claude_key');
+  if (!key) return 'No Claude key saved yet.\n\nGo to Integrations tab → paste your Claude API key → click Save. Then come back here and try again.';
+  var res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1024,
+      system: 'You are a helpful personal assistant in the FLOW dashboard. The user has dyslexia — be clear, concise, use short paragraphs. Be practical.',
+      messages: [{ role: 'user', content: message }] })
+  });
+  var data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return (data.content && data.content[0]) ? data.content[0].text : 'No response.';
+}
+
+async function callOpenAI(message) {
+  var key = localStorage.getItem('flow_openai_key');
+  if (!key) return 'No GPT-4 key saved yet.\n\nGo to Integrations tab → paste your OpenAI API key → click Save.';
+  var res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({ model: 'gpt-4o', max_tokens: 1024,
+      messages: [
+        { role: 'system', content: 'You are a helpful personal assistant. Be clear and concise.' },
+        { role: 'user', content: message }
+      ] })
+  });
+  var data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return (data.choices && data.choices[0]) ? data.choices[0].message.content : 'No response.';
+}
+
+async function callKimi(message) {
+  var key = localStorage.getItem('flow_kimi_key');
+  if (!key) return 'No Kimi key saved yet.\n\nGo to Integrations tab → paste your Kimi API key → click Save.';
+  var res = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({ model: 'moonshot-v1-8k', max_tokens: 1024,
+      messages: [
+        { role: 'system', content: 'You are a helpful personal assistant. Be clear and concise.' },
+        { role: 'user', content: message }
+      ] })
+  });
+  var data = await res.json();
+  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+  return (data.choices && data.choices[0]) ? data.choices[0].message.content : 'No response.';
+}
+
+function addAiMsg(containerId, text, isUser) {
+  var container = document.getElementById(containerId);
+  if (!container) return null;
+  var div = document.createElement('div');
+  div.className = 'ai-msg' + (isUser ? ' user' : '');
+  div.innerHTML = '<div class="ai-avatar ' + (isUser ? 'user-av' : '') + '">' + (isUser ? 'Y' : '✦') + '</div><div class="ai-bubble">' + escHtml(text) + '</div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function addThinkingMsg(containerId) {
+  var container = document.getElementById(containerId);
+  var div = document.createElement('div');
+  div.className = 'ai-msg';
+  div.innerHTML = '<div class="ai-avatar">✦</div><div class="ai-bubble"><div class="ai-thinking"><span></span><span></span><span></span></div></div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function clearAiChat() {
+  var el = document.getElementById('fullAiChat');
+  if (el) el.innerHTML = '<div class="ai-msg"><div class="ai-avatar">✦</div><div class="ai-bubble">Chat cleared. What can I help with?</div></div>';
+}
+
+function checkSavedKeys() {
+  var statusEl = document.getElementById('ai-key-status');
+  if (!statusEl) return;
+  var keys = [];
+  if (localStorage.getItem('flow_claude_key')) keys.push('✦ Claude');
+  if (localStorage.getItem('flow_openai_key')) keys.push('● GPT-4');
+  if (localStorage.getItem('flow_kimi_key')) keys.push('🌙 Kimi');
+  statusEl.textContent = keys.length ? 'Connected: ' + keys.join(' · ') : 'No AI keys saved yet — add them below.';
+  statusEl.style.color = keys.length ? 'var(--accent-green)' : 'var(--text-muted)';
+}
+
+// ── API KEYS ──
+function saveApiKey(service) {
+  var inputMap = { claude:'claudeApiKey', openai:'openaiApiKey', kimi:'kimiApiKey', hubspot:'hubspotKey' };
+  var storageMap = { claude:'flow_claude_key', openai:'flow_openai_key', kimi:'flow_kimi_key', hubspot:'flow_hubspot_key' };
+  var el = document.getElementById(inputMap[service]);
+  if (!el || !el.value.trim()) { showToast('Please enter a key first'); return; }
+  localStorage.setItem(storageMap[service], el.value.trim());
+  el.value = '';
+  var statusEl = document.getElementById(service + '-key-status');
+  if (statusEl) { statusEl.style.display = 'inline-flex'; setTimeout(function(){ statusEl.style.display = 'none'; }, 3000); }
+  checkSavedKeys();
+  renderIntegrations();
+  showToast(service + ' API key saved ✓');
+}
+
+// ── INTEGRATIONS ──
+function integStatus(key) {
+  if (key === 'gcal') return gcalConnected ? 'connected' : 'connect';
+  var storageMap = { claude:'flow_claude_key', openai:'flow_openai_key', kimi:'flow_kimi_key', hubspot:'flow_hubspot_key' };
+  var noKey = ['gdrive','slack','notion','zapier','gemini','mistral','custom'];
+  if (noKey.indexOf(key) >= 0) return 'coming';
+  return localStorage.getItem(storageMap[key]) ? 'connected' : 'connect';
+}
+
+function integHtml(i) {
+  var s = integStatus(i.key);
+  var labels = { connected:'● Connected', connect:'+ Connect', coming:'Coming soon' };
+  var cls = { connected:'status-connected', connect:'status-connect', coming:'status-coming' };
+  return '<div class="integ-card ' + s + '" onclick="handleIntegClick(\'' + i.key + '\')">' +
+    '<div class="integ-logo">' + i.emoji + '</div>' +
+    '<div class="integ-name">' + i.name + '</div>' +
+    '<div class="integ-status ' + cls[s] + '">' + labels[s] + '</div>' +
+    '</div>';
+}
+
+function handleIntegClick(key) {
+  if (key === 'gcal') { connectGoogleCalendar(); return; }
+  if (['claude','openai','kimi','hubspot'].indexOf(key) >= 0) { showView('integrations'); return; }
+  showToast('Coming soon!');
+}
+
+function renderIntegrations() {
+  var crmEl = document.getElementById('crmIntegrations');
+  if (crmEl) crmEl.innerHTML = crmIntegrationsList.map(integHtml).join('');
+  var aiEl = document.getElementById('aiIntegrations');
+  if (aiEl) aiEl.innerHTML = aiIntegrationsList.map(integHtml).join('');
+}
+
+// ── BUSINESSES ──
+function renderBusinesses() {
+  var mini = document.getElementById('bizMiniList');
+  if (mini) mini.innerHTML = businesses.map(function(b) {
+    return '<div class="biz-card" onclick="showView(\'businesses\')">' +
+      '<div class="biz-name">' + b.emoji + ' ' + b.name + ' <span class="biz-tag" style="background:' + b.tagColor + '22;color:' + b.tagColor + '">' + b.tag + '</span></div>' +
+      '<div class="biz-kpi-row">' + b.kpis.map(function(k){ return '<div class="biz-kpi"><div class="biz-kpi-label">' + k.l + '</div><div class="biz-kpi-val">' + k.v + '</div></div>'; }).join('') + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function renderFullBusinesses() {
+  var el = document.getElementById('fullBizList');
+  if (!el) return;
+  el.innerHTML = businesses.map(function(b) {
+    return '<div class="card">' +
+      '<div class="card-header"><div style="font-size:28px;">' + b.emoji + '</div>' +
+      '<div><div style="font-size:17px;font-weight:600;">' + b.name + '</div>' +
+      '<span class="biz-tag" style="background:' + b.tagColor + '22;color:' + b.tagColor + ';font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600;">' + b.tag + '</span></div></div>' +
+      '<div class="card-body">' +
+      '<div class="biz-kpi-row">' + b.kpis.map(function(k){ return '<div class="biz-kpi"><div class="biz-kpi-label">' + k.l + '</div><div class="biz-kpi-val" style="font-size:22px;">' + k.v + '</div></div>'; }).join('') + '</div>' +
+      '<div class="progress-bar" style="margin-top:16px;"><div class="progress-fill" style="width:65%;background:' + b.tagColor + ';"></div></div>' +
+      '<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Q3 progress</div>' +
+      '</div></div>';
+  }).join('');
+}
+
+// ── NOTES ──
+function loadNotes() {
+  var saved = localStorage.getItem('flow_notes');
+  var el = document.getElementById('quickNotes');
+  if (saved && el) el.value = saved;
+}
+
+var notesSaveTimeout;
+function saveNotes() {
+  clearTimeout(notesSaveTimeout);
+  notesSaveTimeout = setTimeout(function() {
+    var el = document.getElementById('quickNotes');
+    if (el) localStorage.setItem('flow_notes', el.value);
+    var s = document.getElementById('notes-saved');
+    if (s) { s.textContent = '✓ Saved'; setTimeout(function(){ s.textContent = ''; }, 1500); }
+  }, 600);
+}
+
+// ── WIDGET TOGGLES ──
+function toggleWidget(id, btn) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('hidden');
+  btn.classList.toggle('on');
+}
+
+function setLayout(mode, btn) {
+  document.querySelectorAll('.focus-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  var all = ['tasks-widget','cal-widget','ai-widget','biz-widget','notes-widget'];
+  var show = mode === 'all' ? all : mode === 'work' ? ['tasks-widget','cal-widget','biz-widget'] : mode === 'personal' ? ['tasks-widget','cal-widget','notes-widget'] : ['biz-widget','tasks-widget','ai-widget'];
+  all.forEach(function(w) {
+    var el = document.getElementById(w);
+    if (el) el.classList.toggle('hidden', show.indexOf(w) < 0);
+  });
+  document.querySelectorAll('.widget-toggle').forEach(function(t) {
+    var m = t.getAttribute('onclick') ? t.getAttribute('onclick').match(/'([^']+)'/) : null;
+    if (m) t.classList.toggle('on', show.indexOf(m[1]) >= 0);
+  });
+}
+
+// ── CREATE EVENT ──
+function openCreatePanel(dateStr) {
+  var panel = document.getElementById('createPanel');
+  if (!panel) return;
+  if (!gcalConnected) { showToast('Connect Google Calendar first'); return; }
+  var dateInput = document.getElementById('new-ev-date');
+  if (dateInput) dateInput.value = dateStr || (selectedDate || new Date().toISOString().substring(0,10));
+  var errEl = document.getElementById('new-ev-error');
+  if (errEl) errEl.style.display = 'none';
+  panel.classList.add('open');
+  setTimeout(function(){ var t = document.getElementById('new-ev-title'); if(t) t.focus(); }, 100);
+}
+
+function closeCreatePanel() {
+  var panel = document.getElementById('createPanel');
+  if (panel) panel.classList.remove('open');
+  ['new-ev-title','new-ev-location','new-ev-attendees','new-ev-desc'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  var rec = document.getElementById('new-ev-recur'); if (rec) rec.value = 'none';
+}
+
+async function createEvent() {
+  var errEl = document.getElementById('new-ev-error');
+  var createBtn = document.querySelector('.create-panel-footer .btn-gold');
+
+  function showErr(msg) {
+    errEl.innerHTML = msg;
+    errEl.style.display = 'block';
+    if (createBtn) { createBtn.textContent = '✨ Create Event'; createBtn.disabled = false; }
+  }
+
+  var title = (document.getElementById('new-ev-title').value || '').trim();
+  var date = (document.getElementById('new-ev-date').value || '').trim();
+  var startTime = document.getElementById('new-ev-start').value || '09:00';
+  var endTime = document.getElementById('new-ev-end').value || '10:00';
+  var location = (document.getElementById('new-ev-location').value || '').trim();
+  var attendeesRaw = (document.getElementById('new-ev-attendees').value || '').trim();
+  var desc = (document.getElementById('new-ev-desc').value || '').trim();
+  var recur = (document.getElementById('new-ev-recur').value || 'none');
+
+  errEl.style.display = 'none';
+
+  if (!title) { showErr('⚠️ Please enter a title for the event.'); return; }
+  if (!date)  { showErr('⚠️ Please pick a date.'); return; }
+
+  var token = localStorage.getItem('flow_gcal_token');
+  if (!token) {
+    showErr('⚠️ Not connected to Google Calendar. Click <strong>Connect Google</strong> first.');
+    return;
+  }
+
+  if (createBtn) { createBtn.textContent = '⏳ Creating…'; createBtn.disabled = true; }
+
+  var attendees = [];
+  if (attendeesRaw) {
+    attendees = attendeesRaw.split(',')
+      .map(function(e){ return e.trim(); })
+      .filter(function(e){ return e.indexOf('@') > 0; })
+      .map(function(e){ return { email: e }; });
+  }
+
+  var tz = 'UTC';
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) {}
+
+  var eventBody = {
+    summary: title,
+    start: { dateTime: date + 'T' + startTime + ':00', timeZone: tz },
+    end:   { dateTime: date + 'T' + endTime   + ':00', timeZone: tz },
+  };
+  if (location)        eventBody.location    = location;
+  if (desc)            eventBody.description = desc;
+  if (attendees.length) eventBody.attendees  = attendees;
 
   if (recur !== 'none') {
     var ruleMap = { DAILY:'RRULE:FREQ=DAILY', WEEKLY:'RRULE:FREQ=WEEKLY', BIWEEKLY:'RRULE:FREQ=WEEKLY;INTERVAL=2', MONTHLY:'RRULE:FREQ=MONTHLY' };
-    event.recurrence = [ruleMap[recur]];
+    if (ruleMap[recur]) eventBody.recurrence = [ruleMap[recur]];
   }
 
-  var createBtn = document.querySelector('.create-panel-footer .btn-gold');
-  if (createBtn) { createBtn.textContent = '⏳ Creating…'; createBtn.disabled = true; }
-
   try {
-    await gapi.client.load('calendar', 'v3');
-
-    // Use fetch directly with stored token for reliability
-    var token = localStorage.getItem('flow_gcal_token');
     var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(event),
+      body: JSON.stringify(eventBody),
     });
 
     var data = await res.json();
 
-    if (!res.ok || data.error) {
-      var msg = data.error ? data.error.message : ('HTTP ' + res.status);
-      // Specific helpful messages
-      if (res.status === 401) {
-        errEl.innerHTML = '⚠️ Google session expired. Click <strong>Disconnect</strong> in Integrations, then reconnect Google Calendar to get fresh write access.';
-      } else if (res.status === 403) {
-        errEl.innerHTML = '⚠️ Write permission denied.<br><br><strong>Fix:</strong> Go to <a href="https://myaccount.google.com/permissions" target="_blank" style="color:var(--accent-gold);">myaccount.google.com/permissions</a>, remove this app, then reconnect Google Calendar on your dashboard. Google will ask for write permission this time.';
-      } else {
-        errEl.textContent = 'Google error: ' + msg;
-      }
-      errEl.style.display = 'block';
+    if (res.status === 401) {
+      showErr('⚠️ Google session expired. Reconnect Google Calendar and try again.');
+      return;
+    }
+    if (res.status === 403) {
+      showErr('⚠️ Permission denied. Go to <a href="https://myaccount.google.com/permissions" target="_blank" style="color:var(--accent-gold);">myaccount.google.com/permissions</a>, remove this app, reconnect Google Calendar on the dashboard, then try again.');
+      return;
+    }
+    if (!res.ok) {
+      showErr('⚠️ Google error ' + res.status + ': ' + (data.error ? data.error.message : 'Unknown error'));
       return;
     }
 
-    // Success
+    // Success — add to local list
     var startD = new Date(data.start.dateTime || data.start.date);
     calEvents.unshift({
       id: data.id,
@@ -1608,26 +2155,24 @@ async function createEvent() {
       description: desc,
       attendees: attendees.map(function(a){ return a.email; }),
       organizer: 'You',
-      color: '#5ab4f0',
+      color: '#5ecb8a',
       isAllDay: false,
       isRecurring: recur !== 'none',
       calendar: 'Google',
       account: 'primary',
     });
 
+    if (createBtn) { createBtn.textContent = '✨ Create Event'; createBtn.disabled = false; }
     closeCreatePanel();
     selectedDate = date;
     renderCalendar();
     renderEventsForDate(date, 'eventList');
     renderEventsForDate(date, 'fullEventList');
-    showToast('Event created in Google Calendar ✓');
+    showToast('✓ Event created in Google Calendar!');
 
   } catch(e) {
-    errEl.textContent = 'Network error: ' + (e.message || 'Unknown. Check internet connection.');
-    errEl.style.display = 'block';
-    console.error('createEvent error:', e);
-  } finally {
-    if (createBtn) { createBtn.textContent = '✨ Create Event'; createBtn.disabled = false; }
+    showErr('⚠️ Network error: ' + (e.message || 'Check your internet connection.'));
+    console.error('createEvent:', e);
   }
 }
 
