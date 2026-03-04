@@ -1137,11 +1137,16 @@ async function saveEventEdit(eventId) {
   try {
     await gapi.client.load('calendar', 'v3');
     var patch = { location: newLoc, description: newDesc };
-    await gapi.client.calendar.events.patch({
-      calendarId: 'primary',
-      eventId: eventId,
-      resource: patch,
+    var token = localStorage.getItem('flow_gcal_token');
+    var patchRes = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/' + eventId, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch),
     });
+    if (!patchRes.ok) {
+      var patchData = await patchRes.json();
+      throw new Error(patchData.error ? patchData.error.message : ('HTTP ' + patchRes.status));
+    }
     // Update local data
     ev.location = newLoc;
     ev.description = newDesc;
@@ -1531,14 +1536,25 @@ async function createEvent() {
   if (!date) { errEl.textContent = 'Please pick a date'; errEl.style.display='block'; return; }
   errEl.style.display = 'none';
 
-  var attendees = attendeesRaw ? attendeesRaw.split(',').map(function(e){ return { email: e.trim() }; }).filter(function(a){ return a.email; }) : [];
+  // Check token is still valid
+  var expiry = localStorage.getItem('flow_gcal_expiry');
+  if (!expiry || Date.now() > parseInt(expiry)) {
+    errEl.innerHTML = '⚠️ Your Google session has expired.<br>Please <strong>disconnect and reconnect Google Calendar</strong> to get write access, then try again.';
+    errEl.style.display = 'block';
+    return;
+  }
 
+  var attendees = attendeesRaw
+    ? attendeesRaw.split(',').map(function(e){ return { email: e.trim() }; }).filter(function(a){ return a.email && a.email.includes('@'); })
+    : [];
+
+  var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   var event = {
     summary: title,
     location: location,
     description: desc,
-    start: { dateTime: date + 'T' + startTime + ':00', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
-    end: { dateTime: date + 'T' + endTime + ':00', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+    start: { dateTime: date + 'T' + startTime + ':00', timeZone: tz },
+    end:   { dateTime: date + 'T' + endTime   + ':00', timeZone: tz },
     attendees: attendees,
   };
 
@@ -1552,27 +1568,64 @@ async function createEvent() {
 
   try {
     await gapi.client.load('calendar', 'v3');
-    var response = await gapi.client.calendar.events.insert({ calendarId: 'primary', resource: event });
-    var newEv = response.result;
-    var startD = new Date(newEv.start.dateTime || newEv.start.date);
-    calEvents.unshift({
-      id: newEv.id, title: newEv.summary, date: date,
-      time: startD.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
-      endTime: endTime, location: location, description: desc,
-      attendees: attendees.map(function(a){ return a.email; }),
-      organizer: 'You', color: '#5ab4f0', isAllDay: false,
-      isRecurring: recur !== 'none', calendar: 'Google', account: 'primary',
+
+    // Use fetch directly with stored token for reliability
+    var token = localStorage.getItem('flow_gcal_token');
+    var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(event),
     });
+
+    var data = await res.json();
+
+    if (!res.ok || data.error) {
+      var msg = data.error ? data.error.message : ('HTTP ' + res.status);
+      // Specific helpful messages
+      if (res.status === 401) {
+        errEl.innerHTML = '⚠️ Google session expired. Click <strong>Disconnect</strong> in Integrations, then reconnect Google Calendar to get fresh write access.';
+      } else if (res.status === 403) {
+        errEl.innerHTML = '⚠️ Write permission denied.<br><br><strong>Fix:</strong> Go to <a href="https://myaccount.google.com/permissions" target="_blank" style="color:var(--accent-gold);">myaccount.google.com/permissions</a>, remove this app, then reconnect Google Calendar on your dashboard. Google will ask for write permission this time.';
+      } else {
+        errEl.textContent = 'Google error: ' + msg;
+      }
+      errEl.style.display = 'block';
+      return;
+    }
+
+    // Success
+    var startD = new Date(data.start.dateTime || data.start.date);
+    calEvents.unshift({
+      id: data.id,
+      title: data.summary || title,
+      date: date,
+      time: startD.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}),
+      endTime: endTime,
+      location: location,
+      description: desc,
+      attendees: attendees.map(function(a){ return a.email; }),
+      organizer: 'You',
+      color: '#5ab4f0',
+      isAllDay: false,
+      isRecurring: recur !== 'none',
+      calendar: 'Google',
+      account: 'primary',
+    });
+
     closeCreatePanel();
     selectedDate = date;
     renderCalendar();
     renderEventsForDate(date, 'eventList');
     renderEventsForDate(date, 'fullEventList');
     showToast('Event created in Google Calendar ✓');
+
   } catch(e) {
-    errEl.textContent = 'Error: ' + (e.message || JSON.stringify(e));
+    errEl.textContent = 'Network error: ' + (e.message || 'Unknown. Check internet connection.');
     errEl.style.display = 'block';
-    console.error(e);
+    console.error('createEvent error:', e);
   } finally {
     if (createBtn) { createBtn.textContent = '✨ Create Event'; createBtn.disabled = false; }
   }
@@ -1612,7 +1665,15 @@ async function confirmDeleteAction() {
       });
     } else {
       await gapi.client.load('calendar', 'v3');
-      await gapi.client.calendar.events.delete({ calendarId: 'primary', eventId: eventId });
+      var delToken = localStorage.getItem('flow_gcal_token');
+      var delRes = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/' + eventId, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + delToken },
+      });
+      if (!delRes.ok && delRes.status !== 204) {
+        var delData = await delRes.json().catch(function(){ return {}; });
+        throw new Error(delData.error ? delData.error.message : ('HTTP ' + delRes.status));
+      }
     }
     calEvents = calEvents.filter(function(e){ return e.id !== eventId; });
     renderCalendar();
