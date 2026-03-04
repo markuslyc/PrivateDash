@@ -223,7 +223,7 @@
     <div class="pa-section-title" style="margin-top:24px;">PA Profile</div>
     <div class="pa-access-item">
       <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#b07cf0,#5ab4f0);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;">PA</div>
-      <div><div style="font-size:13px;font-weight:600;">Your PA</div><div style="font-size:11px;color:var(--text-muted);">pa@yourbusiness.com</div></div>
+      <div><div style="font-size:13px;font-weight:600;">Your PA</div><div style="font-size:11px;color:var(--text-muted);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ec9c8dac9583999e8e999f8582899f9fc28f8381">[email&#160;protected]</a></div></div>
       <div style="margin-left:auto;font-size:11px;color:var(--accent-green);">● Active</div>
     </div>
   </div>
@@ -555,7 +555,7 @@ What would you like to work on?</div></div>
   </main>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ============================================================
 // FLOW DASHBOARD — Full JavaScript
 // Google Calendar + Persistent Tasks + Claude + GPT-4
@@ -564,6 +564,7 @@ What would you like to work on?</div></div>
 // ── CONFIG ──
 const GOOGLE_CLIENT_ID = '387362798277-gvadscn8if9m6i3r78tm641tmnmtkd4e.apps.googleusercontent.com';
 const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+const LIVE_URL = 'https://maspaceship.netlify.app';
 
 // ── STATE ──
 let tasks = [];
@@ -770,32 +771,64 @@ function renderEvents(events, containerId) {
 
 // ── GOOGLE CALENDAR ──
 function initGoogleCalendar() {
-  if (typeof google === 'undefined') return;
-  try {
-    googleTokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: GOOGLE_CLIENT_ID,
-      scope: GCAL_SCOPES,
-      callback: handleGCalToken,
-    });
-  } catch(e) { console.log('Google init error:', e); }
-
-  // Check if we have a stored token
-  const token = localStorage.getItem('flow_gcal_token');
-  const expiry = localStorage.getItem('flow_gcal_expiry');
-  if (token && expiry && Date.now() < parseInt(expiry)) {
-    gapi.load('client', () => {
-      gapi.client.setToken({ access_token: token });
-      fetchCalendarEvents();
-    });
-  }
+  let attempts = 0;
+  const tryInit = () => {
+    attempts++;
+    if (typeof google !== 'undefined' && typeof gapi !== 'undefined') {
+      try {
+        googleTokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: GCAL_SCOPES,
+          callback: handleGCalToken,
+        });
+        const token = localStorage.getItem('flow_gcal_token');
+        const expiry = localStorage.getItem('flow_gcal_expiry');
+        if (token && expiry && Date.now() < parseInt(expiry)) {
+          gapi.load('client', () => {
+            gapi.client.setToken({ access_token: token });
+            fetchCalendarEvents();
+          });
+        }
+      } catch(e) { console.log('Google init error:', e); }
+    } else if (attempts < 15) {
+      setTimeout(tryInit, 600);
+    }
+  };
+  setTimeout(tryInit, 800);
 }
 
 function connectGoogleCalendar() {
   if (!googleTokenClient) {
-    showToast('Google API not loaded. Check your internet connection.');
+    // Try to init again then connect
+    let attempts = 0;
+    const tryConnect = () => {
+      attempts++;
+      if (typeof google !== 'undefined' && typeof gapi !== 'undefined') {
+        try {
+          googleTokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_CLIENT_ID,
+            scope: GCAL_SCOPES,
+            callback: handleGCalToken,
+          });
+          googleTokenClient.requestAccessToken();
+        } catch(e) {
+          showToast('Google error: ' + e.message + ' — make sure you are on the live site, not a local file.');
+        }
+      } else if (attempts < 5) {
+        showToast('Loading Google… please try again in a moment');
+        setTimeout(tryConnect, 800);
+      } else {
+        showToast('Google failed to load. Are you on maspaceship.netlify.app?');
+      }
+    };
+    tryConnect();
     return;
   }
-  googleTokenClient.requestAccessToken();
+  try {
+    googleTokenClient.requestAccessToken();
+  } catch(e) {
+    showToast('Google error: ' + e.message);
+  }
 }
 
 function handleGCalToken(tokenResponse) {
@@ -1192,7 +1225,4 @@ function showToast(msg) {
 
 // Load saved font size
 const savedFontSize = localStorage.getItem('flow_fontsize');
-if (savedFontSize) { fontSize = parseInt(savedFontSize); document.documentElement.style.fontSize = fontSize + 'px'; const el = document.getElementById('fontSizeLabel'); if (el) el.textContent = fontSize; }
-</script>
-</body>
-</html>
+if
