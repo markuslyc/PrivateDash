@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLOW — Personal Command Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Lexend+Mega:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Google API -->
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
+<style>
+  :root {
+    --bg-0: #0f0e0c; --bg-1: #181714; --bg-2: #221f1b; --bg-3: #2e2a24; --bg-card: #1e1b17;
+    --border: rgba(255,255,255,0.07); --border-active: rgba(255,220,100,0.4);
+    --text-primary: #f5f0e8; --text-secondary: #a89880; --text-muted: #5a5148;
+    --accent-gold: #f5c842; --accent-gold-dim: #c89d28; --accent-amber: #f0892a;
+    --accent-green: #5ecb8a; --accent-blue: #5ab4f0; --accent-red: #f06060; --accent-purple: #b07cf0;
+    --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px;
+    --font-main: 'Lexend', sans-serif; --font-display: 'Lexend Mega', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.04) inset;
+    --shadow-glow: 0 0 40px rgba(245,200,66,0.12);
+    --transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 18px; }
+  body { font-family: var(--font-main); background: var(--bg-0); color: var(--text-primary); min-height: 100vh; line-height: 1.7; letter-spacing: 0.02em; overflow-x: hidden; }
+  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: var(--bg-1); } ::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 99px; }
+  .shell { display: grid; grid-template-columns: 72px 1fr; grid-template-rows: auto 1fr; min-height: 100vh; }
+  .sidebar { grid-row: 1/-1; background: var(--bg-1); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 6px; position: sticky; top: 0; height: 100vh; z-index: 100; }
+  .logo-mark { font-family: var(--font-display); font-size: 13px; color: var(--accent-gold); letter-spacing: 0.1em; margin-bottom: 24px; writing-mode: vertical-rl; transform: rotate(180deg); }
+  .nav-btn { width: 46px; height: 46px; border-radius: var(--radius-sm); border: 1px solid transparent; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: var(--transition); position: relative; }
+  .nav-btn:hover { background: var(--bg-2); color: var(--text-primary); border-color: var(--border); }
+  .nav-btn.active { background: rgba(245,200,66,0.12); color: var(--accent-gold); border-color: rgba(245,200,66,0.3); }
+  .nav-btn .tooltip { position: absolute; left: calc(100% + 12px); background: var(--bg-3); color: var(--text-primary); font-size: 12px; padding: 6px 10px; border-radius: var(--radius-sm); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; border: 1px solid var(--border); font-family: var(--font-main); font-weight: 500; z-index: 999; }
+  .nav-btn:hover .tooltip { opacity: 1; }
+  .sidebar-spacer { flex: 1; }
+  .pa-badge { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; cursor: pointer; border: 2px solid var(--bg-1); transition: var(--transition); margin-bottom: 8px; }
+  .pa-badge:hover { transform: scale(1.1); }
+  .topbar { background: var(--bg-1); border-bottom: 1px solid var(--border); padding: 0 28px; height: 64px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 90; }
+  .topbar-greeting { font-family: var(--font-display); font-size: 15px; color: var(--text-primary); letter-spacing: 0.05em; }
+  .topbar-greeting span { color: var(--accent-gold); }
+  .topbar-date { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+  .topbar-spacer { flex: 1; }
+  .focus-toggle { display: flex; background: var(--bg-2); border-radius: 99px; padding: 4px; gap: 2px; border: 1px solid var(--border); }
+  .focus-btn { padding: 5px 14px; border-radius: 99px; border: none; background: transparent; color: var(--text-secondary); font-family: var(--font-main); font-size: 12px; font-weight: 500; cursor: pointer; transition: var(--transition); }
+  .focus-btn.active { background: var(--accent-gold); color: var(--bg-0); }
+  .font-size-ctrl { display: flex; align-items: center; gap: 4px; }
+  .font-size-ctrl button { width: 28px; height: 28px; border-radius: var(--radius-sm); background: var(--bg-2); border: 1px solid var(--border); color: var(--text-secondary); font-size: 14px; cursor: pointer; font-family: var(--font-main); transition: var(--transition); }
+  .font-size-ctrl button:hover { background: var(--bg-3); color: var(--text-primary); }
+  .font-size-ctrl span { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); min-width: 28px; text-align: center; }
+  .topbar-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: var(--bg-0); cursor: pointer; border: 2px solid rgba(245,200,66,0.3); }
+  .main { padding: 28px; overflow-y: auto; background: var(--bg-0); background-image: radial-gradient(ellipse 800px 400px at 60% 0%, rgba(245,200,66,0.03) 0%, transparent 70%); }
+  .view { display: none; } .view.active { display: block; }
+  .grid-area { display: grid; gap: 18px; }
+  .cols-3 { grid-template-columns: repeat(3, 1fr); } .cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .col-span-2 { grid-column: span 2; } .col-span-3 { grid-column: span 3; }
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); overflow: hidden; transition: var(--transition); animation: fadeUp 0.4s ease both; }
+  .card:hover { border-color: rgba(255,255,255,0.11); }
+  .card.glow:hover { box-shadow: var(--shadow-card), var(--shadow-glow); }
+  .card-header { padding: 18px 22px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+  .card-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .card-title { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); }
+  .card-badge { margin-left: auto; font-size: 11px; padding: 3px 9px; border-radius: 99px; font-family: var(--font-mono); font-weight: 500; }
+  .card-body { padding: 18px 22px; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .section-label { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .quick-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .stat-pill { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 18px; transition: var(--transition); cursor: default; }
+  .stat-pill:hover { transform: translateY(-1px); }
+  .stat-pill-label { font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-pill-value { font-family: var(--font-display); font-size: 26px; line-height: 1; font-weight: 700; }
+  .stat-pill-sub { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+  .task-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); transition: var(--transition); }
+  .task-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .task-item:hover { padding-left: 4px; }
+  .task-check { width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--border-active); flex-shrink: 0; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .task-check:hover { background: rgba(245,200,66,0.1); }
+  .task-check.done { background: var(--accent-green); border-color: var(--accent-green); }
+  .task-check.done::after { content: '✓'; font-size: 11px; color: var(--bg-0); font-weight: 700; }
+  .task-text { flex: 1; }
+  .task-name { font-size: 15px; font-weight: 500; line-height: 1.4; }
+  .task-name.done { text-decoration: line-through; color: var(--text-muted); }
+  .task-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .task-del { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 4px; transition: var(--transition); opacity: 0; }
+  .task-item:hover .task-del { opacity: 1; }
+  .task-del:hover { color: var(--accent-red); background: rgba(240,96,96,0.1); }
+  .task-priority { font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 600; letter-spacing: 0.05em; align-self: flex-start; margin-top: 3px; }
+  .priority-high { background: rgba(240,96,96,0.15); color: var(--accent-red); }
+  .priority-med { background: rgba(240,137,42,0.15); color: var(--accent-amber); }
+  .priority-low { background: rgba(94,203,138,0.15); color: var(--accent-green); }
+  .add-task-row { display: flex; gap: 8px; margin-top: 14px; }
+  .add-task-input { flex: 1; background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 14px; color: var(--text-primary); font-family: var(--font-main); font-size: 14px; outline: none; transition: var(--transition); }
+  .add-task-input:focus { border-color: var(--accent-gold-dim); }
+  .add-task-input::placeholder { color: var(--text-muted); }
+  .btn { padding: 9px 18px; border-radius: var(--radius-sm); border: none; font-family: var(--font-main); font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--transition); letter-spacing: 0.03em; }
+  .btn-gold { background: var(--accent-gold); color: var(--bg-0); }
+  .btn-gold:hover { background: var(--accent-amber); transform: translateY(-1px); }
+  .btn-ghost { background: var(--bg-2); color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.15); }
+  .btn-green { background: rgba(94,203,138,0.15); color: var(--accent-green); border: 1px solid rgba(94,203,138,0.3); }
+  .btn-green:hover { background: rgba(94,203,138,0.25); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-month { font-weight: 600; font-size: 15px; }
+  .cal-nav { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); width: 28px; height: 28px; cursor: pointer; font-size: 14px; transition: var(--transition); }
+  .cal-nav:hover { color: var(--text-primary); }
+  .cal-dow { font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; padding: 6px 0; font-weight: 600; }
+  .cal-day { aspect-ratio: 1; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; cursor: pointer; transition: var(--transition); position: relative; }
+  .cal-day:hover { background: var(--bg-3); }
+  .cal-day.other-month { color: var(--text-muted); opacity: 0.4; }
+  .cal-day.today { background: var(--accent-gold); color: var(--bg-0); font-weight: 700; }
+  .cal-day.has-event::after { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--accent-amber); position: absolute; bottom: 3px; }
+  .cal-day.today.has-event::after { background: var(--bg-0); }
+  .event-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .event-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg-2); border-radius: var(--radius-sm); border-left: 3px solid var(--accent-blue); font-size: 13px; }
+  .event-time { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); min-width: 60px; }
+  .event-name { font-weight: 500; flex: 1; }
+  .event-cal { font-size: 10px; color: var(--text-muted); }
+  .ai-chat-area { display: flex; flex-direction: column; gap: 12px; max-height: 280px; overflow-y: auto; margin-bottom: 14px; padding-right: 4px; }
+  .ai-msg { display: flex; gap: 10px; align-items: flex-start; }
+  .ai-msg.user { flex-direction: row-reverse; }
+  .ai-avatar { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber)); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .ai-avatar.user-av { background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue)); }
+  .ai-bubble { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 14px; font-size: 14px; max-width: 82%; line-height: 1.65; white-space: pre-wrap; }
+  .ai-msg.user .ai-bubble { background: rgba(245,200,66,0.08); border-color: rgba(245,200,66,0.2); }
+  .ai-thinking { display: flex; gap: 4px; align-items: center; padding: 14px; }
+  .ai-thinking span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); animation: bounce 1.2s infinite; }
+  .ai-thinking span:nth-child(2) { animation-delay: 0.2s; } .ai-thinking span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity:0.4; } 40% { transform: scale(1); opacity:1; } }
+  .ai-input-row { display: flex; gap: 8px; align-items: center; }
+  .ai-model-select { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); font-family: var(--font-main); font-size: 12px; padding: 6px 10px; outline: none; cursor: pointer; }
+  .integration-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .integ-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; transition: var(--transition); position: relative; overflow: hidden; }
+  .integ-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+  .integ-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .integ-card.connected::before { background: var(--accent-green); }
+  .integ-card.connect::before { background: var(--border); }
+  .integ-card.coming::before { background: var(--accent-gold-dim); }
+  .integ-logo { font-size: 22px; } .integ-name { font-size: 13px; font-weight: 600; }
+  .integ-status { font-size: 11px; font-family: var(--font-mono); margin-top: auto; }
+  .status-connected { color: var(--accent-green); } .status-connect { color: var(--accent-amber); } .status-coming { color: var(--text-muted); }
+  .biz-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px; transition: var(--transition); cursor: pointer; }
+  .biz-card:hover { border-color: rgba(255,255,255,0.13); transform: translateY(-1px); }
+  .biz-name { font-size: 16px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .biz-tag { font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 600; letter-spacing: 0.05em; }
+  .biz-kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+  .biz-kpi { background: var(--bg-3); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .biz-kpi-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .biz-kpi-val { font-family: var(--font-display); font-size: 18px; font-weight: 700; }
+  .focus-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 999; align-items: center; justify-content: center; flex-direction: column; gap: 24px; backdrop-filter: blur(12px); }
+  .focus-overlay.active { display: flex; }
+  .focus-title { font-family: var(--font-display); font-size: 13px; letter-spacing: 0.2em; color: var(--text-secondary); text-transform: uppercase; }
+  .focus-clock { font-family: var(--font-display); font-size: 80px; font-weight: 700; color: var(--accent-gold); letter-spacing: 0.05em; line-height: 1; }
+  .focus-task-display { font-size: 20px; font-weight: 500; color: var(--text-primary); max-width: 520px; text-align: center; line-height: 1.5; }
+  .focus-exit { font-size: 12px; color: var(--text-muted); cursor: pointer; letter-spacing: 0.08em; margin-top: 16px; }
+  .focus-exit:hover { color: var(--text-secondary); }
+  .widget-bar { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .widget-toggle { padding: 6px 14px; border-radius: 99px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-secondary); font-family: var(--font-main); font-size: 12px; font-weight: 500; cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 6px; }
+  .widget-toggle:hover { color: var(--text-primary); }
+  .widget-toggle.on { background: rgba(245,200,66,0.1); border-color: rgba(245,200,66,0.3); color: var(--accent-gold); }
+  .pa-panel { display: none; position: fixed; right: 0; top: 0; bottom: 0; width: 340px; background: var(--bg-1); border-left: 1px solid var(--border); z-index: 200; flex-direction: column; box-shadow: -12px 0 40px rgba(0,0,0,0.5); }
+  .pa-panel.open { display: flex; }
+  .pa-panel-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .pa-panel-title { font-weight: 600; font-size: 15px; flex: 1; }
+  .pa-close { cursor: pointer; color: var(--text-muted); font-size: 18px; line-height: 1; }
+  .pa-panel-body { padding: 20px; flex: 1; overflow-y: auto; }
+  .pa-section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; }
+  .pa-access-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg-2); border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 13px; }
+  .pa-access-icon { font-size: 16px; } .pa-access-label { flex: 1; }
+  .toggle-switch { width: 36px; height: 20px; border-radius: 10px; background: var(--bg-3); cursor: pointer; position: relative; transition: var(--transition); border: 1px solid var(--border); flex-shrink: 0; }
+  .toggle-switch.on { background: var(--accent-green); border-color: var(--accent-green); }
+  .toggle-switch::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: white; top: 2px; left: 2px; transition: var(--transition); }
+  .toggle-switch.on::after { left: 18px; }
+  .share-link-box { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); margin-top: 12px; word-break: break-all; }
+  .progress-bar { height: 6px; background: var(--bg-3); border-radius: 99px; overflow: hidden; margin-top: 10px; }
+  .progress-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+  .widget.hidden { display: none; }
+  .notif-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-red); position: absolute; top: 8px; right: 8px; }
+  .gcal-status { font-size: 11px; padding: 3px 10px; border-radius: 99px; font-family: var(--font-mono); }
+  .gcal-connected { background: rgba(94,203,138,0.15); color: var(--accent-green); }
+  .gcal-disconnected { background: rgba(240,137,42,0.15); color: var(--accent-amber); }
+  .empty-state { text-align: center; padding: 28px 0; color: var(--text-muted); font-size: 14px; }
+  .empty-state .icon { font-size: 32px; margin-bottom: 8px; }
+  .api-key-saved { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--accent-green); font-family: var(--font-mono); }
+  @media (max-width: 1100px) { .cols-3 { grid-template-columns: repeat(2, 1fr); } .quick-stats { grid-template-columns: repeat(2, 1fr); } .col-span-2,.col-span-3 { grid-column: span 1; } }
+</style>
+</head>
+<body>
+
+<!-- FOCUS MODE -->
+<div class="focus-overlay" id="focusOverlay">
+  <div class="focus-title">⚡ Focus Mode</div>
+  <div class="focus-clock" id="focusClock">00:00</div>
+  <div class="focus-task-display" id="focusTaskDisplay">Select a task to focus on</div>
+  <div style="display:flex;gap:12px;margin-top:8px;">
+    <button class="btn btn-gold" id="focusStartBtn" onclick="toggleFocusTimer()">Start</button>
+    <button class="btn btn-ghost" onclick="resetFocusTimer()">Reset</button>
+  </div>
+  <div class="focus-exit" onclick="closeFocusMode()">Press ESC or click here to exit</div>
+</div>
+
+<!-- PA PANEL -->
+<div class="pa-panel" id="paPanel">
+  <div class="pa-panel-header">
+    <div style="font-size:20px;">👤</div>
+    <div class="pa-panel-title">PA Access Settings</div>
+    <div class="pa-close" onclick="togglePaPanel()">✕</div>
+  </div>
+  <div class="pa-panel-body">
+    <div class="pa-section-title">What can your PA see?</div>
+    <div class="pa-access-item"><span class="pa-access-icon">📋</span><span class="pa-access-label">Tasks & To-Dos</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">📅</span><span class="pa-access-label">Calendar</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">🏢</span><span class="pa-access-label">Business Overview</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">📊</span><span class="pa-access-label">HubSpot CRM</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">🤖</span><span class="pa-access-label">AI Assistant</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">📝</span><span class="pa-access-label">Notes</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-section-title" style="margin-top:24px;">Share Link</div>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Send this to your PA — they see only what you've enabled above.</p>
+    <div class="share-link-box" id="paShareLink">—</div>
+    <button class="btn btn-gold" style="width:100%;margin-top:10px;" onclick="copyPaLink()">📋 Copy Link</button>
+    <div class="pa-section-title" style="margin-top:24px;">PA Profile</div>
+    <div class="pa-access-item">
+      <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#b07cf0,#5ab4f0);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;">PA</div>
+      <div><div style="font-size:13px;font-weight:600;">Your PA</div><div style="font-size:11px;color:var(--text-muted);">pa@yourbusiness.com</div></div>
+      <div style="margin-left:auto;font-size:11px;color:var(--accent-green);">● Active</div>
+    </div>
+  </div>
+</div>
+
+<!-- SHELL -->
+<div class="shell">
+  <nav class="sidebar">
+    <div class="logo-mark">FLOW</div>
+    <button class="nav-btn active" onclick="showView('home')" id="nav-home">🏠<span class="tooltip">Home</span></button>
+    <button class="nav-btn" onclick="showView('tasks')" id="nav-tasks">📋<span class="tooltip">Tasks</span></button>
+    <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar">📅<span class="tooltip">Calendar</span></button>
+    <button class="nav-btn" onclick="showView('businesses')" id="nav-businesses">🏢<span class="tooltip">Businesses</span></button>
+    <button class="nav-btn" onclick="showView('ai')" id="nav-ai">🤖<span class="tooltip">AI Assistant</span></button>
+    <button class="nav-btn" onclick="showView('integrations')" id="nav-integrations">🔌<span class="tooltip">Integrations</span></button>
+    <div class="sidebar-spacer"></div>
+    <div class="pa-badge" onclick="togglePaPanel()" title="PA Access">PA</div>
+    <button class="nav-btn" onclick="openFocusMode()">⚡<span class="tooltip">Focus Mode</span></button>
+  </nav>
+
+  <header class="topbar">
+    <div>
+      <div class="topbar-greeting">Good <span id="timeOfDay">morning</span> ✦</div>
+      <div class="topbar-date" id="currentDate">—</div>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="font-size-ctrl">
+      <span>Aa</span>
+      <button onclick="changeFontSize(-1)">−</button>
+      <span id="fontSizeLabel">18</span>
+      <button onclick="changeFontSize(1)">+</button>
+    </div>
+    <div class="focus-toggle">
+      <button class="focus-btn active" onclick="setLayout('all',this)">All</button>
+      <button class="focus-btn" onclick="setLayout('work',this)">Work</button>
+      <button class="focus-btn" onclick="setLayout('personal',this)">Personal</button>
+      <button class="focus-btn" onclick="setLayout('biz',this)">Biz</button>
+    </div>
+    <div class="topbar-avatar" title="Your profile">Y</div>
+  </header>
+
+  <main class="main">
+
+    <!-- HOME VIEW -->
+    <div class="view active" id="view-home">
+      <div class="quick-stats">
+        <div class="stat-pill" style="border-color:rgba(245,200,66,0.2);">
+          <div class="stat-pill-label">Tasks Today</div>
+          <div class="stat-pill-value" style="color:var(--accent-gold);" id="stat-tasks">0</div>
+          <div class="stat-pill-sub" id="stat-tasks-sub">loading…</div>
+        </div>
+        <div class="stat-pill" style="border-color:rgba(94,203,138,0.2);">
+          <div class="stat-pill-label">Meetings</div>
+          <div class="stat-pill-value" style="color:var(--accent-green);" id="stat-meetings">—</div>
+          <div class="stat-pill-sub" id="stat-next-meeting">connecting…</div>
+        </div>
+        <div class="stat-pill" style="border-color:rgba(90,180,240,0.2);">
+          <div class="stat-pill-label">Open Deals</div>
+          <div class="stat-pill-value" style="color:var(--accent-blue);">—</div>
+          <div class="stat-pill-sub">HubSpot CRM</div>
+        </div>
+        <div class="stat-pill" style="border-color:rgba(176,124,240,0.2);">
+          <div class="stat-pill-label">Businesses</div>
+          <div class="stat-pill-value" style="color:var(--accent-purple);" id="stat-biz">3</div>
+          <div class="stat-pill-sub">All active</div>
+        </div>
+      </div>
+
+      <div class="widget-bar">
+        <span style="font-size:12px;color:var(--text-muted);line-height:30px;">Show:</span>
+        <button class="widget-toggle on" onclick="toggleWidget('tasks-widget',this)">📋 Tasks</button>
+        <button class="widget-toggle on" onclick="toggleWidget('cal-widget',this)">📅 Calendar</button>
+        <button class="widget-toggle on" onclick="toggleWidget('ai-widget',this)">🤖 AI Quick Ask</button>
+        <button class="widget-toggle on" onclick="toggleWidget('biz-widget',this)">🏢 Businesses</button>
+        <button class="widget-toggle on" onclick="toggleWidget('notes-widget',this)">📝 Notes</button>
+      </div>
+
+      <div class="grid-area cols-3">
+        <!-- TASKS -->
+        <div class="card glow widget col-span-2" id="tasks-widget">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(245,200,66,0.1);">📋</div>
+            <div class="card-title">Today's Tasks</div>
+            <div class="card-badge" style="background:rgba(245,200,66,0.1);color:var(--accent-gold);" id="task-counter">—</div>
+            <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;margin-left:8px;" onclick="openFocusMode()">⚡ Focus</button>
+          </div>
+          <div class="card-body">
+            <div id="task-list"></div>
+            <div class="add-task-row">
+              <input class="add-task-input" id="newTaskInput" type="text" placeholder="Add a task… (press Enter)" onkeydown="if(event.key==='Enter')addTask()">
+              <button class="btn btn-gold" onclick="addTask()">+ Add</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CALENDAR WIDGET -->
+        <div class="card widget" id="cal-widget">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(94,203,138,0.1);">📅</div>
+            <div class="card-title">Calendar</div>
+            <div id="gcal-badge" class="card-badge gcal-disconnected">Not connected</div>
+          </div>
+          <div class="card-body">
+            <div class="cal-header">
+              <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+              <div class="cal-month" id="calMonthLabel">—</div>
+              <button class="cal-nav" onclick="changeMonth(1)">›</button>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+            <div class="event-list" id="eventList">
+              <div class="empty-state"><div class="icon">📅</div>Connect Google Calendar to see events</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI WIDGET -->
+        <div class="card widget" id="ai-widget">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(176,124,240,0.1);">🤖</div>
+            <div class="card-title">AI Assistant</div>
+            <select class="ai-model-select" id="aiModelSelect">
+              <option value="claude">Claude</option>
+              <option value="gpt4">GPT-4</option>
+              <option value="kimi">Kimi</option>
+            </select>
+          </div>
+          <div class="card-body">
+            <div class="ai-chat-area" id="aiChatArea">
+              <div class="ai-msg"><div class="ai-avatar">✦</div><div class="ai-bubble">Hi! I'm your AI assistant. I can help you draft emails, summarise meetings, prepare for calls, and much more. What do you need? 🚀</div></div>
+            </div>
+            <div class="ai-input-row">
+              <input class="add-task-input" id="aiInput" type="text" placeholder="Ask anything…" style="flex:1;" onkeydown="if(event.key==='Enter')sendAiMessage('aiChatArea','aiInput','aiModelSelect')">
+              <button class="btn btn-gold" onclick="sendAiMessage('aiChatArea','aiInput','aiModelSelect')">→</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- BUSINESSES -->
+        <div class="card widget col-span-2" id="biz-widget">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(90,180,240,0.1);">🏢</div>
+            <div class="card-title">Businesses</div>
+            <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;margin-left:auto;" onclick="showView('businesses')">View all →</button>
+          </div>
+          <div class="card-body">
+            <div class="grid-area cols-3" id="bizMiniList"></div>
+          </div>
+        </div>
+
+        <!-- NOTES -->
+        <div class="card widget" id="notes-widget">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(240,137,42,0.1);">📝</div>
+            <div class="card-title">Quick Notes</div>
+            <div style="margin-left:auto;font-size:11px;color:var(--accent-green);" id="notes-saved"></div>
+          </div>
+          <div class="card-body">
+            <textarea id="quickNotes" class="add-task-input" style="width:100%;resize:vertical;min-height:130px;line-height:1.7;" placeholder="Type a note… auto-saved as you type" oninput="saveNotes()"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TASKS VIEW -->
+    <div class="view" id="view-tasks">
+      <div class="section-label">All Tasks</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(245,200,66,0.1);">📋</div>
+          <div class="card-title">Task Manager</div>
+          <div class="card-badge" style="background:rgba(245,200,66,0.1);color:var(--accent-gold);" id="full-task-counter">—</div>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;margin-left:8px;" onclick="openFocusMode()">⚡ Focus Mode</button>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;" onclick="clearDoneTasks()">🗑 Clear done</button>
+        </div>
+        <div class="card-body">
+          <div id="full-task-list"></div>
+          <div class="add-task-row">
+            <input class="add-task-input" id="fullNewTaskInput" type="text" placeholder="Add a task… (Enter to add)" onkeydown="if(event.key==='Enter')addTask(true)">
+            <select class="ai-model-select" id="newTaskPriority" style="padding:9px 10px;">
+              <option value="high">🔴 High</option>
+              <option value="med" selected>🟡 Medium</option>
+              <option value="low">🟢 Low</option>
+            </select>
+            <button class="btn btn-gold" onclick="addTask(true)">+ Add Task</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR VIEW -->
+    <div class="view" id="view-calendar">
+      <div class="section-label">Calendar & Meetings</div>
+      <div class="grid-area cols-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(94,203,138,0.1);">📅</div>
+            <div class="card-title">This Month</div>
+            <div id="gcal-badge-full" class="card-badge gcal-disconnected">Not connected</div>
+            <button class="btn btn-green" style="padding:5px 12px;font-size:11px;" id="gcal-connect-btn" onclick="connectGoogleCalendar()">Connect Google</button>
+          </div>
+          <div class="card-body">
+            <div class="cal-header">
+              <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+              <div class="cal-month" id="calMonthLabelFull">—</div>
+              <button class="cal-nav" onclick="changeMonth(1)">›</button>
+            </div>
+            <div class="cal-grid" id="calGridFull"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(90,180,240,0.1);">🕐</div>
+            <div class="card-title">Upcoming Events</div>
+          </div>
+          <div class="card-body">
+            <div class="event-list" id="fullEventList">
+              <div class="empty-state"><div class="icon">📅</div>Connect Google Calendar to see events</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUSINESSES VIEW -->
+    <div class="view" id="view-businesses">
+      <div class="section-label">Business Portfolio</div>
+      <div class="grid-area cols-2" id="fullBizList"></div>
+    </div>
+
+    <!-- AI VIEW -->
+    <div class="view" id="view-ai">
+      <div class="section-label">AI Assistant</div>
+      <div class="card" style="max-width:820px;">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(176,124,240,0.1);">🤖</div>
+          <div class="card-title">AI Assistant</div>
+          <select class="ai-model-select" id="aiModelSelectFull" style="margin-left:auto;">
+            <option value="claude">✦ Claude (Anthropic)</option>
+            <option value="gpt4">● GPT-4 (OpenAI)</option>
+            <option value="kimi">🌙 Kimi</option>
+          </select>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;" onclick="clearAiChat()">Clear chat</button>
+        </div>
+        <div class="card-body">
+          <div class="ai-chat-area" id="fullAiChat" style="max-height:520px;">
+            <div class="ai-msg"><div class="ai-avatar">✦</div><div class="ai-bubble">Hello! I'm connected and ready. I can help you:
+
+• Draft and summarise emails
+• Prepare for meetings
+• Analyse your business data
+• Help with any task on your list
+• Answer questions about your schedule
+
+What would you like to work on?</div></div>
+          </div>
+          <div class="ai-input-row" style="margin-top:16px;">
+            <input class="add-task-input" id="fullAiInput" type="text" placeholder="Ask me anything…" style="flex:1;" onkeydown="if(event.key==='Enter')sendAiMessage('fullAiChat','fullAiInput','aiModelSelectFull')">
+            <button class="btn btn-gold" onclick="sendAiMessage('fullAiChat','fullAiInput','aiModelSelectFull')">Send →</button>
+          </div>
+          <div id="ai-key-status" style="margin-top:10px;font-size:12px;color:var(--text-muted);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTEGRATIONS VIEW -->
+    <div class="view" id="view-integrations">
+      <div class="section-label">Integrations & API Keys</div>
+      <div class="grid-area cols-2">
+        <div class="card">
+          <div class="card-header"><div class="card-icon" style="background:rgba(240,137,42,0.1);">🔗</div><div class="card-title">CRM & Productivity</div></div>
+          <div class="card-body"><div class="integration-grid" id="crmIntegrations"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-icon" style="background:rgba(176,124,240,0.1);">🤖</div><div class="card-title">AI Tools</div></div>
+          <div class="card-body"><div class="integration-grid" id="aiIntegrations"></div></div>
+        </div>
+        <div class="card col-span-2">
+          <div class="card-header"><div class="card-icon" style="background:rgba(94,203,138,0.1);">🔑</div><div class="card-title">API Keys & OAuth</div></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+              <div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em;">Claude (Anthropic)</div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <input type="password" class="add-task-input" id="claudeApiKey" placeholder="sk-ant-api03-…" style="flex:1;">
+                  <button class="btn btn-gold" onclick="saveApiKey('claude')">Save</button>
+                  <span id="claude-key-status" class="api-key-saved" style="display:none;">✓ Saved</span>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em;">OpenAI (GPT-4)</div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <input type="password" class="add-task-input" id="openaiApiKey" placeholder="sk-…" style="flex:1;">
+                  <button class="btn btn-gold" onclick="saveApiKey('openai')">Save</button>
+                  <span id="openai-key-status" class="api-key-saved" style="display:none;">✓ Saved</span>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em;">Kimi API</div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <input type="password" class="add-task-input" id="kimiApiKey" placeholder="kimi-api-…" style="flex:1;">
+                  <button class="btn btn-gold" onclick="saveApiKey('kimi')">Save</button>
+                  <span id="kimi-key-status" class="api-key-saved" style="display:none;">✓ Saved</span>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em;">HubSpot</div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <input type="password" class="add-task-input" id="hubspotKey" placeholder="pat-na1-…" style="flex:1;">
+                  <button class="btn btn-gold" onclick="saveApiKey('hubspot')">Save</button>
+                  <span id="hubspot-key-status" class="api-key-saved" style="display:none;">✓ Saved</span>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:20px;">
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.07em;">Google Calendar</div>
+              <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                <button class="btn btn-green" id="gcal-main-btn" onclick="connectGoogleCalendar()">🔗 Connect Google Calendar</button>
+                <div id="gcal-main-status" style="font-size:13px;color:var(--text-muted);">Not connected</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;padding:12px 16px;background:var(--bg-2);border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);border:1px solid var(--border);">
+              <strong style="color:var(--accent-gold);">🔒 Security:</strong> All API keys are stored in your browser's local storage only. They are never sent anywhere except directly to each service's official API.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ============================================================
+// FLOW DASHBOARD — Full JavaScript
+// Google Calendar + Persistent Tasks + Claude + GPT-4
+// ============================================================
+
+// ── CONFIG ──
+const GOOGLE_CLIENT_ID = '387362798277-gvadscn8if9m6i3r78tm641tmnmtkd4e.apps.googleusercontent.com';
+const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+
+// ── STATE ──
+let tasks = [];
+let nextTaskId = 1;
+let calYear, calMonth;
+let calEvents = []; // from Google Calendar
+let gcalConnected = false;
+let googleTokenClient = null;
+let focusSeconds = 0, timerRunning = false, focusTimerInterval = null;
+let fontSize = 18;
+let aiConversationHistory = [];
+
+const businesses = [
+  { name: 'TechVenture Ltd', emoji: '⚡', tag: 'SaaS', tagColor: '#5ab4f0', kpis: [{l:'MRR',v:'£42k'},{l:'Users',v:'1,240'},{l:'Churn',v:'2.1%'}] },
+  { name: 'Green Logistics', emoji: '🌿', tag: 'Ops', tagColor: '#5ecb8a', kpis: [{l:'Revenue',v:'£88k'},{l:'Shipments',v:'340'},{l:'NPS',v:'72'}] },
+  { name: 'Studio Creative', emoji: '🎨', tag: 'Agency', tagColor: '#f5c842', kpis: [{l:'Retainers',v:'8'},{l:'Pipeline',v:'£24k'},{l:'Open',v:'3 proj'}] },
+];
+
+const crmIntegrationsList = [
+  { name:'HubSpot', emoji:'🟠', key:'hubspot' },
+  { name:'Google Calendar', emoji:'📅', key:'gcal' },
+  { name:'Google Drive', emoji:'📂', key:'gdrive' },
+  { name:'Slack', emoji:'💬', key:'slack' },
+  { name:'Notion', emoji:'📄', key:'notion' },
+  { name:'Zapier', emoji:'⚡', key:'zapier' },
+];
+
+const aiIntegrationsList = [
+  { name:'Claude', emoji:'✦', key:'claude' },
+  { name:'GPT-4', emoji:'🔵', key:'openai' },
+  { name:'Kimi', emoji:'🌙', key:'kimi' },
+  { name:'Gemini', emoji:'♊', key:'gemini' },
+  { name:'Mistral', emoji:'💨', key:'mistral' },
+  { name:'Custom API', emoji:'🔧', key:'custom' },
+];
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+
+  updateDateTime();
+  setInterval(updateDateTime, 60000);
+
+  loadTasksFromStorage();
+  renderTasks();
+  renderCalendar();
+  renderBusinesses();
+  renderIntegrations();
+  loadNotes();
+  checkSavedKeys();
+  initGoogleCalendar();
+  updatePaShareLink();
+  setInterval(updateDateTime, 60000);
+});
+
+// ── DATETIME ──
+function updateDateTime() {
+  const now = new Date();
+  const h = now.getHours();
+  document.getElementById('timeOfDay').textContent = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  document.getElementById('currentDate').textContent = now.toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+
+// ── TASKS (PERSISTENT) ──
+function loadTasksFromStorage() {
+  try {
+    const saved = localStorage.getItem('flow_tasks');
+    if (saved) {
+      tasks = JSON.parse(saved);
+      nextTaskId = tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+    } else {
+      tasks = [
+        { id:1, text:'Review Q3 business reports', done:false, priority:'high', date:'Today', source:'dashboard' },
+        { id:2, text:'Respond to 3 HubSpot leads', done:false, priority:'med', date:'Today', source:'hubspot' },
+        { id:3, text:'Send weekly update to team', done:false, priority:'low', date:'EOD', source:'dashboard' },
+      ];
+      nextTaskId = 4;
+      saveTasks();
+    }
+  } catch(e) { tasks = []; }
+}
+
+function saveTasks() {
+  localStorage.setItem('flow_tasks', JSON.stringify(tasks));
+  updateTaskStats();
+}
+
+function updateTaskStats() {
+  const pending = tasks.filter(t => !t.done).length;
+  const done = tasks.filter(t => t.done).length;
+  const el = document.getElementById('stat-tasks');
+  if (el) el.textContent = pending;
+  const sub = document.getElementById('stat-tasks-sub');
+  if (sub) sub.textContent = done + ' completed';
+  const counter = document.getElementById('task-counter');
+  if (counter) counter.textContent = pending + ' pending';
+  const full = document.getElementById('full-task-counter');
+  if (full) full.textContent = pending + ' pending';
+}
+
+function renderTasks() {
+  ['task-list', 'full-task-list'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = tasks.length ? tasks.map(t => taskHtml(t)).join('') : '<div class="empty-state"><div class="icon">✅</div>All done! Add a task above.</div>';
+  });
+  updateTaskStats();
+}
+
+function taskHtml(t) {
+  return `<div class="task-item" id="task-${t.id}">
+    <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})"></div>
+    <div class="task-text">
+      <div class="task-name ${t.done?'done':''}">${escHtml(t.text)}</div>
+      <div class="task-meta">${t.date}${t.source!=='dashboard'?' · via '+t.source:''}</div>
+    </div>
+    <span class="task-priority priority-${t.priority}">${t.priority.toUpperCase()}</span>
+    <button class="task-del" onclick="deleteTask(${t.id})" title="Delete">✕</button>
+  </div>`;
+}
+
+function toggleTask(id) {
+  const t = tasks.find(t => t.id === id);
+  if (t) { t.done = !t.done; saveTasks(); renderTasks(); }
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasks(); renderTasks();
+}
+
+function clearDoneTasks() {
+  tasks = tasks.filter(t => !t.done);
+  saveTasks(); renderTasks();
+  showToast('Completed tasks cleared ✓');
+}
+
+function addTask(fromFull) {
+  const inputId = fromFull ? 'fullNewTaskInput' : 'newTaskInput';
+  const el = document.getElementById(inputId);
+  const text = el.value.trim();
+  if (!text) return;
+  const prioEl = document.getElementById('newTaskPriority');
+  const prio = (fromFull && prioEl) ? prioEl.value : 'med';
+  tasks.unshift({ id: nextTaskId++, text, done: false, priority: prio, date: 'Today', source: 'dashboard' });
+  el.value = '';
+  saveTasks(); renderTasks();
+}
+
+// ── CALENDAR ──
+function changeMonth(delta) {
+  calMonth += delta;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const now = new Date();
+  const monthName = new Date(calYear, calMonth, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  ['calMonthLabel','calMonthLabelFull'].forEach(id => { const e = document.getElementById(id); if(e) e.textContent = monthName; });
+
+  ['calGrid','calGridFull'].forEach(id => {
+    const container = document.getElementById(id);
+    if (!container) return;
+    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    let html = days.map(d => `<div class="cal-dow">${d}</div>`).join('');
+    const firstDay = new Date(calYear, calMonth, 1);
+    let startDow = firstDay.getDay() - 1; if (startDow < 0) startDow = 6;
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const prevDays = new Date(calYear, calMonth, 0).getDate();
+    for (let i = startDow - 1; i >= 0; i--) html += `<div class="cal-day other-month">${prevDays - i}</div>`;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const isToday = d === now.getDate() && calMonth === now.getMonth() && calYear === now.getFullYear();
+      const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const hasEvent = calEvents.some(e => e.date === dateStr);
+      html += `<div class="cal-day ${isToday?'today':''} ${hasEvent?'has-event':''}" onclick="showDayEvents('${dateStr}')">${d}</div>`;
+    }
+    container.innerHTML = html;
+  });
+}
+
+function showDayEvents(dateStr) {
+  const dayEvents = calEvents.filter(e => e.date === dateStr);
+  if (dayEvents.length === 0) return;
+  showToast(`${dayEvents.length} event${dayEvents.length>1?'s':''} on ${dateStr}`);
+}
+
+function renderEvents(events, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (!events || events.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📅</div>No upcoming events</div>';
+    return;
+  }
+  el.innerHTML = events.slice(0, 10).map(e => `
+    <div class="event-item" style="border-left-color:${e.color||'var(--accent-blue)'}">
+      <div class="event-time">${e.time || ''}</div>
+      <div class="event-name">${escHtml(e.title)}</div>
+      <div class="event-cal">${e.calendar || 'Google'}</div>
+    </div>`).join('');
+}
+
+// ── GOOGLE CALENDAR ──
+function initGoogleCalendar() {
+  if (typeof google === 'undefined') return;
+  try {
+    googleTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: GCAL_SCOPES,
+      callback: handleGCalToken,
+    });
+  } catch(e) { console.log('Google init error:', e); }
+
+  // Check if we have a stored token
+  const token = localStorage.getItem('flow_gcal_token');
+  const expiry = localStorage.getItem('flow_gcal_expiry');
+  if (token && expiry && Date.now() < parseInt(expiry)) {
+    gapi.load('client', () => {
+      gapi.client.setToken({ access_token: token });
+      fetchCalendarEvents();
+    });
+  }
+}
+
+function connectGoogleCalendar() {
+  if (!googleTokenClient) {
+    showToast('Google API not loaded. Check your internet connection.');
+    return;
+  }
+  googleTokenClient.requestAccessToken();
+}
+
+function handleGCalToken(tokenResponse) {
+  if (tokenResponse.error) {
+    showToast('Google Calendar connection failed: ' + tokenResponse.error);
+    return;
+  }
+  const expiry = Date.now() + (tokenResponse.expires_in * 1000);
+  localStorage.setItem('flow_gcal_token', tokenResponse.access_token);
+  localStorage.setItem('flow_gcal_expiry', expiry.toString());
+  gapi.load('client', () => {
+    gapi.client.setToken(tokenResponse);
+    fetchCalendarEvents();
+  });
+}
+
+async function fetchCalendarEvents() {
+  try {
+    await gapi.client.load('calendar', 'v3');
+    const now = new Date();
+    const timeMin = now.toISOString();
+    const timeMax = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const response = await gapi.client.calendar.events.list({
+      calendarId: 'primary',
+      timeMin, timeMax,
+      singleEvents: true,
+      orderBy: 'startTime',
+      maxResults: 50,
+    });
+    const items = response.result.items || [];
+    calEvents = items.map(ev => {
+      const start = ev.start.dateTime || ev.start.date;
+      const d = new Date(start);
+      return {
+        title: ev.summary || '(No title)',
+        date: start.substring(0, 10),
+        time: ev.start.dateTime ? d.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'}) : 'All day',
+        color: '#5ab4f0',
+        calendar: 'Google',
+      };
+    });
+    gcalConnected = true;
+    updateGCalUI();
+    renderCalendar();
+    const upcoming = calEvents.slice(0, 10);
+    renderEvents(upcoming, 'eventList');
+    renderEvents(upcoming, 'fullEventList');
+    const todayEvents = calEvents.filter(e => e.date === new Date().toISOString().substring(0,10));
+    const statM = document.getElementById('stat-meetings');
+    if (statM) statM.textContent = todayEvents.length;
+    const nextM = document.getElementById('stat-next-meeting');
+    if (nextM && todayEvents.length > 0) nextM.textContent = 'Next: ' + todayEvents[0].time;
+    else if (nextM) nextM.textContent = 'None today';
+    showToast('Google Calendar connected ✓ — ' + items.length + ' events loaded');
+  } catch(e) {
+    console.error('Calendar fetch error:', e);
+    showToast('Could not load calendar events. Check console.');
+  }
+}
+
+function updateGCalUI() {
+  const badges = ['gcal-badge','gcal-badge-full'];
+  badges.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'card-badge ' + (gcalConnected ? 'gcal-connected' : 'gcal-disconnected');
+    el.textContent = gcalConnected ? '● Google Connected' : 'Not connected';
+  });
+  const btn = document.getElementById('gcal-connect-btn');
+  if (btn) { btn.textContent = gcalConnected ? '✓ Connected' : 'Connect Google'; btn.disabled = gcalConnected; }
+  const mainBtn = document.getElementById('gcal-main-btn');
+  if (mainBtn) { mainBtn.textContent = gcalConnected ? '✓ Google Calendar Connected' : '🔗 Connect Google Calendar'; mainBtn.disabled = gcalConnected; }
+  const mainStatus = document.getElementById('gcal-main-status');
+  if (mainStatus) mainStatus.textContent = gcalConnected ? '● Connected — events loaded' : 'Not connected';
+  renderIntegrations();
+}
+
+// ── AI ASSISTANT ──
+async function sendAiMessage(chatAreaId, inputId, modelSelectId) {
+  const input = document.getElementById(inputId);
+  const model = document.getElementById(modelSelectId)?.value || 'claude';
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addAiMsg(chatAreaId, msg, true);
+  const thinkingEl = addThinkingMsg(chatAreaId);
+  let reply;
+  try {
+    if (model === 'claude') reply = await callClaude(msg);
+    else if (model === 'gpt4') reply = await callOpenAI(msg);
+    else if (model === 'kimi') reply = await callKimi(msg);
+    else reply = 'Model not configured.';
+  } catch(e) {
+    reply = 'Error: ' + e.message;
+  }
+  thinkingEl.remove();
+  addAiMsg(chatAreaId, reply, false);
+}
+
+async function callClaude(message) {
+  const key = localStorage.getItem('flow_claude_key');
+  if (!key) return '⚠️ No Claude API key found.\n\nGo to Integrations → AI Tools → paste your Claude key and click Save.';
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      system: 'You are a helpful personal assistant built into the FLOW dashboard. The user has dyslexia — always be clear, concise and well-structured. Use short paragraphs. Be practical and actionable. Never use unnecessary jargon.',
+      messages: [{ role: 'user', content: message }]
+    })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content?.[0]?.text || 'No response.';
+}
+
+async function callOpenAI(message) {
+  const key = localStorage.getItem('flow_openai_key');
+  if (!key) return '⚠️ No OpenAI API key found.\n\nGo to Integrations → AI Tools → paste your GPT-4 key and click Save.';
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: 'You are a helpful personal assistant in the FLOW dashboard. The user has dyslexia — be clear, concise and structured. Use short paragraphs.' },
+        { role: 'user', content: message }
+      ],
+      max_tokens: 1024
+    })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.choices?.[0]?.message?.content || 'No response.';
+}
+
+async function callKimi(message) {
+  const key = localStorage.getItem('flow_kimi_key');
+  if (!key) return '⚠️ No Kimi API key found.\n\nGo to Integrations → AI Tools → paste your Kimi key and click Save.';
+  const res = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({
+      model: 'moonshot-v1-8k',
+      messages: [
+        { role: 'system', content: 'You are a helpful personal assistant. Be clear and concise.' },
+        { role: 'user', content: message }
+      ],
+      max_tokens: 1024
+    })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+  return data.choices?.[0]?.message?.content || 'No response.';
+}
+
+function addAiMsg(containerId, text, isUser) {
+  const container = document.getElementById(containerId);
+  if (!container) return null;
+  const div = document.createElement('div');
+  div.className = 'ai-msg' + (isUser ? ' user' : '');
+  div.innerHTML = `<div class="ai-avatar ${isUser?'user-av':''}">${isUser?'Y':'✦'}</div><div class="ai-bubble">${escHtml(text)}</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function addThinkingMsg(containerId) {
+  const container = document.getElementById(containerId);
+  const div = document.createElement('div');
+  div.className = 'ai-msg';
+  div.innerHTML = `<div class="ai-avatar">✦</div><div class="ai-bubble ai-thinking"><span></span><span></span><span></span></div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function clearAiChat() {
+  const el = document.getElementById('fullAiChat');
+  if (el) el.innerHTML = `<div class="ai-msg"><div class="ai-avatar">✦</div><div class="ai-bubble">Chat cleared. What can I help you with?</div></div>`;
+}
+
+function checkSavedKeys() {
+  const statusEl = document.getElementById('ai-key-status');
+  if (!statusEl) return;
+  const keys = [];
+  if (localStorage.getItem('flow_claude_key')) keys.push('✦ Claude');
+  if (localStorage.getItem('flow_openai_key')) keys.push('● GPT-4');
+  if (localStorage.getItem('flow_kimi_key')) keys.push('🌙 Kimi');
+  statusEl.textContent = keys.length ? 'Connected: ' + keys.join(' · ') : 'No AI keys saved yet. Go to Integrations to add them.';
+  statusEl.style.color = keys.length ? 'var(--accent-green)' : 'var(--text-muted)';
+}
+
+// ── API KEYS ──
+function saveApiKey(service) {
+  const inputMap = { claude:'claudeApiKey', openai:'openaiApiKey', kimi:'kimiApiKey', hubspot:'hubspotKey' };
+  const storageMap = { claude:'flow_claude_key', openai:'flow_openai_key', kimi:'flow_kimi_key', hubspot:'flow_hubspot_key' };
+  const el = document.getElementById(inputMap[service]);
+  if (!el || !el.value.trim()) { showToast('Please enter a key first'); return; }
+  localStorage.setItem(storageMap[service], el.value.trim());
+  el.value = '';
+  const statusEl = document.getElementById(service + '-key-status');
+  if (statusEl) { statusEl.style.display = 'inline-flex'; setTimeout(() => statusEl.style.display = 'none', 3000); }
+  checkSavedKeys();
+  renderIntegrations();
+  showToast(service + ' API key saved ✓');
+}
+
+// ── INTEGRATIONS RENDER ──
+function integStatus(key) {
+  if (key === 'gcal') return gcalConnected ? 'connected' : 'connect';
+  const storageMap = { claude:'flow_claude_key', openai:'flow_openai_key', kimi:'flow_kimi_key', hubspot:'flow_hubspot_key' };
+  const noKey = ['gdrive','slack','notion','zapier','gemini','mistral','custom'];
+  if (noKey.includes(key)) return 'coming';
+  return localStorage.getItem(storageMap[key]) ? 'connected' : 'connect';
+}
+
+function integHtml(i) {
+  const s = integStatus(i.key);
+  const labels = { connected:'● Connected', connect:'+ Connect', coming:'Coming soon' };
+  const cls = { connected:'status-connected', connect:'status-connect', coming:'status-coming' };
+  return `<div class="integ-card ${s}" onclick="handleIntegClick('${i.key}')">
+    <div class="integ-logo">${i.emoji}</div>
+    <div class="integ-name">${i.name}</div>
+    <div class="integ-status ${cls[s]}">${labels[s]}</div>
+  </div>`;
+}
+
+function handleIntegClick(key) {
+  if (key === 'gcal') { connectGoogleCalendar(); return; }
+  if (['claude','openai','kimi','hubspot'].includes(key)) { showView('integrations'); showToast('Add your ' + key + ' key in the API Keys section below ↓'); return; }
+  showToast('Coming soon — more integrations being built!');
+}
+
+function renderIntegrations() {
+  const crmEl = document.getElementById('crmIntegrations');
+  if (crmEl) crmEl.innerHTML = crmIntegrationsList.map(integHtml).join('');
+  const aiEl = document.getElementById('aiIntegrations');
+  if (aiEl) aiEl.innerHTML = aiIntegrationsList.map(integHtml).join('');
+}
+
+// ── BUSINESSES ──
+function bizMiniHtml(b) {
+  return `<div class="biz-card" onclick="showView('businesses')">
+    <div class="biz-name">${b.emoji} ${b.name} <span class="biz-tag" style="background:${b.tagColor}22;color:${b.tagColor}">${b.tag}</span></div>
+    <div class="biz-kpi-row">${b.kpis.map(k=>`<div class="biz-kpi"><div class="biz-kpi-label">${k.l}</div><div class="biz-kpi-val">${k.v}</div></div>`).join('')}</div>
+  </div>`;
+}
+
+function renderBusinesses() {
+  const mini = document.getElementById('bizMiniList');
+  if (mini) mini.innerHTML = businesses.map(bizMiniHtml).join('');
+}
+
+function renderFullBusinesses() {
+  const el = document.getElementById('fullBizList');
+  if (el) el.innerHTML = businesses.map(b => `
+    <div class="card" style="cursor:pointer;">
+      <div class="card-header">
+        <div style="font-size:28px;">${b.emoji}</div>
+        <div><div style="font-size:17px;font-weight:600;">${b.name}</div>
+        <span class="biz-tag" style="background:${b.tagColor}22;color:${b.tagColor};font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600;">${b.tag}</span></div>
+      </div>
+      <div class="card-body">
+        <div class="biz-kpi-row">${b.kpis.map(k=>`<div class="biz-kpi"><div class="biz-kpi-label">${k.l}</div><div class="biz-kpi-val" style="font-size:22px;">${k.v}</div></div>`).join('')}</div>
+        <div class="progress-bar" style="margin-top:16px;"><div class="progress-fill" style="width:${Math.floor(Math.random()*40)+40}%;background:${b.tagColor};"></div></div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Q3 target progress</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── NOTES ──
+function loadNotes() {
+  const saved = localStorage.getItem('flow_notes');
+  const el = document.getElementById('quickNotes');
+  if (saved && el) el.value = saved;
+}
+let notesSaveTimeout;
+function saveNotes() {
+  clearTimeout(notesSaveTimeout);
+  notesSaveTimeout = setTimeout(() => {
+    localStorage.setItem('flow_notes', document.getElementById('quickNotes').value);
+    const s = document.getElementById('notes-saved');
+    if (s) { s.textContent = '✓ Saved'; setTimeout(() => { s.textContent = ''; }, 1500); }
+  }, 600);
+}
+
+// ── WIDGET TOGGLES ──
+function toggleWidget(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('hidden');
+  btn.classList.toggle('on');
+}
+
+function setLayout(mode, btn) {
+  document.querySelectorAll('.focus-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const all = ['tasks-widget','cal-widget','ai-widget','biz-widget','notes-widget'];
+  const show = mode === 'all' ? all : mode === 'work' ? ['tasks-widget','cal-widget','biz-widget'] : mode === 'personal' ? ['tasks-widget','cal-widget','notes-widget'] : ['biz-widget','tasks-widget','ai-widget'];
+  all.forEach(w => { const el = document.getElementById(w); if (el) el.classList.toggle('hidden', !show.includes(w)); });
+  document.querySelectorAll('.widget-toggle').forEach(t => {
+    const m = t.getAttribute('onclick')?.match(/'([^']+)'/);
+    if (m) t.classList.toggle('on', show.includes(m[1]));
+  });
+}
+
+// ── FOCUS MODE ──
+function openFocusMode() {
+  const activeTask = tasks.find(t => !t.done);
+  document.getElementById('focusTaskDisplay').textContent = activeTask ? '🎯 ' + activeTask.text : 'No pending tasks — enjoy the moment!';
+  document.getElementById('focusOverlay').classList.add('active');
+  updateFocusClock();
+}
+function closeFocusMode() {
+  document.getElementById('focusOverlay').classList.remove('active');
+  clearInterval(focusTimerInterval); focusTimerInterval = null; timerRunning = false;
+}
+function toggleFocusTimer() {
+  const btn = document.getElementById('focusStartBtn');
+  if (!timerRunning) {
+    timerRunning = true; btn.textContent = 'Pause';
+    focusTimerInterval = setInterval(() => { focusSeconds++; updateFocusClock(); }, 1000);
+  } else {
+    timerRunning = false; btn.textContent = 'Resume'; clearInterval(focusTimerInterval);
+  }
+}
+function resetFocusTimer() {
+  clearInterval(focusTimerInterval); focusTimerInterval = null; timerRunning = false;
+  focusSeconds = 0; updateFocusClock();
+  document.getElementById('focusStartBtn').textContent = 'Start';
+}
+function updateFocusClock() {
+  const m = String(Math.floor(focusSeconds/60)).padStart(2,'0');
+  const s = String(focusSeconds%60).padStart(2,'0');
+  document.getElementById('focusClock').textContent = m+':'+s;
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFocusMode(); });
+
+// ── FONT SIZE ──
+function changeFontSize(delta) {
+  fontSize = Math.max(14, Math.min(26, fontSize + delta));
+  document.documentElement.style.fontSize = fontSize + 'px';
+  document.getElementById('fontSizeLabel').textContent = fontSize;
+  localStorage.setItem('flow_fontsize', fontSize);
+}
+
+// ── VIEW SWITCHING ──
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'tasks') renderTasks();
+  if (name === 'businesses') renderFullBusinesses();
+  if (name === 'integrations') { renderIntegrations(); checkSavedKeys(); }
+}
+
+// ── PA PANEL ──
+function togglePaPanel() { document.getElementById('paPanel').classList.toggle('open'); }
+function updatePaShareLink() {
+  const el = document.getElementById('paShareLink');
+  if (el) el.textContent = window.location.href.split('?')[0] + '?pa=view&token=abc123';
+}
+function copyPaLink() {
+  const link = document.getElementById('paShareLink')?.textContent;
+  if (link) navigator.clipboard.writeText(link).then(() => showToast('PA link copied! ✓')).catch(() => showToast('Copy failed — select the link manually'));
+}
+
+// ── UTILS ──
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(10px);background:#1e1b17;color:#f5f0e8;border:1px solid rgba(245,200,66,0.3);border-radius:99px;padding:10px 22px;font-size:13px;font-family:var(--font-main);z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);transition:opacity 0.3s,transform 0.3s;opacity:0;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(10px)'; }, 2800);
+}
+
+// Load saved font size
+const savedFontSize = localStorage.getItem('flow_fontsize');
+if (savedFontSize) { fontSize = parseInt(savedFontSize); document.documentElement.style.fontSize = fontSize + 'px'; const el = document.getElementById('fontSizeLabel'); if (el) el.textContent = fontSize; }
+</script>
+</body>
+</html>
