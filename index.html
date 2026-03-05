@@ -271,7 +271,7 @@
     <div class="pa-section-title" style="margin-top:24px;">PA Profile</div>
     <div class="pa-access-item">
       <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#b07cf0,#5ab4f0);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;">PA</div>
-      <div><div style="font-size:13px;font-weight:600;">Your PA</div><div style="font-size:11px;color:var(--text-muted);">pa@yourcompany.com</div></div>
+      <div><div style="font-size:13px;font-weight:600;">Your PA</div><div style="font-size:11px;color:var(--text-muted);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="98e8f9d8e1f7edeafbf7f5e8f9f6e1b6fbf7f5">[email&#160;protected]</a></div></div>
       <div style="margin-left:auto;font-size:11px;color:var(--accent-green);">● Active</div>
     </div>
   </div>
@@ -688,12 +688,12 @@ What would you like to work on?</div></div>
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ============================================================
 // FLOW DASHBOARD — JavaScript (deduplicated & fixed)
 // ============================================================
 
-const GOOGLE_CLIENT_ID = '387362798277-ohnsmqrcctjfpntrpstjbfr8n27635h1.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = '387362798277-gvadscn8if9m6i3r78tm641tmnmtkd4e.apps.googleusercontent.com';
 const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar';
 
 let tasks = [];
@@ -1503,6 +1503,15 @@ async function createEvent() {
     return;
   }
 
+  // Check token expiry
+  var expiry = localStorage.getItem('flow_gcal_expiry');
+  if (expiry && Date.now() > parseInt(expiry)) {
+    showErr('⚠️ Google session has expired. Please click <strong>Connect Google</strong> again to refresh.');
+    gcalConnected = false;
+    updateGCalUI();
+    return;
+  }
+
   if (createBtn) { createBtn.textContent = '⏳ Creating…'; createBtn.disabled = true; }
 
   var attendees = [];
@@ -1530,6 +1539,9 @@ async function createEvent() {
     if (ruleMap[recur]) eventBody.recurrence = [ruleMap[recur]];
   }
 
+  console.log('Creating event with body:', JSON.stringify(eventBody));
+  console.log('Token (first 20 chars):', token.substring(0, 20) + '...');
+
   try {
     var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
       method: 'POST',
@@ -1537,22 +1549,30 @@ async function createEvent() {
       body: JSON.stringify(eventBody),
     });
 
-    var data = await res.json();
+    var responseText = await res.text();
+    console.log('Google API response status:', res.status);
+    console.log('Google API response body:', responseText);
+
+    var data;
+    try { data = JSON.parse(responseText); } catch(e) { data = {}; }
 
     if (res.status === 401) {
-      showErr('⚠️ Google session expired. Please reconnect Google Calendar and try again.');
+      showErr('⚠️ Google session expired (401). Please click <strong>Connect Google</strong> again to re-authenticate.');
+      gcalConnected = false;
+      updateGCalUI();
       return;
     }
     if (res.status === 403) {
-      showErr('⚠️ Permission denied. Go to <a href="https://myaccount.google.com/permissions" target="_blank">myaccount.google.com/permissions</a>, remove this app, then reconnect Google Calendar.');
+      showErr('⚠️ Permission denied (403). Your OAuth token may be read-only. Please:<br>1. Go to <a href="https://myaccount.google.com/permissions" target="_blank" style="color:var(--accent-gold)">myaccount.google.com/permissions</a><br>2. Remove this app<br>3. Click Connect Google Calendar again to grant full access.');
       return;
     }
     if (!res.ok) {
-      showErr('⚠️ Google error ' + res.status + ': ' + ((data.error && data.error.message) ? data.error.message : 'Unknown error'));
+      var errMsg = (data.error && data.error.message) ? data.error.message : ('HTTP ' + res.status + ': ' + responseText.substring(0, 200));
+      showErr('⚠️ Google error: ' + errMsg);
       return;
     }
 
-    // Success — add to local list
+    // Success
     var startD = new Date(data.start.dateTime || data.start.date);
     calEvents.unshift({
       id: data.id,
@@ -1737,10 +1757,4 @@ function showToast(msg) {
     document.body.appendChild(toast);
   }
   toast.textContent = msg;
-  toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(0)';
-  clearTimeout(toast._t);
-  toast._t = setTimeout(function(){ toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(10px)'; }, 2800);
-}
-</script>
-</body>
-</html>
+  toast.style.opacity = '1'; toast.style.trans
