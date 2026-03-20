@@ -158,7 +158,7 @@
       <div class="s-section">System</div>
       <div class="s-item" onclick="nav('howto')" id="n-howto">📖 How to Approve</div>
       <div class="s-item" onclick="nav('log')" id="n-log">📋 Activity Log</div>
-      <div class="s-item" onclick="window.location.href='/PrivateDash/index.html'">🏠 Dashboard</div>
+      <div class="s-item" onclick="window.location.href='index.html'">🏠 Dashboard</div>
       <div class="s-footer">
         <div class="s-user">
           <div class="s-avatar" id="adminAvatar">A</div>
@@ -294,7 +294,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false">
   // ── AUTH CHECK ──
   var adminUser = null;
   try {
@@ -307,12 +307,12 @@
   function showGateErr(msg) {
     document.getElementById('gateMsg').textContent = msg;
     document.getElementById('gateMsg').className = 'err';
-    setTimeout(function() { window.location.href = '/login.html'; }, 2000);
+    setTimeout(function() { window.location.href = 'login.html'; }, 2000);
   }
 
   function signOut() {
     localStorage.removeItem('flow_user');
-    window.location.href = '/login.html';
+    window.location.href = 'login.html';
   }
 
   // ── DATA ──
