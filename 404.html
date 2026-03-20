@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>FLOW — Redirecting</title>
+<script>
+  // GitHub Pages 404 redirect hack
+  // Preserve the path and redirect to login
+  var path = window.location.pathname;
+  // If trying to access a specific file, redirect there via login
+  // Otherwise just go to login
+  sessionStorage.setItem("gh_redirect", path);
+  window.location.replace("/PrivateDash/login.html");
+</script>
+</head>
+<body>
+<p>Redirecting...</p>
+</body>
+</html>
