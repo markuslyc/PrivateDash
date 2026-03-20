@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLOW — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Lexend+Mega:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+  :root {
+    --bg-0: #0f0e0c; --bg-1: #181714; --bg-2: #221f1b; --bg-3: #2e2a24;
+    --border: rgba(255,255,255,0.07); --border-gold: rgba(245,200,66,0.25);
+    --text-primary: #f5f0e8; --text-secondary: #a89880; --text-muted: #5a5148;
+    --accent-gold: #f5c842; --accent-green: #5ecb8a; --accent-red: #f06060; --accent-amber: #f0892a;
+    --font-main: 'Lexend', sans-serif; --font-display: 'Lexend Mega', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: var(--font-main); background: var(--bg-0); color: var(--text-primary); display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
+
+  .bg-glow { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .bg-glow::before { content: ''; position: absolute; top: -30%; left: 20%; width: 60%; height: 60%; background: radial-gradient(ellipse, rgba(245,200,66,0.06) 0%, transparent 70%); animation: pulse 8s ease-in-out infinite; }
+  .bg-glow::after { content: ''; position: absolute; bottom: -20%; right: 10%; width: 50%; height: 50%; background: radial-gradient(ellipse, rgba(176,124,240,0.04) 0%, transparent 70%); animation: pulse 10s ease-in-out infinite reverse; }
+  @keyframes pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } }
+
+  .bg-grid { position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px); background-size: 48px 48px; }
+
+  .wrap { position: relative; z-index: 10; width: 100%; max-width: 420px; padding: 20px; animation: fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .logo-area { text-align: center; margin-bottom: 36px; }
+  .logo-mark { font-family: var(--font-display); font-size: 38px; color: var(--accent-gold); letter-spacing: 0.15em; }
+  .logo-tag { font-size: 12px; color: var(--text-muted); letter-spacing: 0.14em; text-transform: uppercase; font-family: var(--font-mono); margin-top: 4px; }
+
+  .card { background: var(--bg-1); border: 1px solid var(--border); border-radius: 20px; padding: 32px; box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.04) inset; }
+
+  /* View toggling */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .view-title { font-size: 19px; font-weight: 600; margin-bottom: 6px; text-align: center; }
+  .view-sub { font-size: 13px; color: var(--text-secondary); text-align: center; margin-bottom: 28px; line-height: 1.6; }
+
+  .btn-google { width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 20px; background: var(--bg-2); border: 1px solid var(--border-gold); border-radius: 12px; color: var(--text-primary); font-family: var(--font-main); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .btn-google:hover { background: var(--bg-3); border-color: rgba(245,200,66,0.45); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .btn-google:active { transform: translateY(0); }
+  .btn-google:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .google-icon { width: 20px; height: 20px; flex-shrink: 0; }
+
+  .status { display: none; margin-top: 14px; padding: 10px 14px; border-radius: 10px; font-size: 13px; text-align: center; line-height: 1.5; }
+  .status.error { background: rgba(240,96,96,0.1); border: 1px solid rgba(240,96,96,0.25); color: var(--accent-red); display: block; }
+  .status.info { background: rgba(245,200,66,0.08); border: 1px solid rgba(245,200,66,0.2); color: var(--accent-gold); display: block; }
+
+  /* Pending view */
+  .state-icon { font-size: 40px; text-align: center; margin-bottom: 12px; }
+  .dots { display: flex; justify-content: center; gap: 5px; margin: 14px 0; }
+  .dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-gold); animation: dot 1.2s infinite; }
+  .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot { 0%,80%,100% { transform: scale(0.5); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
+
+  .email-pill { display: inline-block; margin-top: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--accent-gold); background: rgba(245,200,66,0.08); border: 1px solid rgba(245,200,66,0.2); border-radius: 99px; padding: 4px 14px; }
+
+  .btn-out { display: block; width: 100%; margin-top: 16px; padding: 9px; background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-family: var(--font-main); font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .btn-out:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.15); }
+
+  .footer { text-align: center; margin-top: 22px; font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.06em; line-height: 1.9; }
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="bg-grid"></div>
+
+<div class="wrap">
+  <div class="logo-area">
+    <div class="logo-mark">FLOW</div>
+    <div class="logo-tag">Personal Command Centre</div>
+  </div>
+
+  <div class="card">
+
+    <!-- Sign in view -->
+    <div class="view active" id="v-signin">
+      <div class="view-title">Welcome back</div>
+      <div class="view-sub">Sign in to access your dashboard.<br>Access is by invitation only.</div>
+      <button class="btn-google" id="signInBtn" onclick="startGoogleSignIn()">
+        <svg class="google-icon" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Continue with Google
+      </button>
+      <div class="status" id="signinStatus"></div>
+    </div>
+
+    <!-- Pending view -->
+    <div class="view" id="v-pending">
+      <div class="state-icon">⏳</div>
+      <div class="view-title">Awaiting Approval</div>
+      <div class="view-sub">Your sign-in request has been sent.<br>You'll be redirected automatically once approved.</div>
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div style="text-align:center;"><span class="email-pill" id="pendingEmail">—</span></div>
+      <button class="btn-out" onclick="signOut()">Sign out</button>
+    </div>
+
+    <!-- Denied view -->
+    <div class="view" id="v-denied">
+      <div class="state-icon">🚫</div>
+      <div class="view-title">Access Denied</div>
+      <div class="view-sub">Your account doesn't have access.<br>Contact the admin if you think this is a mistake.</div>
+      <div style="text-align:center;"><span class="email-pill" id="deniedEmail">—</span></div>
+      <button class="btn-out" onclick="signOut()">Sign out</button>
+    </div>
+
+  </div>
+
+  <div class="footer">🔒 Secured with Google OAuth<br>FLOW © 2025 — Invite-only access</div>
+</div>
+
+<script>
+  // ── CONFIG ──
+  // Replace with your Google OAuth Client ID
+  var GOOGLE_CLIENT_ID = '387362798277-gvadscn8if9m6i3r78tm641tmnmtkd4e.apps.googleusercontent.com';
+
+  // ── APPROVED EMAILS ──
+  // This list is the source of truth for who can access FLOW.
+  // Add emails here to grant access. Role: 'admin' or 'user'.
+  var APPROVED_USERS = {
+    // 'your@email.com': { role: 'admin', name: 'Markus' },
+    // 'colleague@email.com': { role: 'user', name: 'Ryan' },
+  };
+
+  // ── STATE ──
+  var currentUser = null;
+  var pollTimer = null;
+
+  // ── INIT ──
+  // Check if already logged in
+  window.addEventListener('load', function() {
+    try {
+      var stored = JSON.parse(localStorage.getItem('flow_user') || 'null');
+      if (stored && stored.email && stored.token) {
+        checkAccess(stored);
+      }
+    } catch(e) {}
+  });
+
+  // ── GOOGLE SIGN IN ──
+  function startGoogleSignIn() {
+    setStatus('info', 'Opening Google sign in…');
+    var btn = document.getElementById('signInBtn');
+    btn.disabled = true;
+
+    if (!window.google || !window.google.accounts) {
+      setStatus('error', 'Google sign-in failed to load. Please refresh the page.');
+      btn.disabled = false;
+      return;
+    }
+
+    var client = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: 'email profile https://www.googleapis.com/auth/calendar',
+      callback: function(resp) {
+        btn.disabled = false;
+        if (resp.error) {
+          setStatus('error', 'Sign in cancelled or failed. Please try again.');
+          return;
+        }
+        setStatus('info', 'Verifying your account…');
+        fetchUserInfo(resp.access_token, resp.expires_in);
+      },
+    });
+    client.requestAccessToken({ prompt: 'select_account' });
+  }
+
+  function fetchUserInfo(token, expiresIn) {
+    fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(info) {
+      currentUser = {
+        email: info.email,
+        name: info.name || info.email,
+        avatar: info.picture || '',
+        token: token,
+        expiry: Date.now() + ((expiresIn || 3600) * 1000),
+      };
+      storePendingRequest(currentUser);
+      checkAccess(currentUser);
+    })
+    .catch(function() {
+      setStatus('error', 'Could not verify your Google account. Please try again.');
+    });
+  }
+
+  function checkAccess(user) {
+    var record = APPROVED_USERS[user.email];
+
+    if (!record) {
+      // Not in approved list — show pending
+      document.getElementById('pendingEmail').textContent = user.email;
+      showView('v-pending');
+      startPolling(user);
+      return;
+    }
+
+    if (record.role === 'denied') {
+      document.getElementById('deniedEmail').textContent = user.email;
+      showView('v-denied');
+      return;
+    }
+
+    // Approved — save and redirect
+    var flowUser = {
+      email: user.email,
+      name: record.name || user.name,
+      avatar: user.avatar,
+      role: record.role || 'user',
+      token: user.token,
+      expiry: user.expiry,
+    };
+    localStorage.setItem('flow_user', JSON.stringify(flowUser));
+    // Also save gcal token so dashboard can use it
+    if (user.token) {
+      localStorage.setItem('flow_gcal_token', user.token);
+      localStorage.setItem('flow_gcal_expiry', String(user.expiry));
+    }
+    window.location.href = '/index.html';
+  }
+
+  // ── PENDING POLL ──
+  // Polls every 10s to check if admin has added user to APPROVED_USERS
+  // In practice, admin adds the email to the APPROVED_USERS object and redeploys.
+  // The user just needs to click "sign in" again after approval.
+  function startPolling(user) {
+    clearInterval(pollTimer);
+    pollTimer = setInterval(function() {
+      // Re-check in case page was redeployed with updated approved list
+      var record = APPROVED_USERS[user.email];
+      if (record && record.role !== 'denied') {
+        clearInterval(pollTimer);
+        checkAccess(user);
+      }
+    }, 10000);
+  }
+
+  // ── PENDING REQUESTS STORE ──
+  // Stores pending users in localStorage so admin panel can see them
+  function storePendingRequest(user) {
+    try {
+      var list = JSON.parse(localStorage.getItem('flow_pending_users') || '[]');
+      var exists = list.find(function(u) { return u.email === user.email; });
+      if (!exists) {
+        list.push({
+          email: user.email,
+          name: user.name,
+          avatar: user.avatar,
+          requestedAt: new Date().toISOString(),
+        });
+        localStorage.setItem('flow_pending_users', JSON.stringify(list));
+      }
+    } catch(e) {}
+  }
+
+  // ── SIGN OUT ──
+  function signOut() {
+    clearInterval(pollTimer);
+    localStorage.removeItem('flow_user');
+    localStorage.removeItem('flow_gcal_token');
+    localStorage.removeItem('flow_gcal_expiry');
+    currentUser = null;
+    setStatus('', '');
+    showView('v-signin');
+    document.getElementById('signInBtn').disabled = false;
+  }
+
+  // ── UTILS ──
+  function showView(id) {
+    document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+    var el = document.getElementById(id);
+    if (el) el.classList.add('active');
+  }
+
+  function setStatus(type, msg) {
+    var el = document.getElementById('signinStatus');
+    if (!el) return;
+    el.className = 'status' + (type ? ' ' + type : '');
+    el.textContent = msg;
+    if (!type) el.style.display = 'none';
+  }
+</script>
+</body>
+</html>

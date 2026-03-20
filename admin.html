@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLOW — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Lexend+Mega:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-0: #0f0e0c; --bg-1: #181714; --bg-2: #221f1b; --bg-3: #2e2a24; --bg-card: #1e1b17;
+    --border: rgba(255,255,255,0.07);
+    --text-primary: #f5f0e8; --text-secondary: #a89880; --text-muted: #5a5148;
+    --accent-gold: #f5c842; --accent-gold-dim: #c89d28; --accent-amber: #f0892a;
+    --accent-green: #5ecb8a; --accent-blue: #5ab4f0; --accent-red: #f06060;
+    --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px;
+    --font-main: 'Lexend', sans-serif; --font-display: 'Lexend Mega', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.04) inset;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-main); background: var(--bg-0); color: var(--text-primary); min-height: 100vh; }
+
+  /* Auth gate */
+  #gate { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 12px; }
+  #gate .logo { font-family: var(--font-display); font-size: 28px; color: var(--accent-gold); letter-spacing: 0.12em; }
+  #gate p { font-size: 13px; color: var(--text-muted); }
+  #gate .err { color: var(--accent-red); }
+
+  /* Shell */
+  #app { display: none; }
+  .shell { display: grid; grid-template-columns: 210px 1fr; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar { background: var(--bg-1); border-right: 1px solid var(--border); padding: 0; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+  .s-logo { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 8px; }
+  .s-logo-mark { font-family: var(--font-display); font-size: 16px; color: var(--accent-gold); letter-spacing: 0.1em; }
+  .s-logo-sub { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; }
+  .s-section { padding: 16px 12px 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); font-weight: 600; }
+  .s-item { display: flex; align-items: center; gap: 9px; padding: 9px 16px; margin: 1px 8px; border-radius: var(--radius-sm); font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; border: 1px solid transparent; }
+  .s-item:hover { background: var(--bg-2); color: var(--text-primary); }
+  .s-item.active { background: rgba(245,200,66,0.1); color: var(--accent-gold); border-color: rgba(245,200,66,0.2); }
+  .s-badge { margin-left: auto; font-size: 10px; font-family: var(--font-mono); background: var(--accent-red); color: white; border-radius: 99px; padding: 1px 6px; }
+  .s-footer { margin-top: auto; padding: 14px; border-top: 1px solid var(--border); }
+  .s-user { display: flex; align-items: center; gap: 9px; }
+  .s-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber)); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--bg-0); overflow: hidden; flex-shrink: 0; }
+  .s-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .s-name { font-size: 12px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .s-role { font-size: 10px; color: var(--accent-gold); font-family: var(--font-mono); }
+  .btn-out { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 15px; padding: 4px; transition: color 0.2s; }
+  .btn-out:hover { color: var(--accent-red); }
+
+  /* Main */
+  .main { padding: 28px 32px; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-hd { margin-bottom: 24px; }
+  .page-title { font-family: var(--font-display); font-size: 18px; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .page-sub { font-size: 12px; color: var(--text-muted); }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 22px; }
+  .stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 16px; }
+  .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 5px; }
+  .stat-val { font-family: var(--font-display); font-size: 26px; font-weight: 700; line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+
+  /* Card */
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); margin-bottom: 18px; overflow: hidden; }
+  .card-hd { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .card-icon { width: 28px; height: 28px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
+  .card-meta { margin-left: auto; font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); padding: 8px 14px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+
+  .u-cell { display: flex; align-items: center; gap: 9px; }
+  .t-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--bg-3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; overflow: hidden; flex-shrink: 0; }
+  .t-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .u-email { font-size: 11px; color: var(--text-muted); }
+  .u-date { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+
+  .pill { font-size: 10px; padding: 3px 9px; border-radius: 99px; font-weight: 600; font-family: var(--font-mono); }
+  .pill-pending { background: rgba(240,137,42,0.15); color: var(--accent-amber); }
+  .pill-approved { background: rgba(94,203,138,0.15); color: var(--accent-green); }
+  .pill-denied { background: rgba(240,96,96,0.15); color: var(--accent-red); }
+  .pill-admin { background: rgba(245,200,66,0.15); color: var(--accent-gold); }
+
+  .actions { display: flex; gap: 5px; }
+  .btn { padding: 5px 12px; border-radius: var(--radius-sm); border: 1px solid transparent; font-family: var(--font-main); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .btn-approve { background: rgba(94,203,138,0.12); color: var(--accent-green); border-color: rgba(94,203,138,0.25); }
+  .btn-approve:hover { background: rgba(94,203,138,0.22); }
+  .btn-deny { background: rgba(240,96,96,0.1); color: var(--accent-red); border-color: rgba(240,96,96,0.2); }
+  .btn-deny:hover { background: rgba(240,96,96,0.2); }
+  .btn-revoke { background: rgba(240,137,42,0.1); color: var(--accent-amber); border-color: rgba(240,137,42,0.2); }
+  .btn-revoke:hover { background: rgba(240,137,42,0.2); }
+  .btn-reinstate { background: var(--bg-2); color: var(--text-secondary); border-color: var(--border); }
+  .btn-reinstate:hover { color: var(--text-primary); }
+  .btn-primary { background: var(--accent-gold); color: var(--bg-0); border-color: var(--accent-gold); }
+  .btn-primary:hover { background: var(--accent-amber); border-color: var(--accent-amber); }
+
+  .empty { text-align: center; padding: 28px; color: var(--text-muted); font-size: 13px; }
+  .empty-icon { font-size: 26px; margin-bottom: 6px; }
+
+  /* Code block */
+  .code-block { background: var(--bg-0); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 18px; font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); line-height: 1.8; overflow-x: auto; }
+  .code-block .k { color: var(--accent-gold); }
+  .code-block .s { color: var(--accent-green); }
+  .code-block .c { color: var(--text-muted); }
+  .copy-code-btn { float: right; padding: 3px 10px; border-radius: 6px; background: var(--bg-2); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-main); font-size: 11px; cursor: pointer; transition: all 0.15s; }
+  .copy-code-btn:hover { color: var(--text-primary); }
+
+  /* Log */
+  .log-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .log-item:last-child { border-bottom: none; }
+  .log-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .log-text { flex: 1; font-size: 13px; }
+  .log-time { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); flex-shrink: 0; }
+
+  /* Inline form */
+  .add-form { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border); }
+  .add-input { flex: 1; background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; color: var(--text-primary); font-family: var(--font-main); font-size: 13px; outline: none; transition: border-color 0.2s; }
+  .add-input:focus { border-color: var(--accent-gold-dim); }
+  .add-select { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; color: var(--text-primary); font-family: var(--font-mono); font-size: 12px; outline: none; cursor: pointer; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(8px); background: var(--bg-1); color: var(--text-primary); border: 1px solid rgba(245,200,66,0.3); border-radius: 99px; padding: 9px 20px; font-size: 13px; z-index: 9999; box-shadow: 0 8px 32px rgba(0,0,0,0.5); transition: all 0.25s; opacity: 0; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Info box */
+  .info-box { background: var(--bg-2); border: 1px solid rgba(90,180,240,0.2); border-radius: var(--radius-md); padding: 14px 16px; font-size: 12px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 16px; }
+  .info-box strong { color: var(--accent-blue); }
+  .info-box code { background: var(--bg-0); border-radius: 4px; padding: 1px 5px; font-family: var(--font-mono); font-size: 11px; color: var(--accent-gold); }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="logo">FLOW</div>
+  <p id="gateMsg">Checking admin access…</p>
+</div>
+
+<div id="app">
+  <div class="shell">
+    <nav class="sidebar">
+      <div class="s-logo">
+        <div class="s-logo-mark">FLOW</div>
+        <div class="s-logo-sub">Admin</div>
+      </div>
+      <div class="s-section">Users</div>
+      <div class="s-item active" onclick="nav('pending')" id="n-pending">⏳ Pending <span class="s-badge" id="pendingBadge" style="display:none">0</span></div>
+      <div class="s-item" onclick="nav('approved')" id="n-approved">✅ Approved</div>
+      <div class="s-item" onclick="nav('denied')" id="n-denied">🚫 Denied</div>
+      <div class="s-section">System</div>
+      <div class="s-item" onclick="nav('howto')" id="n-howto">📖 How to Approve</div>
+      <div class="s-item" onclick="nav('log')" id="n-log">📋 Activity Log</div>
+      <div class="s-item" onclick="window.location.href='/index.html'">🏠 Dashboard</div>
+      <div class="s-footer">
+        <div class="s-user">
+          <div class="s-avatar" id="adminAvatar">A</div>
+          <div style="flex:1;min-width:0;">
+            <div class="s-name" id="adminName">Admin</div>
+            <div class="s-role">Administrator</div>
+          </div>
+          <button class="btn-out" onclick="signOut()" title="Sign out">⏻</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main">
+
+      <!-- PENDING -->
+      <div class="page active" id="p-pending">
+        <div class="page-hd">
+          <div class="page-title">Pending Approval</div>
+          <div class="page-sub">Users who signed in and are waiting for access</div>
+        </div>
+        <div class="stats" id="statsRow"></div>
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-icon" style="background:rgba(240,137,42,0.1);">⏳</div>
+            <div class="card-title">Waiting for Access</div>
+            <div class="card-meta" id="pendingMeta">0 users</div>
+          </div>
+          <div id="pendingList"></div>
+          <div class="add-form">
+            <input class="add-input" id="addEmail" placeholder="Add email manually…" type="email">
+            <select class="add-select" id="addRole">
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+            <button class="btn btn-approve" onclick="addManual()">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPROVED -->
+      <div class="page" id="p-approved">
+        <div class="page-hd">
+          <div class="page-title">Approved Users</div>
+          <div class="page-sub">Users with active dashboard access</div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-icon" style="background:rgba(94,203,138,0.1);">✅</div>
+            <div class="card-title">Active Access</div>
+            <div class="card-meta" id="approvedMeta">0 users</div>
+          </div>
+          <div id="approvedList"></div>
+        </div>
+      </div>
+
+      <!-- DENIED -->
+      <div class="page" id="p-denied">
+        <div class="page-hd">
+          <div class="page-title">Denied Users</div>
+          <div class="page-sub">Users blocked from accessing the dashboard</div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-icon" style="background:rgba(240,96,96,0.1);">🚫</div>
+            <div class="card-title">Blocked</div>
+          </div>
+          <div id="deniedList"></div>
+        </div>
+      </div>
+
+      <!-- HOW TO -->
+      <div class="page" id="p-howto">
+        <div class="page-hd">
+          <div class="page-title">How to Approve Users</div>
+          <div class="page-sub">The approval system explained</div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-icon" style="background:rgba(90,180,240,0.1);">📖</div>
+            <div class="card-title">Approval Process</div>
+          </div>
+          <div style="padding:18px 20px;">
+            <div class="info-box">
+              <strong>How it works:</strong> FLOW uses a simple email allowlist in <code>login.html</code>.
+              When someone signs in with Google, their email is checked against the <code>APPROVED_USERS</code> object.
+              If their email is there, they get in. If not, they see a "Pending" screen.
+            </div>
+
+            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;font-weight:600;">To approve a user:</p>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.7;">
+              1. Find the user in the <strong style="color:var(--text-secondary)">Pending</strong> tab<br>
+              2. Click <strong style="color:var(--accent-green)">✓ Approve</strong> — this copies the code snippet<br>
+              3. Open <code>login.html</code> in a text editor<br>
+              4. Find the <code>APPROVED_USERS</code> object and paste the line<br>
+              5. Redeploy to Netlify<br>
+              6. User can sign in immediately
+            </p>
+
+            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;font-weight:600;">The APPROVED_USERS object looks like this:</p>
+            <div class="code-block">
+              <button class="copy-code-btn" onclick="copyExample()">Copy</button>
+              <span id="exampleCode">
+<span class="k">var</span> APPROVED_USERS = {<br>
+&nbsp;&nbsp;<span class="s">'markus@email.com'</span>: { role: <span class="s">'admin'</span>, name: <span class="s">'Markus'</span> },<br>
+&nbsp;&nbsp;<span class="s">'ryan@email.com'</span>: { role: <span class="s">'user'</span>, name: <span class="s">'Ryan'</span> },<br>
+&nbsp;&nbsp;<span class="c">// Add more users here</span><br>
+};
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOG -->
+      <div class="page" id="p-log">
+        <div class="page-hd">
+          <div class="page-title">Activity Log</div>
+          <div class="page-sub">Recent admin actions in this browser</div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-icon" style="background:rgba(90,180,240,0.1);">📋</div>
+            <div class="card-title">Log</div>
+            <button class="btn btn-reinstate" style="margin-left:auto;padding:4px 10px;font-size:11px;" onclick="clearLog()">Clear</button>
+          </div>
+          <div style="padding:0 16px;" id="logList"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── AUTH CHECK ──
+  var adminUser = null;
+  try {
+    var u = JSON.parse(localStorage.getItem('flow_user') || 'null');
+    if (!u || !u.email) { showGateErr('Not signed in.'); }
+    else if (u.role !== 'admin') { showGateErr('Admin access only.'); }
+    else { adminUser = u; initApp(); }
+  } catch(e) { showGateErr('Auth error.'); }
+
+  function showGateErr(msg) {
+    document.getElementById('gateMsg').textContent = msg;
+    document.getElementById('gateMsg').className = 'err';
+    setTimeout(function() { window.location.href = '/login.html'; }, 2000);
+  }
+
+  function signOut() {
+    localStorage.removeItem('flow_user');
+    window.location.href = '/login.html';
+  }
+
+  // ── DATA ──
+  var users = { pending: [], approved: [], denied: [] };
+  var log = [];
+
+  function loadData() {
+    try { users.pending  = JSON.parse(localStorage.getItem('flow_pending_users')  || '[]'); } catch(e) { users.pending  = []; }
+    try { users.approved = JSON.parse(localStorage.getItem('flow_approved_users') || '[]'); } catch(e) { users.approved = []; }
+    try { users.denied   = JSON.parse(localStorage.getItem('flow_denied_users')   || '[]'); } catch(e) { users.denied   = []; }
+    try { log            = JSON.parse(localStorage.getItem('flow_admin_log')       || '[]'); } catch(e) { log = []; }
+  }
+
+  function saveData() {
+    localStorage.setItem('flow_pending_users',  JSON.stringify(users.pending));
+    localStorage.setItem('flow_approved_users', JSON.stringify(users.approved));
+    localStorage.setItem('flow_denied_users',   JSON.stringify(users.denied));
+    localStorage.setItem('flow_admin_log',      JSON.stringify(log));
+  }
+
+  // ── ACTIONS ──
+  function approve(email) {
+    var idx = users.pending.findIndex(function(u) { return u.email === email; });
+    if (idx < 0) return;
+    var u = users.pending.splice(idx, 1)[0];
+    u.status = 'approved'; u.approvedAt = new Date().toISOString();
+    users.approved.push(u);
+    saveData(); addLog('green', '✅ Approved: ' + email);
+    renderAll(); toast('✅ Approved — now add to login.html');
+    copyApprovalSnippet(email, u.name || email, 'user');
+  }
+
+  function deny(email) {
+    var src = ['pending','approved'];
+    for (var i = 0; i < src.length; i++) {
+      var idx = users[src[i]].findIndex(function(u) { return u.email === email; });
+      if (idx >= 0) {
+        var u = users[src[i]].splice(idx, 1)[0];
+        u.status = 'denied'; u.deniedAt = new Date().toISOString();
+        users.denied.push(u);
+        saveData(); addLog('red', '🚫 Denied: ' + email);
+        renderAll(); toast('🚫 Access denied for ' + email);
+        return;
+      }
+    }
+  }
+
+  function reinstate(email) {
+    var idx = users.denied.findIndex(function(u) { return u.email === email; });
+    if (idx < 0) return;
+    var u = users.denied.splice(idx, 1)[0];
+    u.status = 'pending'; delete u.deniedAt;
+    users.pending.push(u);
+    saveData(); addLog('gold', '↩️ Reinstated: ' + email);
+    renderAll(); toast('↩️ Moved back to pending');
+  }
+
+  function addManual() {
+    var email = document.getElementById('addEmail').value.trim().toLowerCase();
+    var role = document.getElementById('addRole').value;
+    if (!email || email.indexOf('@') < 0) { toast('Enter a valid email'); return; }
+    var all = users.pending.concat(users.approved).concat(users.denied);
+    if (all.find(function(u) { return u.email === email; })) { toast('User already exists'); return; }
+    users.approved.push({ email: email, name: email.split('@')[0], avatar: '', requestedAt: new Date().toISOString(), status: 'approved', role: role });
+    saveData(); addLog('blue', '➕ Manually added: ' + email + ' (' + role + ')');
+    document.getElementById('addEmail').value = '';
+    renderAll(); toast('Added ' + email);
+    copyApprovalSnippet(email, email.split('@')[0], role);
+  }
+
+  function copyApprovalSnippet(email, name, role) {
+    var line = "  '" + email + "': { role: '" + role + "', name: '" + name + "' },";
+    navigator.clipboard.writeText(line).then(function() {
+      toast('📋 Code copied! Paste into APPROVED_USERS in login.html, then redeploy.');
+    }).catch(function() {
+      toast('Approve: add  ' + line + '  to APPROVED_USERS in login.html');
+    });
+  }
+
+  function copyExample() {
+    var code = "var APPROVED_USERS = {\n  'markus@email.com': { role: 'admin', name: 'Markus' },\n  // add more\n};";
+    navigator.clipboard.writeText(code).then(function() { toast('Copied!'); });
+  }
+
+  // ── RENDER ──
+  function initApp() {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    var av = document.getElementById('adminAvatar');
+    if (adminUser.avatar) av.innerHTML = '<img src="' + esc(adminUser.avatar) + '">';
+    else av.textContent = (adminUser.name || 'A').charAt(0).toUpperCase();
+    document.getElementById('adminName').textContent = adminUser.name || adminUser.email;
+    loadData(); renderAll();
+  }
+
+  function renderAll() {
+    renderStats();
+    renderList('pendingList',  users.pending,  'pending');
+    renderList('approvedList', users.approved, 'approved');
+    renderList('deniedList',   users.denied,   'denied');
+    var pb = document.getElementById('pendingBadge');
+    pb.textContent = users.pending.length;
+    pb.style.display = users.pending.length > 0 ? 'inline-block' : 'none';
+    document.getElementById('pendingMeta').textContent  = users.pending.length  + ' users';
+    document.getElementById('approvedMeta').textContent = users.approved.length + ' users';
+    renderLog();
+  }
+
+  function renderStats() {
+    document.getElementById('statsRow').innerHTML =
+      stat('Pending',  users.pending.length,  '⏳', 'var(--accent-amber)') +
+      stat('Approved', users.approved.length, '✅', 'var(--accent-green)') +
+      stat('Denied',   users.denied.length,   '🚫', 'var(--accent-red)');
+  }
+
+  function stat(label, val, icon, color) {
+    return '<div class="stat"><div class="stat-label">' + label + '</div>' +
+      '<div class="stat-val" style="color:' + color + '">' + val + '</div></div>';
+  }
+
+  function renderList(id, list, type) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (list.length === 0) {
+      el.innerHTML = '<div class="empty"><div class="empty-icon">' +
+        (type==='pending'?'😴':type==='approved'?'✨':'📭') +
+        '</div>No ' + type + ' users</div>';
+      return;
+    }
+    var html = '<table><thead><tr><th>User</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>';
+    list.forEach(function(u) {
+      var av = u.avatar ? '<img src="' + esc(u.avatar) + '">' : (u.name||u.email).charAt(0).toUpperCase();
+      var date = u.requestedAt ? new Date(u.requestedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      var pillClass = 'pill-' + type;
+      var pillLabel = type.charAt(0).toUpperCase() + type.slice(1);
+      var acts = '';
+      if (type === 'pending') {
+        acts = '<button class="btn btn-approve" onclick="approve(\'' + esc(u.email) + '\')">✓ Approve</button>' +
+               '<button class="btn btn-deny"    onclick="deny(\''    + esc(u.email) + '\')">✕ Deny</button>';
+      } else if (type === 'approved') {
+        acts = '<button class="btn btn-revoke" onclick="deny(\'' + esc(u.email) + '\')">Revoke</button>';
+      } else {
+        acts = '<button class="btn btn-reinstate" onclick="reinstate(\'' + esc(u.email) + '\')">↩ Reinstate</button>';
+      }
+      html += '<tr><td><div class="u-cell"><div class="t-avatar">' + av + '</div>' +
+        '<div><div style="font-weight:500;">' + esc(u.name||u.email) + '</div>' +
+        '<div class="u-email">' + esc(u.email) + '</div></div></div></td>' +
+        '<td><span class="pill ' + pillClass + '">' + pillLabel + '</span></td>' +
+        '<td class="u-date">' + date + '</td>' +
+        '<td><div class="actions">' + acts + '</div></td></tr>';
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  }
+
+  // ── LOG ──
+  function addLog(color, text) {
+    var now = new Date();
+    log.unshift({ color: color, text: text, time: now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + ' ' + now.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) });
+    if (log.length > 100) log = log.slice(0, 100);
+    localStorage.setItem('flow_admin_log', JSON.stringify(log));
+    renderLog();
+  }
+
+  function renderLog() {
+    var el = document.getElementById('logList');
+    if (!el) return;
+    if (log.length === 0) { el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>No activity yet</div>'; return; }
+    el.innerHTML = log.map(function(e) {
+      var dotColor = {green:'#5ecb8a',red:'#f06060',gold:'#f5c842',blue:'#5ab4f0'}[e.color] || '#5a5148';
+      return '<div class="log-item"><div class="log-dot" style="background:' + dotColor + '"></div>' +
+        '<div class="log-text">' + esc(e.text) + '</div>' +
+        '<div class="log-time">' + e.time + '</div></div>';
+    }).join('');
+  }
+
+  function clearLog() { log = []; localStorage.removeItem('flow_admin_log'); renderLog(); toast('Log cleared'); }
+
+  // ── NAV ──
+  function nav(page) {
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.s-item').forEach(function(n) { n.classList.remove('active'); });
+    var p = document.getElementById('p-' + page); if (p) p.classList.add('active');
+    var n = document.getElementById('n-' + page); if (n) n.classList.add('active');
+  }
+
+  // ── UTILS ──
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._t); t._t = setTimeout(function() { t.classList.remove('show'); }, 3000);
+  }
+</script>
+</body>
+</html>
