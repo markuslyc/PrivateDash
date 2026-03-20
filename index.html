@@ -5,45 +5,167 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FLOW — Personal Command Centre</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Lexend+Mega:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
 <style>
+  /* ── LIQUID GLASS MORPHISM THEME ── */
+  @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
   :root {
-    --bg-0: #0f0e0c; --bg-1: #181714; --bg-2: #221f1b; --bg-3: #2e2a24; --bg-card: #1e1b17;
-    --border: rgba(255,255,255,0.07); --border-active: rgba(255,220,100,0.4);
-    --text-primary: #f5f0e8; --text-secondary: #a89880; --text-muted: #5a5148;
-    --accent-gold: #f5c842; --accent-gold-dim: #c89d28; --accent-amber: #f0892a;
-    --accent-green: #5ecb8a; --accent-blue: #5ab4f0; --accent-red: #f06060; --accent-purple: #b07cf0;
-    --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px;
-    --font-main: 'Lexend', sans-serif; --font-display: 'Lexend Mega', sans-serif; --font-mono: 'JetBrains Mono', monospace;
-    --shadow-card: 0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.04) inset;
-    --shadow-glow: 0 0 40px rgba(245,200,66,0.12);
-    --transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+    /* Base palette — soft sky gradient world */
+    --bg-base: #e8f4f8;
+    --bg-gradient: linear-gradient(135deg, #dff0f7 0%, #e8f0ff 40%, #f0eeff 70%, #e0f5ee 100%);
+    --bg-card: rgba(255,255,255,0.55);
+    --bg-card-hover: rgba(255,255,255,0.72);
+    --bg-sidebar: rgba(255,255,255,0.42);
+    --bg-input: rgba(255,255,255,0.6);
+    --bg-2: rgba(255,255,255,0.35);
+    --bg-3: rgba(255,255,255,0.25);
+
+    /* Glass borders */
+    --border: rgba(255,255,255,0.65);
+    --border-subtle: rgba(180,210,240,0.4);
+    --border-active: rgba(56,189,198,0.7);
+
+    /* Text — warm dark on light, dyslexia-friendly */
+    --text-primary: #1a2332;
+    --text-secondary: #3d5a73;
+    --text-muted: #7a99b0;
+
+    /* Accent palette — teal/mint/sky */
+    --accent-gold: #38bdc6;
+    --accent-gold-dim: #2a9da6;
+    --accent-amber: #f59e4a;
+    --accent-green: #34c97a;
+    --accent-blue: #4a90d9;
+    --accent-red: #e05c5c;
+    --accent-purple: #8b7fd4;
+    --accent-teal: #38bdc6;
+    --accent-mint: #5dd9c4;
+
+    /* Liquid glass effects */
+    --glass-blur: blur(20px) saturate(180%);
+    --glass-blur-heavy: blur(32px) saturate(200%);
+    --glass-shadow: 0 8px 32px rgba(56,120,180,0.12), 0 1px 0 rgba(255,255,255,0.8) inset, 0 -1px 0 rgba(255,255,255,0.3) inset;
+    --glass-shadow-hover: 0 16px 48px rgba(56,120,180,0.18), 0 1px 0 rgba(255,255,255,0.9) inset;
+    --glass-shadow-active: 0 4px 16px rgba(56,189,198,0.25), 0 1px 0 rgba(255,255,255,0.9) inset;
+
+    /* Spacing & radius */
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+
+    /* Typography */
+    --font-main: 'Atkinson Hyperlegible', sans-serif;
+    --font-display: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+
+    /* Transitions */
+    --transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+    --transition-spring: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+
+    /* Dyslexia-friendly line height & spacing */
+    --line-height: 1.75;
+    --letter-spacing: 0.025em;
+    --word-spacing: 0.06em;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 18px; }
-  body { font-family: var(--font-main); background: var(--bg-0); color: var(--text-primary); min-height: 100vh; line-height: 1.7; letter-spacing: 0.02em; overflow-x: hidden; }
-  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: var(--bg-1); } ::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 99px; }
-  .shell { display: grid; grid-template-columns: 72px 1fr; grid-template-rows: auto 1fr; min-height: 100vh; }
-  .sidebar { grid-row: 1/-1; background: var(--bg-1); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 6px; position: sticky; top: 0; height: 100vh; z-index: 100; }
-  .logo-mark { font-family: var(--font-display); font-size: 13px; color: var(--accent-gold); letter-spacing: 0.1em; margin-bottom: 24px; writing-mode: vertical-rl; transform: rotate(180deg); }
-  .nav-btn { width: 46px; height: 46px; border-radius: var(--radius-sm); border: 1px solid transparent; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: var(--transition); position: relative; }
-  .nav-btn:hover { background: var(--bg-2); color: var(--text-primary); border-color: var(--border); }
-  .nav-btn.active { background: rgba(245,200,66,0.12); color: var(--accent-gold); border-color: rgba(245,200,66,0.3); }
+  html { font-size: 17px; }
+  body {
+    font-family: var(--font-main);
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: var(--line-height);
+    letter-spacing: var(--letter-spacing);
+    word-spacing: var(--word-spacing);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Animated background orbs for depth */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 800px 600px at 20% 20%, rgba(56,189,198,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 600px 500px at 80% 70%, rgba(139,127,212,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 700px 400px at 60% 10%, rgba(93,217,196,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+    animation: bgShift 20s ease-in-out infinite alternate;
+  }
+  @keyframes bgShift {
+    0% { opacity: 1; transform: scale(1) translate(0,0); }
+    100% { opacity: 0.8; transform: scale(1.05) translate(1%,1%); }
+  }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(56,189,198,0.3); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(56,189,198,0.5); }
+  .shell { display: grid; grid-template-columns: 72px 1fr; grid-template-rows: auto 1fr; min-height: 100vh; position: relative; z-index: 1; }
+  .sidebar {
+    grid-row: 1/-1;
+    background: var(--bg-sidebar);
+    backdrop-filter: var(--glass-blur-heavy);
+    -webkit-backdrop-filter: var(--glass-blur-heavy);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px 0; gap: 6px;
+    position: sticky; top: 0; height: 100vh; z-index: 100;
+    box-shadow: 2px 0 24px rgba(56,120,180,0.08);
+  }
+  .logo-mark { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--accent-teal); letter-spacing: 0.12em; margin-bottom: 24px; writing-mode: vertical-rl; transform: rotate(180deg); }
+  .nav-btn {
+    width: 46px; height: 46px;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    transition: var(--transition-spring);
+    position: relative;
+  }
+  .nav-btn:hover {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(12px);
+    color: var(--text-primary);
+    border-color: var(--border);
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(56,120,180,0.1);
+  }
+  .nav-btn.active {
+    background: linear-gradient(135deg, rgba(56,189,198,0.2), rgba(93,217,196,0.15));
+    color: var(--accent-teal);
+    border-color: rgba(56,189,198,0.45);
+    box-shadow: 0 4px 16px rgba(56,189,198,0.2), 0 1px 0 rgba(255,255,255,0.8) inset;
+  }
   .nav-btn .tooltip { position: absolute; left: calc(100% + 12px); background: var(--bg-3); color: var(--text-primary); font-size: 12px; padding: 6px 10px; border-radius: var(--radius-sm); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; border: 1px solid var(--border); font-family: var(--font-main); font-weight: 500; z-index: 999; }
   .nav-btn:hover .tooltip { opacity: 1; }
   .sidebar-spacer { flex: 1; }
   .pa-badge { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; cursor: pointer; border: 2px solid var(--bg-1); transition: var(--transition); margin-bottom: 8px; }
   .pa-badge:hover { transform: scale(1.1); }
-  .topbar { background: var(--bg-1); border-bottom: 1px solid var(--border); padding: 0 28px; height: 64px; display: flex; align-items: center; gap: 20px; position: sticky; top: 0; z-index: 90; }
-  .topbar-greeting { font-family: var(--font-display); font-size: 15px; color: var(--text-primary); letter-spacing: 0.05em; }
-  .topbar-greeting span { color: var(--accent-gold); }
+  .topbar {
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px; height: 64px;
+    display: flex; align-items: center; gap: 20px;
+    position: sticky; top: 0; z-index: 90;
+    box-shadow: 0 2px 16px rgba(56,120,180,0.06);
+  }
+  .topbar-greeting { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--text-primary); letter-spacing: 0.03em; }
+  .topbar-greeting span { color: var(--accent-teal); font-weight: 700; }
   .topbar-date { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
   .topbar-spacer { flex: 1; }
-  .focus-toggle { display: flex; background: var(--bg-2); border-radius: 99px; padding: 4px; gap: 2px; border: 1px solid var(--border); }
-  .focus-btn { padding: 5px 14px; border-radius: 99px; border: none; background: transparent; color: var(--text-secondary); font-family: var(--font-main); font-size: 12px; font-weight: 500; cursor: pointer; transition: var(--transition); }
-  .focus-btn.active { background: var(--accent-gold); color: var(--bg-0); }
+  .focus-toggle { display: flex; background: rgba(255,255,255,0.5); backdrop-filter: blur(10px); border-radius: 99px; padding: 4px; gap: 2px; border: 1px solid var(--border); }
+  .focus-btn { padding: 5px 14px; border-radius: 99px; border: none; background: transparent; color: var(--text-secondary); font-family: var(--font-main); font-size: 12px; font-weight: 600; cursor: pointer; transition: var(--transition); }
+  .focus-btn.active { background: linear-gradient(135deg, var(--accent-teal), var(--accent-mint)); color: white; box-shadow: 0 2px 10px rgba(56,189,198,0.3); }
   .font-size-ctrl { display: flex; align-items: center; gap: 4px; }
   .font-size-ctrl button { width: 28px; height: 28px; border-radius: var(--radius-sm); background: var(--bg-2); border: 1px solid var(--border); color: var(--text-secondary); font-size: 14px; cursor: pointer; font-family: var(--font-main); transition: var(--transition); }
   .font-size-ctrl button:hover { background: var(--bg-3); color: var(--text-primary); }
@@ -86,11 +208,24 @@
   .task-item:hover .task-del { opacity: 1; }
   .task-del:hover { color: var(--accent-red); background: rgba(240,96,96,0.1); }
   .task-priority { font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 600; letter-spacing: 0.05em; align-self: flex-start; margin-top: 3px; }
-  .priority-high { background: rgba(240,96,96,0.15); color: var(--accent-red); }
-  .priority-med { background: rgba(240,137,42,0.15); color: var(--accent-amber); }
-  .priority-low { background: rgba(94,203,138,0.15); color: var(--accent-green); }
+  .priority-high { background: rgba(224,92,92,0.15); color: var(--accent-red); border: 1px solid rgba(224,92,92,0.2); }
+  .priority-med { background: rgba(245,158,74,0.15); color: var(--accent-amber); border: 1px solid rgba(245,158,74,0.2); }
+  .priority-low { background: rgba(52,201,122,0.15); color: var(--accent-green); border: 1px solid rgba(52,201,122,0.2); }
   .add-task-row { display: flex; gap: 8px; margin-top: 14px; }
-  .add-task-input { flex: 1; background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 14px; color: var(--text-primary); font-family: var(--font-main); font-size: 14px; outline: none; transition: var(--transition); }
+  .add-task-input {
+    flex: 1;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    font-size: 14px; outline: none;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(56,120,180,0.06) inset;
+  }
+  .add-task-input:focus { border-color: rgba(56,189,198,0.6); box-shadow: 0 0 0 3px rgba(56,189,198,0.12); background: rgba(255,255,255,0.8); }
   .add-task-input:focus { border-color: var(--accent-gold-dim); }
   .add-task-input::placeholder { color: var(--text-muted); }
   .btn { padding: 9px 18px; border-radius: var(--radius-sm); border: none; font-family: var(--font-main); font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--transition); letter-spacing: 0.03em; }
@@ -233,6 +368,118 @@
   .api-key-saved { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--accent-green); font-family: var(--font-mono); }
   #new-ev-error a { color: var(--accent-gold); }
   @media (max-width: 1100px) { .cols-3 { grid-template-columns: repeat(2, 1fr); } .quick-stats { grid-template-columns: repeat(2, 1fr); } .col-span-2,.col-span-3 { grid-column: span 1; } }
+
+  /* Gmail Agent */
+  .gmail-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+  .gmail-filter-btn{padding:6px 14px;border-radius:99px;border:1px solid var(--border);background:var(--bg-2);color:var(--text-secondary);font-family:var(--font-main);font-size:12px;cursor:pointer;transition:all 0.18s;}
+  .gmail-filter-btn.active{background:rgba(245,200,66,0.15);color:var(--accent-gold);border-color:rgba(245,200,66,0.35);}
+  .gmail-filter-btn:hover{color:var(--text-primary);}
+  .gmail-connect-box{background:var(--bg-card);border:1px dashed var(--border);border-radius:var(--radius-lg);padding:40px;text-align:center;color:var(--text-muted);}
+  .gmail-connect-box .big-icon{font-size:48px;margin-bottom:12px;}
+  .gmail-connect-box h3{font-size:17px;color:var(--text-secondary);margin-bottom:8px;}
+  .gmail-connect-box p{font-size:13px;margin-bottom:20px;line-height:1.6;}
+  .gmail-layout{display:grid;grid-template-columns:340px 1fr;gap:16px;height:calc(100vh - 160px);}
+  .gmail-list{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow-y:auto;}
+  .gmail-list-header{padding:12px 16px;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:600;display:flex;align-items:center;justify-content:space-between;}
+  .gmail-email-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:all 0.15s;}
+  .gmail-email-item:hover{background:rgba(255,255,255,0.03);}
+  .gmail-email-item.active{background:rgba(245,200,66,0.07);border-left:3px solid var(--accent-gold);}
+  .gmail-email-item.unread .gmail-subject{font-weight:700;color:var(--text-primary);}
+  .gmail-sender{font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:3px;display:flex;align-items:center;justify-content:space-between;}
+  .gmail-subject{font-size:12px;color:var(--text-secondary);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .gmail-snippet{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .gmail-date{font-size:10px;color:var(--text-muted);font-family:var(--font-mono);flex-shrink:0;}
+  .unread-dot{width:7px;height:7px;border-radius:50%;background:var(--accent-gold);flex-shrink:0;margin-right:5px;}
+  .gmail-detail{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);display:flex;flex-direction:column;overflow:hidden;}
+  .gmail-detail-header{padding:18px 20px;border-bottom:1px solid var(--border);}
+  .gmail-detail-subject{font-size:16px;font-weight:600;margin-bottom:7px;line-height:1.3;}
+  .gmail-detail-meta{font-size:12px;color:var(--text-muted);display:flex;gap:14px;flex-wrap:wrap;}
+  .gmail-detail-body{flex:1;overflow-y:auto;}
+  .gmail-summary-box{margin:14px 16px;padding:14px 16px;background:rgba(245,200,66,0.06);border:1px solid rgba(245,200,66,0.2);border-radius:var(--radius-md);}
+  .gmail-summary-box h4{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-gold);margin-bottom:10px;font-weight:600;}
+  .gmail-summary-box ul{list-style:none;padding:0;}
+  .gmail-summary-box li{font-size:13px;color:var(--text-secondary);padding:3px 0 3px 16px;position:relative;line-height:1.5;}
+  .gmail-summary-box li::before{content:"•";position:absolute;left:0;color:var(--accent-gold);}
+  .gmail-body-raw{margin:0 16px 14px;padding:14px;background:var(--bg-2);border-radius:var(--radius-md);font-size:12px;color:var(--text-secondary);line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:180px;overflow-y:auto;}
+  .gmail-reply-area{padding:14px 16px;border-top:1px solid var(--border);background:var(--bg-1);}
+  .gmail-reply-area h4{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:8px;font-weight:600;}
+  .gmail-points-input{width:100%;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 14px;color:var(--text-primary);font-family:var(--font-main);font-size:13px;resize:none;outline:none;transition:border-color 0.2s;min-height:72px;}
+  .gmail-points-input:focus{border-color:var(--accent-gold-dim);}
+  .gmail-reply-actions{display:flex;gap:8px;margin-top:10px;}
+  .gmail-draft-box{margin-top:12px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;font-size:13px;color:var(--text-secondary);line-height:1.7;white-space:pre-wrap;display:none;}
+  .gmail-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);gap:10px;}
+  .gmail-loading{text-align:center;padding:20px;color:var(--text-muted);font-size:13px;}
+  /* Settings */
+  .settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+  .settings-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;}
+  .settings-card h3{font-size:14px;font-weight:600;margin-bottom:4px;}
+  .settings-card p{font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.5;}
+  .widget-toggle-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+  .widget-toggle-row:last-child{border-bottom:none;}
+  .widget-toggle-info{flex:1;}
+  .widget-toggle-name{font-size:13px;font-weight:500;}
+  .widget-toggle-desc{font-size:11px;color:var(--text-muted);margin-top:2px;}
+  .toggle-sw{width:38px;height:21px;border-radius:99px;cursor:pointer;position:relative;transition:all 0.2s;border:1px solid var(--border);flex-shrink:0;background:var(--bg-3);}
+  .toggle-sw.on{background:var(--accent-green);border-color:var(--accent-green);}
+  .toggle-sw::after{content:'';position:absolute;width:15px;height:15px;border-radius:50%;background:white;top:2px;left:2px;transition:all 0.2s;}
+  .toggle-sw.on::after{left:19px;}
+  .color-swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .color-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.2s;}
+  .color-swatch.active{border-color:white;transform:scale(1.15);}
+
+
+  /* Enhanced task form */
+  .task-form-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+  .task-form-row input, .task-form-row select {
+    background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:6px 10px; color:var(--text-primary); font-family:var(--font-main); font-size:12px;
+    outline:none; transition:border-color 0.2s;
+  }
+  .task-form-row input:focus, .task-form-row select:focus { border-color:var(--accent-gold-dim); }
+  .task-form-row input[type=date], .task-form-row input[type=time] { color-scheme:dark; }
+  /* Gmail task modal */
+  .gmail-task-modal { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; display:flex; align-items:center; justify-content:center; }
+  .gmail-task-modal-card { background:var(--bg-1); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px; width:460px; max-width:90vw; box-shadow:0 24px 64px rgba(0,0,0,0.5); }
+  .gmail-task-modal-card h3 { font-size:16px; font-weight:600; margin-bottom:4px; }
+  .gmail-task-modal-card p { font-size:12px; color:var(--text-muted); margin-bottom:18px; }
+  .gtm-field { margin-bottom:14px; }
+  .gtm-field label { font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); font-weight:600; display:block; margin-bottom:5px; }
+  .gtm-field input, .gtm-field select, .gtm-field textarea {
+    width:100%; background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:9px 12px; color:var(--text-primary); font-family:var(--font-main); font-size:13px;
+    outline:none; transition:border-color 0.2s;
+  }
+  .gtm-field input:focus, .gtm-field select:focus { border-color:var(--accent-gold-dim); }
+  .gtm-field input[type=date], .gtm-field input[type=time] { color-scheme:dark; }
+  .gtm-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .gtm-actions { display:flex; gap:8px; margin-top:18px; }
+  .task-action-items { background:var(--bg-2); border-radius:var(--radius-md); padding:12px 14px; margin-bottom:14px; }
+  .task-action-items p { font-size:12px; color:var(--accent-gold); margin-bottom:8px; font-weight:600; }
+  .task-action-item { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:13px; }
+  .task-action-item input[type=checkbox] { accent-color:var(--accent-gold); width:14px; height:14px; }
+
+
+  /* Liquid glass shimmer on hover */
+  @keyframes liquidShimmer {
+    0% { transform: translateX(-100%) skewX(-15deg); }
+    100% { transform: translateX(200%) skewX(-15deg); }
+  }
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transform: translateX(-100%) skewX(-15deg);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+  .card:hover::after { animation: liquidShimmer 0.7s ease; }
+  .card { position: relative; overflow: hidden; }
+
+  /* Dyslexia-friendly selection highlight */
+  ::selection { background: rgba(56,189,198,0.25); color: var(--text-primary); }
+
 </style>
 </head>
 <body>
@@ -260,7 +507,7 @@
     <div class="pa-section-title">What can your PA see?</div>
     <div class="pa-access-item"><span class="pa-access-icon">📋</span><span class="pa-access-label">Tasks & To-Dos</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
     <div class="pa-access-item"><span class="pa-access-icon">📅</span><span class="pa-access-label">Calendar</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
-    <div class="pa-access-item"><span class="pa-access-icon">🏢</span><span class="pa-access-label">Business Overview</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">🏢</span></div>
     <div class="pa-access-item"><span class="pa-access-icon">📊</span><span class="pa-access-label">HubSpot CRM</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
     <div class="pa-access-item"><span class="pa-access-icon">🤖</span><span class="pa-access-label">AI Assistant</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
     <div class="pa-access-item"><span class="pa-access-icon">📝</span><span class="pa-access-label">Notes</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
@@ -284,10 +531,11 @@
     <button class="nav-btn active" onclick="showView('home')" id="nav-home">🏠<span class="tooltip">Home</span></button>
     <button class="nav-btn" onclick="showView('tasks')" id="nav-tasks">📋<span class="tooltip">Tasks</span></button>
     <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar">📅<span class="tooltip">Calendar</span></button>
-    <button class="nav-btn" onclick="showView('businesses')" id="nav-businesses">🏢<span class="tooltip">Businesses</span></button>
     <button class="nav-btn" onclick="showView('ai')" id="nav-ai">🤖<span class="tooltip">AI Assistant</span></button>
     <button class="nav-btn" onclick="showView('integrations')" id="nav-integrations">🔌<span class="tooltip">Integrations</span></button>
-    <div class="sidebar-spacer"></div>
+    <button class="nav-btn" onclick="showView('gmail')" id="nav-gmail">✉️<span class="tooltip">Gmail</span></button>
+  <button class="nav-btn" onclick="showView('settings')" id="nav-settings">⚙️<span class="tooltip">Settings</span></button>
+  <div class="sidebar-spacer"></div>
     <div class="pa-badge" onclick="togglePaPanel()" title="PA Access">PA</div>
     <button class="nav-btn" onclick="openFocusMode()">⚡<span class="tooltip">Focus Mode</span></button>
   </nav>
@@ -345,76 +593,11 @@
         <button class="widget-toggle on" onclick="toggleWidget('tasks-widget',this)">📋 Tasks</button>
         <button class="widget-toggle on" onclick="toggleWidget('cal-widget',this)">📅 Calendar</button>
         <button class="widget-toggle on" onclick="toggleWidget('ai-widget',this)">🤖 AI Quick Ask</button>
-        <button class="widget-toggle on" onclick="toggleWidget('biz-widget',this)">🏢 Businesses</button>
         <button class="widget-toggle on" onclick="toggleWidget('notes-widget',this)">📝 Notes</button>
       </div>
 
       <div class="grid-area cols-3">
-        <div class="card glow widget col-span-2" id="tasks-widget">
-          <div class="card-header">
-            <div class="card-icon" style="background:rgba(245,200,66,0.1);">📋</div>
-            <div class="card-title">Today's Tasks</div>
-            <div class="card-badge" style="background:rgba(245,200,66,0.1);color:var(--accent-gold);" id="task-counter">—</div>
-            <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;margin-left:8px;" onclick="openFocusMode()">⚡ Focus</button>
-          </div>
-          <div class="card-body">
-            <div id="task-list"></div>
-            <div class="add-task-row">
-              <input class="add-task-input" id="newTaskInput" type="text" placeholder="Add a task… (press Enter)" onkeydown="if(event.key==='Enter')addTask()">
-              <button class="btn btn-gold" onclick="addTask()">+ Add</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card widget" id="cal-widget">
-          <div class="card-header">
-            <div class="card-icon" style="background:rgba(94,203,138,0.1);">📅</div>
-            <div class="card-title">Calendar</div>
-            <div id="gcal-badge" class="card-badge gcal-disconnected">Not connected</div>
-          </div>
-          <div class="card-body">
-            <div class="cal-header">
-              <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
-              <div class="cal-month" id="calMonthLabel">—</div>
-              <button class="cal-nav" onclick="changeMonth(1)">›</button>
-            </div>
-            <div class="cal-grid" id="calGrid"></div>
-            <div class="event-list" id="eventList">
-              <div class="empty-state"><div class="icon">📅</div>Connect Google Calendar to see events</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card widget" id="ai-widget">
-          <div class="card-header">
-            <div class="card-icon" style="background:rgba(176,124,240,0.1);">🤖</div>
-            <div class="card-title">AI Assistant</div>
-            <select class="ai-model-select" id="aiModelSelect">
-              <option value="claude">Claude</option>
-              <option value="gpt4">GPT-4</option>
-              <option value="kimi">Kimi</option>
-            </select>
-          </div>
-          <div class="card-body">
-            <div class="ai-chat-area" id="aiChatArea">
-              <div class="ai-msg"><div class="ai-avatar">✦</div><div class="ai-bubble">Hi! I'm your AI assistant. I can help you draft emails, summarise meetings, prepare for calls, and much more. What do you need? 🚀</div></div>
-            </div>
-            <div class="ai-input-row">
-              <input class="add-task-input" id="aiInput" type="text" placeholder="Ask anything…" style="flex:1;" onkeydown="if(event.key==='Enter')sendAiMessage('aiChatArea','aiInput','aiModelSelect')">
-              <button class="btn btn-gold" onclick="sendAiMessage('aiChatArea','aiInput','aiModelSelect')">→</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card widget col-span-2" id="biz-widget">
-          <div class="card-header">
-            <div class="card-icon" style="background:rgba(90,180,240,0.1);">🏢</div>
-            <div class="card-title">Businesses</div>
-            <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;margin-left:auto;" onclick="showView('businesses')">View all →</button>
-          </div>
-          <div class="card-body">
-            <div class="grid-area cols-3" id="bizMiniList"></div>
-          </div>
+        
         </div>
 
         <div class="card widget" id="notes-widget">
@@ -501,12 +684,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- BUSINESSES VIEW -->
-    <div class="view" id="view-businesses">
-      <div class="section-label">Business Portfolio</div>
-      <div class="grid-area cols-2" id="fullBizList"></div>
     </div>
 
     <!-- AI VIEW -->
@@ -603,6 +780,100 @@ What would you like to work on?</div></div>
             <div style="margin-top:16px;padding:12px 16px;background:var(--bg-2);border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);border:1px solid var(--border);">
               <strong style="color:var(--accent-gold);">🔒 Security:</strong> All API keys are stored in your browser's local storage only. They are never sent anywhere except directly to each service's official API.
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- GMAIL VIEW -->
+    <div class="view" id="view-gmail">
+      <div style="margin-bottom:20px;">
+        <div style="font-family:var(--font-display);font-size:18px;letter-spacing:0.06em;margin-bottom:4px;">✉️ Gmail Agent</div>
+        <div style="font-size:13px;color:var(--text-muted);">AI-powered inbox — summarise, draft, send</div>
+      </div>
+      <div id="gmail-connect-area" class="gmail-connect-box" style="display:none;">
+        <div class="big-icon">📬</div>
+        <h3>Gmail Access Needed</h3>
+        <p>Sign out and sign back in to grant Gmail scope,<br>or your current token may already include it.</p>
+        <button class="btn-gold" onclick="refreshGmail()">Try Anyway</button>
+      </div>
+      <div id="gmail-main-area" style="display:none;">
+        <div class="gmail-toolbar">
+          <button class="gmail-filter-btn active" onclick="setGmailFilter('all',this)">All</button>
+          <button class="gmail-filter-btn" onclick="setGmailFilter('unread',this)">Unread</button>
+          <button class="gmail-filter-btn" onclick="setGmailFilter('important',this)">Important</button>
+          <button class="gmail-filter-btn" style="margin-left:auto;" onclick="refreshGmail()">🔄 Refresh</button>
+        </div>
+        <div class="gmail-layout">
+          <div class="gmail-list">
+            <div class="gmail-list-header"><span id="gmail-count">Inbox</span></div>
+            <div id="gmail-email-list"><div class="gmail-loading">Loading…</div></div>
+          </div>
+          <div class="gmail-detail" id="gmail-detail-panel">
+            <div class="gmail-empty-state">
+              <div style="font-size:40px;">✉️</div>
+              <div style="font-size:14px;font-weight:500;">Select an email to read</div>
+              <div style="font-size:12px;">AI will summarise it instantly</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS VIEW -->
+    <div class="view" id="view-settings">
+      <div style="margin-bottom:20px;">
+        <div style="font-family:var(--font-display);font-size:18px;letter-spacing:0.06em;margin-bottom:4px;">⚙️ Settings</div>
+        <div style="font-size:13px;color:var(--text-muted);">Customise your FLOW dashboard</div>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>🧩 Widgets</h3>
+          <p>Show or hide dashboard sections</p>
+          <div id="widget-toggles">
+            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">📋 Tasks</div><div class="widget-toggle-desc">Today's task list</div></div><div class="toggle-sw on" id="toggle-tasks" onclick="toggleWidget('tasks',this)"></div></div>
+            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">📅 Calendar</div><div class="widget-toggle-desc">Events and scheduling</div></div><div class="toggle-sw on" id="toggle-calendar" onclick="toggleWidget('calendar',this)"></div></div>
+            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">✉️ Gmail Agent</div><div class="widget-toggle-desc">AI email assistant</div></div><div class="toggle-sw on" id="toggle-gmail" onclick="toggleWidget('gmail',this)"></div></div>
+            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">🤖 AI Assistant</div><div class="widget-toggle-desc">Chat with Claude, GPT-4</div></div><div class="toggle-sw on" id="toggle-ai" onclick="toggleWidget('ai',this)"></div></div>
+
+            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">🔌 Integrations</div><div class="widget-toggle-desc">API keys and connections</div></div><div class="toggle-sw on" id="toggle-integrations" onclick="toggleWidget('integrations',this)"></div></div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>🎨 Accent Colour</h3>
+          <p>Pick your dashboard accent</p>
+          <div class="color-swatches" id="color-swatches">
+            <div class="color-swatch active" style="background:#f5c842;" onclick="setAccent('#f5c842','#c89d28',this)" title="Gold"></div>
+            <div class="color-swatch" style="background:#5ecb8a;" onclick="setAccent('#5ecb8a','#3da86a',this)" title="Green"></div>
+            <div class="color-swatch" style="background:#5ab4f0;" onclick="setAccent('#5ab4f0','#3a94d0',this)" title="Blue"></div>
+            <div class="color-swatch" style="background:#b07cf0;" onclick="setAccent('#b07cf0','#9060d0',this)" title="Purple"></div>
+            <div class="color-swatch" style="background:#f0892a;" onclick="setAccent('#f0892a','#d06910',this)" title="Amber"></div>
+            <div class="color-swatch" style="background:#f06060;" onclick="setAccent('#f06060','#d04040',this)" title="Red"></div>
+          </div>
+          <div style="margin-top:18px;">
+            <h3 style="margin-bottom:4px;">📐 Layout Density</h3>
+            <p style="margin-bottom:10px;">Adjust spacing and font size</p>
+            <div style="display:flex;gap:8px;">
+              <button class="gmail-filter-btn" onclick="setDensity('compact',this)">Compact</button>
+              <button class="gmail-filter-btn active" onclick="setDensity('normal',this)">Normal</button>
+              <button class="gmail-filter-btn" onclick="setDensity('comfortable',this)">Comfortable</button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>👤 Profile</h3>
+          <p>Your current session</p>
+          <div id="profile-info" style="font-size:13px;color:var(--text-secondary);line-height:2;"></div>
+          <button style="margin-top:12px;width:100%;padding:9px;background:rgba(240,96,96,0.15);color:var(--accent-red);border:1px solid rgba(240,96,96,0.25);border-radius:var(--radius-md);font-family:var(--font-main);font-size:13px;font-weight:600;cursor:pointer;" onclick="signOutFlow()">Sign Out</button>
+        </div>
+        <div class="settings-card">
+          <h3>💾 Data</h3>
+          <p>Manage your local data</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="gmail-filter-btn" onclick="exportData()">📤 Export my data</button>
+            <button class="gmail-filter-btn" onclick="clearTasks()">🗑 Clear completed tasks</button>
+            <button class="gmail-filter-btn" onclick="clearNotes()">🗑 Clear all notes</button>
           </div>
         </div>
       </div>
@@ -718,11 +989,6 @@ let fontSize = 18;
 let selectedDate = null;
 let expandedEventId = null;
 
-const businesses = [
-  { name: 'TechVenture Ltd', emoji: '⚡', tag: 'SaaS', tagColor: '#5ab4f0', kpis: [{l:'MRR',v:'£42k'},{l:'Users',v:'1,240'},{l:'Churn',v:'2.1%'}] },
-  { name: 'Green Logistics', emoji: '🌿', tag: 'Ops', tagColor: '#5ecb8a', kpis: [{l:'Revenue',v:'£88k'},{l:'Shipments',v:'340'},{l:'NPS',v:'72'}] },
-  { name: 'Studio Creative', emoji: '🎨', tag: 'Agency', tagColor: '#f5c842', kpis: [{l:'Retainers',v:'8'},{l:'Pipeline',v:'£24k'},{l:'Open',v:'3 proj'}] },
-];
 
 const crmIntegrationsList = [
   { name:'HubSpot', emoji:'🟠', key:'hubspot' },
@@ -752,7 +1018,6 @@ document.addEventListener('DOMContentLoaded', function() {
   loadTasksFromStorage();
   renderTasks();
   renderCalendar();
-  renderBusinesses();
   renderIntegrations();
   loadNotes();
   checkSavedKeys();
@@ -835,11 +1100,14 @@ function renderTasks() {
 }
 
 function taskHtml(t) {
+  var reminderBadge = t.reminderTime ? '<span title="Reminder set" style="font-size:11px;margin-left:4px;">🔔</span>' : '';
+  var sourceBadge = t.source === 'gmail' ? '<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:rgba(90,180,240,0.15);color:var(--accent-blue);font-family:var(--font-mono);margin-left:4px;">✉️ Gmail</span>' : '';
+  var dueStr = t.dueDate ? t.dueDate + (t.dueTime ? ' ' + t.dueTime : '') : t.date;
   return '<div class="task-item" id="task-' + t.id + '">' +
     '<div class="task-check ' + (t.done ? 'done' : '') + '" onclick="toggleTask(' + t.id + ')"></div>' +
     '<div class="task-text">' +
-    '<div class="task-name ' + (t.done ? 'done' : '') + '">' + escHtml(t.text) + '</div>' +
-    '<div class="task-meta">' + t.date + '</div>' +
+    '<div class="task-name ' + (t.done ? 'done' : '') + '">' + escHtml(t.text) + reminderBadge + sourceBadge + '</div>' +
+    '<div class="task-meta">' + escHtml(dueStr) + '</div>' +
     '</div>' +
     '<span class="task-priority priority-' + t.priority + '">' + t.priority.toUpperCase() + '</span>' +
     '<button class="task-del" onclick="deleteTask(' + t.id + ')" title="Delete">✕</button>' +
@@ -870,9 +1138,69 @@ function addTask(fromFull) {
   if (!text) return;
   var prioEl = document.getElementById('newTaskPriority');
   var prio = (fromFull && prioEl) ? prioEl.value : 'med';
-  tasks.unshift({ id: nextTaskId++, text: text, done: false, priority: prio, date: 'Today', source: 'dashboard' });
+  var dueDateEl = document.getElementById('newTaskDueDate');
+  var dueTimeEl = document.getElementById('newTaskDueTime');
+  var reminderEl = document.getElementById('newTaskReminder');
+  var dueDate = dueDateEl ? dueDateEl.value : '';
+  var dueTime = dueTimeEl ? dueTimeEl.value : '';
+  var reminder = reminderEl ? reminderEl.value : '';
+  var task = { id: nextTaskId++, text: text, done: false, priority: prio, date: dueDate || 'Today', dueDate: dueDate, dueTime: dueTime, reminderTime: reminder, source: 'dashboard' };
+  tasks.unshift(task);
+  if (dueDate && reminder) scheduleEmailReminder(task);
   el.value = '';
   saveTasks(); renderTasks();
+}
+
+function addTaskFromGmail(taskText, priority, dueDate, reminderTime, emailSubject) {
+  var task = {
+    id: nextTaskId++, text: taskText, done: false,
+    priority: priority || 'med',
+    date: dueDate || 'Today', dueDate: dueDate || '', dueTime: '',
+    reminderTime: reminderTime || '',
+    source: 'gmail', emailRef: emailSubject || ''
+  };
+  tasks.unshift(task);
+  if (task.dueDate && task.reminderTime) scheduleEmailReminder(task);
+  saveTasks(); renderTasks();
+  showToast('✅ Task added: ' + taskText.substring(0, 40));
+}
+
+function scheduleEmailReminder(task) {
+  // Create a Google Calendar event with email notification as the reminder mechanism
+  var token = localStorage.getItem('flow_gcal_token');
+  if (!token || !task.dueDate) return;
+  var tz = 'UTC';
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) {}
+  var startTime = task.dueDate + 'T' + (task.dueTime || '09:00') + ':00';
+  var endTime = task.dueDate + 'T' + (task.dueTime ? addMinutes(task.dueTime, 30) : '09:30') + ':00';
+  // Reminder minutes before
+  var reminderMins = {
+    '15min': 15, '1hr': 60, '3hr': 180,
+    '1day': 1440, '2day': 2880
+  }[task.reminderTime] || 60;
+
+  var event = {
+    summary: '🔔 FLOW Reminder: ' + task.text,
+    description: 'Task reminder from FLOW dashboard.' + (task.emailRef ? '\n\nFrom email: ' + task.emailRef : ''),
+    start: { dateTime: startTime, timeZone: tz },
+    end: { dateTime: endTime, timeZone: tz },
+    reminders: { useDefault: false, overrides: [{ method: 'email', minutes: reminderMins }, { method: 'popup', minutes: reminderMins }] }
+  };
+  fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify(event)
+  }).then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.id) showToast('🔔 Reminder set in Google Calendar!');
+    else showToast('⚠️ Could not set reminder: ' + (d.error && d.error.message || 'Check calendar access'));
+  }).catch(function() { showToast('Network error setting reminder'); });
+}
+
+function addMinutes(timeStr, mins) {
+  var parts = timeStr.split(':');
+  var d = new Date(); d.setHours(parseInt(parts[0])); d.setMinutes(parseInt(parts[1]) + mins);
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
 }
 
 // ── CALENDAR ──
@@ -1318,31 +1646,6 @@ function renderIntegrations() {
 }
 
 // ── BUSINESSES ──
-function renderBusinesses() {
-  var mini = document.getElementById('bizMiniList');
-  if (mini) mini.innerHTML = businesses.map(function(b) {
-    return '<div class="biz-card" onclick="showView(\'businesses\')">' +
-      '<div class="biz-name">' + b.emoji + ' ' + b.name + ' <span class="biz-tag" style="background:' + b.tagColor + '22;color:' + b.tagColor + '">' + b.tag + '</span></div>' +
-      '<div class="biz-kpi-row">' + b.kpis.map(function(k){ return '<div class="biz-kpi"><div class="biz-kpi-label">' + k.l + '</div><div class="biz-kpi-val">' + k.v + '</div></div>'; }).join('') + '</div>' +
-      '</div>';
-  }).join('');
-}
-
-function renderFullBusinesses() {
-  var el = document.getElementById('fullBizList');
-  if (!el) return;
-  el.innerHTML = businesses.map(function(b) {
-    return '<div class="card">' +
-      '<div class="card-header"><div style="font-size:28px;">' + b.emoji + '</div>' +
-      '<div><div style="font-size:17px;font-weight:600;">' + b.name + '</div>' +
-      '<span class="biz-tag" style="background:' + b.tagColor + '22;color:' + b.tagColor + ';font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600;">' + b.tag + '</span></div></div>' +
-      '<div class="card-body">' +
-      '<div class="biz-kpi-row">' + b.kpis.map(function(k){ return '<div class="biz-kpi"><div class="biz-kpi-label">' + k.l + '</div><div class="biz-kpi-val" style="font-size:22px;">' + k.v + '</div></div>'; }).join('') + '</div>' +
-      '<div class="progress-bar" style="margin-top:16px;"><div class="progress-fill" style="width:65%;background:' + b.tagColor + ';"></div></div>' +
-      '<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Q3 progress</div>' +
-      '</div></div>';
-  }).join('');
-}
 
 // ── NOTES ──
 function loadNotes() {
@@ -1685,6 +1988,8 @@ async function confirmDeleteAction() {
 
 // ── VIEW SWITCHING ──
 function showView(name) {
+  if (name === 'gmail') setTimeout(initGmailView, 50);
+  if (name === 'settings') setTimeout(initSettings, 50);
   document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
   document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
   var view = document.getElementById('view-' + name);
@@ -1692,7 +1997,7 @@ function showView(name) {
   if (view) view.classList.add('active');
   if (nav) nav.classList.add('active');
   if (name === 'tasks') renderTasks();
-  if (name === 'businesses') renderFullBusinesses();
+  if (name === 'businesses')
   if (name === 'integrations') { renderIntegrations(); checkSavedKeys(); }
   if (name === 'calendar') { renderCalendar(); renderEventsForDate(selectedDate, 'fullEventList'); }
 }
@@ -1777,7 +2082,7 @@ function showToast(msg) {
   if (!toast) {
     toast = document.createElement('div');
     toast.id = 'toast';
-    toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(10px);background:#1e1b17;color:#f5f0e8;border:1px solid rgba(245,200,66,0.3);border-radius:99px;padding:10px 22px;font-size:13px;font-family:Lexend,sans-serif;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);transition:opacity 0.3s,transform 0.3s;opacity:0;';
+    toast.style.cssText = "position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(10px);background:rgba(255,255,255,0.85);backdrop-filter:blur(20px);color:#1a2332;border:1px solid rgba(56,189,198,0.4);border-radius:99px;padding:10px 24px;font-size:13px;font-family:'Atkinson Hyperlegible',sans-serif;font-weight:700;z-index:9999;box-shadow:0 8px 32px rgba(56,120,180,0.2);transition:opacity 0.3s,transform 0.3s;opacity:0;";
     document.body.appendChild(toast);
   }
   toast.textContent = msg;
@@ -1785,6 +2090,434 @@ function showToast(msg) {
   clearTimeout(toast._t);
   toast._t = setTimeout(function(){ toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(10px)'; }, 2800);
 }
+// ════════════════════════════════
+// GMAIL AGENT
+// ════════════════════════════════
+var gmailMessages=[], gmailFilter='all', gmailActiveId=null;
+
+function initGmailView() {
+  var token=localStorage.getItem('flow_gcal_token');
+  var expiry=parseInt(localStorage.getItem('flow_gcal_expiry')||'0');
+  var ca=document.getElementById('gmail-connect-area');
+  var ma=document.getElementById('gmail-main-area');
+  if (!token||Date.now()>expiry) { if(ca)ca.style.display='block'; if(ma)ma.style.display='none'; return; }
+  if(ca)ca.style.display='none'; if(ma)ma.style.display='block';
+  if (gmailMessages.length===0) fetchGmailList(token);
+}
+
+function fetchGmailList(token) {
+  var el=document.getElementById('gmail-email-list');
+  if(!el) return;
+  el.innerHTML='<div class="gmail-loading">\u23f3 Loading inbox\u2026</div>';
+  var q=gmailFilter==='unread'?'is:unread':gmailFilter==='important'?'is:important':'in:inbox';
+  fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=25&q='+encodeURIComponent(q),{headers:{Authorization:'Bearer '+token}})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){
+      el.innerHTML='<div class="gmail-loading" style="color:var(--accent-red);">\u26a0\ufe0f '+escHtml(data.error.message||'Gmail access denied')+'<br><small>Sign out and back in to grant Gmail scope.</small></div>';
+      return;
+    }
+    var msgs=data.messages||[];
+    if(msgs.length===0){el.innerHTML='<div class="gmail-loading">No emails found</div>';return;}
+    gmailMessages=[];
+    el.innerHTML='<div class="gmail-loading">Loading '+msgs.length+' emails\u2026</div>';
+    var loaded=0;
+    msgs.forEach(function(msg){
+      fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+msg.id+'?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date',{headers:{Authorization:'Bearer '+token}})
+      .then(function(r){return r.json();})
+      .then(function(m){
+        var h={};(m.payload&&m.payload.headers||[]).forEach(function(hh){h[hh.name]=hh.value;});
+        gmailMessages.push({id:m.id,threadId:m.threadId,subject:h['Subject']||'(no subject)',from:h['From']||'Unknown',date:h['Date']||'',snippet:m.snippet||'',unread:(m.labelIds||[]).indexOf('UNREAD')>=0,important:(m.labelIds||[]).indexOf('IMPORTANT')>=0});
+        if(++loaded===msgs.length)renderGmailList();
+      }).catch(function(){if(++loaded===msgs.length)renderGmailList();});
+    });
+  }).catch(function(){if(el)el.innerHTML='<div class="gmail-loading" style="color:var(--accent-red);">Network error</div>';});
+}
+
+function renderGmailList() {
+  var el=document.getElementById('gmail-email-list');
+  if(!el)return;
+  gmailMessages.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  var cnt=document.getElementById('gmail-count');
+  if(cnt)cnt.textContent=gmailMessages.length+' emails';
+  if(!gmailMessages.length){el.innerHTML='<div class="gmail-loading">No emails</div>';return;}
+  el.innerHTML=gmailMessages.map(function(m){
+    var name=m.from.replace(/<[^>]+>/,'').replace(/"/g,'').trim().substring(0,26);
+    var dateStr=m.date?new Date(m.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+    return '<div class="gmail-email-item'+(m.unread?' unread':'')+(m.id===gmailActiveId?' active':'')+'" onclick="openGmailEmail(\''+m.id+'\')">'+
+      '<div class="gmail-sender"><span style="display:flex;align-items:center;gap:4px;">'+(m.unread?'<span class="unread-dot"></span>':'')+escHtml(name)+'</span><span class="gmail-date">'+dateStr+'</span></div>'+
+      '<div class="gmail-subject">'+escHtml(m.subject.substring(0,55))+'</div>'+
+      '<div class="gmail-snippet">'+escHtml(m.snippet.substring(0,70))+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+function setGmailFilter(f,btn){
+  gmailFilter=f;
+  document.querySelectorAll('.gmail-filter-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  gmailMessages=[];
+  var token=localStorage.getItem('flow_gcal_token');
+  if(token)fetchGmailList(token);
+}
+
+function refreshGmail(){
+  gmailMessages=[];
+  var token=localStorage.getItem('flow_gcal_token');
+  if(token){document.getElementById('gmail-connect-area').style.display='none';document.getElementById('gmail-main-area').style.display='block';fetchGmailList(token);}
+}
+
+function openGmailEmail(id){
+  gmailActiveId=id;
+  renderGmailList();
+  var panel=document.getElementById('gmail-detail-panel');
+  if(!panel)return;
+  panel.innerHTML='<div class="gmail-loading">\u23f3 Loading email\u2026</div>';
+  var token=localStorage.getItem('flow_gcal_token');
+  fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+id+'?format=full',{headers:{Authorization:'Bearer '+token}})
+  .then(function(r){return r.json();})
+  .then(function(m){
+    var h={};(m.payload&&m.payload.headers||[]).forEach(function(hh){h[hh.name]=hh.value;});
+    var body=extractGmailBody(m.payload);
+    var msg=gmailMessages.find(function(x){return x.id===id;})||{};
+    renderGmailDetail(id,h,body,msg);
+    autoSummariseEmail(id,h,body);
+    if(msg.unread)markAsRead(id,token);
+  }).catch(function(){if(panel)panel.innerHTML='<div class="gmail-loading" style="color:var(--accent-red);">Failed to load email</div>';});
+}
+
+function extractGmailBody(payload){
+  if(!payload)return'';
+  if(payload.body&&payload.body.data){try{return atob(payload.body.data.replace(/-/g,'+').replace(/_/g,'/'));}catch(e){return'';}}
+  if(payload.parts){
+    var plain=payload.parts.find(function(p){return p.mimeType==='text/plain';});
+    if(plain&&plain.body&&plain.body.data){try{return atob(plain.body.data.replace(/-/g,'+').replace(/_/g,'/'));}catch(e){}}
+    var html=payload.parts.find(function(p){return p.mimeType==='text/html';});
+    if(html&&html.body&&html.body.data){try{return atob(html.body.data.replace(/-/g,'+').replace(/_/g,'/')).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();}catch(e){}}
+    for(var i=0;i<payload.parts.length;i++){var r=extractGmailBody(payload.parts[i]);if(r)return r;}
+  }
+  return'';
+}
+
+function renderGmailDetail(id,h,body,msg){
+  var panel=document.getElementById('gmail-detail-panel');
+  if(!panel)return;
+  var fromName=(h['From']||'').replace(/<[^>]+>/,'').replace(/"/g,'').trim();
+  var dateStr=h['Date']?new Date(h['Date']).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+  var safeId=id.replace(/[^a-z0-9]/gi,'');
+  panel.innerHTML=
+    '<div class="gmail-detail-header">'+
+      '<div class="gmail-detail-subject">'+escHtml(h['Subject']||'(no subject)')+'</div>'+
+      '<div class="gmail-detail-meta"><span>From: <strong style="color:var(--text-primary)">'+escHtml(fromName)+'</strong></span><span>'+dateStr+'</span>'+(msg.important?'<span style="font-size:10px;padding:2px 7px;border-radius:99px;background:rgba(240,137,42,0.15);color:var(--accent-amber);">\u2b50 Important</span>':'')+'</div>'+
+    '</div>'+
+    '<div class="gmail-detail-body">'+
+      '<div id="gmail-sum-'+safeId+'" class="gmail-summary-box"><h4>\u2728 AI Summary</h4><div style="color:var(--text-muted);font-size:12px;">Summarising\u2026</div></div>'+
+      '<div class="gmail-body-raw">'+escHtml(body.substring(0,500))+(body.length>500?'\n\n[\u2026truncated]':'')+'</div>'+
+    '</div>'+
+    '<div style="padding:10px 16px;border-top:1px solid var(--border);background:var(--bg-2);display:flex;gap:8px;">'+
+      '<button class="gmail-filter-btn" onclick="openAddTaskFromEmail(\'' + id + '\',\'' + (h['Subject']||'').replace(/'/g,'') + '\',\'' + (h['From']||'').replace(/'/g,'') + '\')">\U0001f4cb Add as Task</button>'+
+      '<button class="gmail-filter-btn" onclick="autoExtractAndAddAllTasks(\'' + id + '\',\'' + (h['Subject']||'').replace(/'/g,'') + '\')">✨ Extract All Tasks</button>'+
+    '</div>'+
+    '<div class="gmail-reply-area">'+
+      '<h4>\u270d\ufe0f Draft Reply \u2014 type your points below</h4>'+
+      '<textarea class="gmail-points-input" id="rp-'+safeId+'" placeholder="e.g.&#10;- Thanks for reaching out&#10;- Happy to meet Thursday 3pm&#10;- Please send the proposal first"></textarea>'+
+      '<div class="gmail-reply-actions">'+
+        '<button class="btn-gold" onclick="draftGmailReply(\''+safeId+'\',\''+escHtml(h['From']||'')+'\',\''+escHtml(h['Subject']||'')+'\')">\u2728 Draft Reply</button>'+
+        '<button class="btn btn-ghost" onclick="sendGmailReply(\''+id+'\',\''+safeId+'\',\''+escHtml(h['From']||'')+'\',\''+escHtml(h['Subject']||'')+'\')">\U0001f4e4 Send</button>'+
+      '</div>'+
+      '<div class="gmail-draft-box" id="db-'+safeId+'"></div>'+
+    '</div>';
+}
+
+function autoSummariseEmail(id,h,body){
+  var safeId=id.replace(/[^a-z0-9]/gi,'');
+  var el=document.getElementById('gmail-sum-'+safeId);
+  if(!el)return;
+  var key=localStorage.getItem('flow_claude_key');
+  if(!key){el.innerHTML='<h4>\u2728 AI Summary</h4><div style="color:var(--text-muted);font-size:12px;">Add Claude API key in Integrations to enable AI summaries.</div>';return;}
+  var prompt='Summarise this email in 3-5 bullet points. Focus on key info and action items. Return ONLY a JSON array of strings.\n\nFrom: '+(h['From']||'')+'\nSubject: '+(h['Subject']||'')+'\n\n'+body.substring(0,2000);
+  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:prompt}]})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var text=data.content&&data.content[0]?data.content[0].text:'';
+    var bullets=[];
+    try{bullets=JSON.parse(text.replace(/```json|```/g,'').trim());}catch(e){bullets=text.split('\n').filter(function(l){return l.trim();}).map(function(l){return l.replace(/^[-•\d.]\s*/,'');}).filter(function(l){return l.length>0;});}
+    var el2=document.getElementById('gmail-sum-'+safeId);
+    if(el2)el2.innerHTML='<h4>\u2728 AI Summary</h4><ul>'+bullets.map(function(b){return'<li>'+escHtml(String(b))+'</li>';}).join('')+'</ul>';
+  }).catch(function(){var el2=document.getElementById('gmail-sum-'+safeId);if(el2)el2.innerHTML='<h4>\u2728 AI Summary</h4><div style="color:var(--text-muted);font-size:12px;">Could not summarise.</div>';});
+}
+
+function draftGmailReply(safeId,from,subject){
+  var pts=document.getElementById('rp-'+safeId);
+  var db=document.getElementById('db-'+safeId);
+  if(!pts||!db)return;
+  if(!pts.value.trim()){showToast('Enter your reply points first');return;}
+  var key=localStorage.getItem('flow_claude_key');
+  if(!key){showToast('Add Claude API key in Integrations');return;}
+  db.style.display='block';db.textContent='\u2728 Drafting\u2026';
+  var userName=(window._flowUser&&window._flowUser.name)||'Markus';
+  var prompt='Draft a professional email reply based on these points.\n\nReply to: '+from+'\nRe: '+subject+'\n\nMy points:\n'+pts.value+'\n\nWrite ONLY the email body. Professional, warm, concise. Sign as '+userName+'.';
+  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})})
+  .then(function(r){return r.json();})
+  .then(function(data){var t=data.content&&data.content[0]?data.content[0].text:'Could not draft.';var db2=document.getElementById('db-'+safeId);if(db2)db2.textContent=t;showToast('\u2705 Draft ready \u2014 review and send!');})
+  .catch(function(){var db2=document.getElementById('db-'+safeId);if(db2)db2.textContent='Error drafting. Check your API key.';});
+}
+
+function sendGmailReply(threadId,safeId,to,subject){
+  var db=document.getElementById('db-'+safeId);
+  if(!db||db.style.display==='none'||!db.textContent||db.textContent.includes('Drafting')){showToast('Draft a reply first');return;}
+  var token=localStorage.getItem('flow_gcal_token');
+  if(!token){showToast('Not connected to Google');return;}
+  var sub=subject.startsWith('Re:')?subject:'Re: '+subject;
+  var raw='To: '+to+'\r\nSubject: '+sub+'\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n'+db.textContent;
+  var enc=btoa(unescape(encodeURIComponent(raw))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({raw:enc,threadId:threadId})})
+  .then(function(r){return r.json();})
+  .then(function(d){if(d.id){showToast('\u2705 Email sent!');db.style.display='none';}else{showToast('\u26a0\ufe0f Send failed: '+(d.error&&d.error.message||'Unknown'));}})
+  .catch(function(){showToast('Network error sending email');});
+}
+
+function markAsRead(id,token){
+  fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+id+'/modify',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({removeLabelIds:['UNREAD']})})
+  .then(function(){var m=gmailMessages.find(function(x){return x.id===id;});if(m){m.unread=false;renderGmailList();}}).catch(function(){});
+}
+
+// ════════════════════════════════
+// SETTINGS & CUSTOMISATION
+// ════════════════════════════════
+function initSettings(){
+  var prefs=userLoad('flow_widget_prefs',{});
+  ['tasks','calendar','gmail','ai','integrations'].forEach(function(w){
+    var on=prefs[w]!==false;
+    var sw=document.getElementById('toggle-'+w);if(sw)sw.className='toggle-sw'+(on?' on':'');
+    var nb=document.getElementById('nav-'+w);if(nb)nb.style.display=on?'':'none';
+  });
+  var u=window._flowUser||{};
+  var pi=document.getElementById('profile-info');
+  if(pi)pi.innerHTML='<div>\U0001f464 <strong>'+escHtml(u.name||'\u2014')+'</strong></div><div>\U0001f4e7 '+escHtml(u.email||'\u2014')+'</div><div>\U0001f511 Role: <span style="color:var(--accent-gold)">'+escHtml(u.role||'user')+'</span></div>';
+  var accent=localStorage.getItem('flow_accent')||'#f5c842';
+  document.querySelectorAll('.color-swatch').forEach(function(sw){
+    var bg=sw.getAttribute('onclick')||'';sw.classList.toggle('active',bg.includes("'"+accent+"'"));
+  });
+}
+
+function toggleWidget(name,el){
+  el.classList.toggle('on');
+  var on=el.classList.contains('on');
+  var prefs=userLoad('flow_widget_prefs',{});
+  prefs[name]=on;userStore('flow_widget_prefs',prefs);
+  var nb=document.getElementById('nav-'+name);if(nb)nb.style.display=on?'':'none';
+  showToast((on?'\u2705 ':'\U0001f6ab ')+name.charAt(0).toUpperCase()+name.slice(1)+' '+(on?'enabled':'hidden'));
+}
+
+function setAccent(color,dim,el){
+  document.querySelectorAll('.color-swatch').forEach(function(s){s.classList.remove('active');});
+  el.classList.add('active');
+  document.documentElement.style.setProperty('--accent-gold',color);
+  document.documentElement.style.setProperty('--accent-gold-dim',dim);
+  localStorage.setItem('flow_accent',color);localStorage.setItem('flow_accent_dim',dim);
+  showToast('\U0001f3a8 Accent colour updated');
+}
+
+function setDensity(mode,el){
+  document.querySelectorAll('.gmail-filter-btn').forEach(function(b){if(['Compact','Normal','Comfortable'].indexOf(b.textContent)>=0)b.classList.remove('active');});
+  el.classList.add('active');
+  var s={compact:'14px',normal:'18px',comfortable:'20px'};
+  document.documentElement.style.fontSize=s[mode]||'18px';
+  localStorage.setItem('flow_density',mode);showToast('\U0001f4d0 Layout: '+mode);
+}
+
+function signOutFlow(){
+  if(!confirm('Sign out of FLOW?'))return;
+  ['flow_user','flow_gcal_token','flow_gcal_expiry'].forEach(function(k){localStorage.removeItem(k);});
+  window.location.href='/login.html';
+}
+
+function exportData(){
+  var d={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.startsWith('flow_'))d[k]=localStorage.getItem(k);}
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
+  a.download='flow-data-'+new Date().toISOString().slice(0,10)+'.json';a.click();showToast('\U0001f4e4 Data exported');
+}
+
+function clearTasks(){
+  if(!confirm('Clear completed tasks?'))return;
+  var t=JSON.parse(localStorage.getItem('flow_tasks')||'[]').filter(function(x){return!x.done;});
+  localStorage.setItem('flow_tasks',JSON.stringify(t));loadTasksFromStorage();showToast('\U0001f5d1 Completed tasks cleared');
+}
+
+function clearNotes(){
+  if(!confirm('Clear all notes?'))return;
+  localStorage.removeItem('flow_notes');showToast('\U0001f5d1 Notes cleared');
+}
+
+// Apply saved prefs on load
+(function(){
+  var a=localStorage.getItem('flow_accent'),d=localStorage.getItem('flow_accent_dim');
+  if(a)document.documentElement.style.setProperty('--accent-gold',a);
+  if(d)document.documentElement.style.setProperty('--accent-gold-dim',d);
+  var dn=localStorage.getItem('flow_density');
+  if(dn)document.documentElement.style.fontSize={compact:'14px',normal:'18px',comfortable:'20px'}[dn]||'18px';
+  // Apply widget visibility
+  var prefs=userLoad('flow_widget_prefs',{});
+  ['tasks','calendar','gmail','ai','integrations'].forEach(function(w){
+    if(prefs[w]===false){var nb=document.getElementById('nav-'+w);if(nb)nb.style.display='none';}
+  });
+})();
+
+
+// ════════════════════════════════
+// GMAIL → TASK INTEGRATION
+// ════════════════════════════════
+function openAddTaskFromEmail(emailId, subject, from) {
+  // Show modal
+  var modal = document.getElementById('gmail-task-modal');
+  if (modal) { modal.remove(); }
+  var safeId = emailId.replace(/[^a-z0-9]/gi, '');
+  var today = new Date().toISOString().split('T')[0];
+  var modalHtml = '<div class="gmail-task-modal" id="gmail-task-modal" onclick="if(event.target===this)closeGmailTaskModal()">' +
+    '<div class="gmail-task-modal-card">' +
+      '<h3>📋 Add Task from Email</h3>' +
+      '<p>From: ' + escHtml(from || '') + '</p>' +
+      '<div class="task-action-items" id="gtm-action-items" style="display:none;">' +
+        '<p>✨ AI extracted action items — check the ones to add:</p>' +
+        '<div id="gtm-items-list"><div style="color:var(--text-muted);font-size:12px;">Extracting…</div></div>' +
+      '</div>' +
+      '<div class="gtm-field">' +
+        '<label>Task Title</label>' +
+        '<input type="text" id="gtm-title" value="' + escHtml(subject || '') + '" placeholder="Task description">' +
+      '</div>' +
+      '<div class="gtm-row">' +
+        '<div class="gtm-field"><label>Priority</label>' +
+          '<select id="gtm-priority"><option value="high">🔴 High</option><option value="med" selected>🟡 Medium</option><option value="low">🟢 Low</option></select>' +
+        '</div>' +
+        '<div class="gtm-field"><label>Due Date</label><input type="date" id="gtm-date" value="' + today + '" style="color-scheme:dark;"></div>' +
+      '</div>' +
+      '<div class="gtm-row">' +
+        '<div class="gtm-field"><label>Due Time</label><input type="time" id="gtm-time" value="09:00" style="color-scheme:dark;"></div>' +
+        '<div class="gtm-field"><label>📧 Email Reminder</label>' +
+          '<select id="gtm-reminder"><option value="">No reminder</option><option value="15min">15 min before</option><option value="1hr" selected>1 hour before</option><option value="3hr">3 hours before</option><option value="1day">1 day before</option><option value="2day">2 days before</option></select>' +
+        '</div>' +
+      '</div>' +
+      '<div class="gtm-actions">' +
+        '<button class="btn-gold" onclick="saveGmailTask()">✅ Add Task + Set Reminder</button>' +
+        '<button class="btn btn-ghost" onclick="closeGmailTaskModal()">Cancel</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  // Auto-extract action items with AI
+  extractEmailActionItems(emailId);
+}
+
+function extractEmailActionItems(emailId) {
+  var key = localStorage.getItem('flow_claude_key');
+  var token = localStorage.getItem('flow_gcal_token');
+  if (!key || !token) return;
+
+  fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/' + emailId + '?format=full', {
+    headers: { Authorization: 'Bearer ' + token }
+  }).then(function(r){return r.json();})
+  .then(function(m){
+    var body = extractGmailBody(m.payload).substring(0, 2000);
+    var h = {};
+    (m.payload && m.payload.headers || []).forEach(function(hh){h[hh.name]=hh.value;});
+
+    var prompt = 'Extract action items from this email. Return ONLY a JSON array of short action item strings (max 6 items, max 60 chars each). If no clear action items, return [].\n\nSubject: ' + (h['Subject']||'') + '\n\n' + body;
+
+    fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:prompt}]})
+    }).then(function(r){return r.json();})
+    .then(function(data){
+      var text = data.content && data.content[0] ? data.content[0].text : '[]';
+      var items = [];
+      try { items = JSON.parse(text.replace(/```json|```/g,'').trim()); } catch(e){}
+      var listEl = document.getElementById('gtm-items-list');
+      var containerEl = document.getElementById('gtm-action-items');
+      if (!listEl || !containerEl) return;
+      if (!items.length) { containerEl.style.display='none'; return; }
+      containerEl.style.display='block';
+      listEl.innerHTML = items.map(function(item, i){
+        return '<div class="task-action-item">' +
+          '<input type="checkbox" id="gtm-item-' + i + '" checked>' +
+          '<label for="gtm-item-' + i + '" style="cursor:pointer;">' + escHtml(String(item)) + '</label>' +
+        '</div>';
+      }).join('');
+      // Set first item as title
+      if (items[0]) document.getElementById('gtm-title').value = String(items[0]).substring(0, 80);
+    }).catch(function(){});
+  }).catch(function(){});
+}
+
+function saveGmailTask() {
+  var title = (document.getElementById('gtm-title')||{}).value || '';
+  var priority = (document.getElementById('gtm-priority')||{}).value || 'med';
+  var date = (document.getElementById('gtm-date')||{}).value || '';
+  var time = (document.getElementById('gtm-time')||{}).value || '';
+  var reminder = (document.getElementById('gtm-reminder')||{}).value || '';
+
+  if (!title.trim()) { showToast('Enter a task title'); return; }
+
+  // Add checked action items as separate tasks
+  var addedCount = 0;
+  var checkboxes = document.querySelectorAll('[id^="gtm-item-"]');
+  checkboxes.forEach(function(cb, i) {
+    if (cb.checked) {
+      var label = document.querySelector('label[for="' + cb.id + '"]');
+      var text = label ? label.textContent : '';
+      if (text && text !== title.trim()) {
+        addTaskFromGmail(text, priority, date, i === 0 ? reminder : '', '');
+        addedCount++;
+      }
+    }
+  });
+
+  // Add the main task
+  addTaskFromGmail(title.trim(), priority, date, reminder, '');
+  closeGmailTaskModal();
+  showToast('✅ ' + (addedCount + 1) + ' task(s) added' + (reminder ? ' + reminder set!' : '!'));
+
+  // Switch to tasks view
+  setTimeout(function(){ showView('tasks'); }, 600);
+}
+
+function closeGmailTaskModal() {
+  var m = document.getElementById('gmail-task-modal');
+  if (m) m.remove();
+}
+
+
+function autoExtractAndAddAllTasks(emailId, subject) {
+  var key = localStorage.getItem('flow_claude_key');
+  var token = localStorage.getItem('flow_gcal_token');
+  if (!key) { showToast('Add Claude API key in Integrations first'); return; }
+  showToast('✨ Extracting action items…');
+  openAddTaskFromEmail(emailId, subject, '');
+}
+
+
+// ════════════════════════════════
+// PER-USER DATA ISOLATION
+// ════════════════════════════════
+function getUserKey(key) {
+  var u = window._flowUser;
+  if (!u || !u.email) return key;
+  return key + '_' + u.email.replace(/[^a-z0-9]/gi, '_');
+}
+
+function userStore(key, value) {
+  localStorage.setItem(getUserKey(key), JSON.stringify(value));
+}
+
+function userLoad(key, defaultVal) {
+  try {
+    var raw = localStorage.getItem(getUserKey(key));
+    return raw !== null ? JSON.parse(raw) : defaultVal;
+  } catch(e) { return defaultVal; }
+}
+
 </script>
 </body>
 </html>

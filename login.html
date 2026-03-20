@@ -5,23 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FLOW — Sign In</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Lexend+Mega:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async></script>
 <style>
   :root {
-    --bg-0: #0f0e0c; --bg-1: #181714; --bg-2: #221f1b; --bg-3: #2e2a24;
-    --border: rgba(255,255,255,0.07); --border-gold: rgba(245,200,66,0.25);
-    --text-primary: #f5f0e8; --text-secondary: #a89880; --text-muted: #5a5148;
-    --accent-gold: #f5c842; --accent-green: #5ecb8a; --accent-red: #f06060; --accent-amber: #f0892a;
-    --font-main: 'Lexend', sans-serif; --font-display: 'Lexend Mega', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+    --bg-gradient: linear-gradient(135deg, #dff0f7 0%, #e8f0ff 40%, #f0eeff 70%, #e0f5ee 100%);
+    --border: rgba(255,255,255,0.65);
+    --border-gold: rgba(56,189,198,0.35);
+    --text-primary: #1a2332; --text-secondary: #3d5a73; --text-muted: #7a99b0;
+    --accent-gold: #38bdc6; --accent-green: #34c97a; --accent-red: #e05c5c; --accent-amber: #f59e4a;
+    --accent-teal: #38bdc6; --accent-mint: #5dd9c4;
+    --font-main: 'Atkinson Hyperlegible', sans-serif;
+    --font-display: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --glass-blur: blur(20px) saturate(180%);
+    --glass-shadow: 0 8px 32px rgba(56,120,180,0.12), 0 1px 0 rgba(255,255,255,0.8) inset;
+    --radius-sm: 10px; --radius-md: 16px; --radius-lg: 24px;
+    --transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; }
-  body { font-family: var(--font-main); background: var(--bg-0); color: var(--text-primary); display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
+  body { font-family: var(--font-main); background: var(--bg-gradient); background-attachment: fixed; color: var(--text-primary); display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; }
 
   .bg-glow { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-  .bg-glow::before { content: ''; position: absolute; top: -30%; left: 20%; width: 60%; height: 60%; background: radial-gradient(ellipse, rgba(245,200,66,0.06) 0%, transparent 70%); animation: pulse 8s ease-in-out infinite; }
-  .bg-glow::after { content: ''; position: absolute; bottom: -20%; right: 10%; width: 50%; height: 50%; background: radial-gradient(ellipse, rgba(176,124,240,0.04) 0%, transparent 70%); animation: pulse 10s ease-in-out infinite reverse; }
+  .bg-glow::before { content: ''; position: absolute; top: -30%; left: 20%; width: 60%; height: 60%; background: radial-gradient(ellipse, rgba(56,189,198,0.1) 0%, transparent 70%); animation: pulse 8s ease-in-out infinite; }
+  .bg-glow::after { content: ''; position: absolute; bottom: -20%; right: 10%; width: 50%; height: 50%; background: radial-gradient(ellipse, rgba(93,217,196,0.08) 0%, transparent 70%); animation: pulse 10s ease-in-out infinite reverse; }
   @keyframes pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } }
 
   .bg-grid { position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px); background-size: 48px 48px; }
@@ -30,10 +38,10 @@
   @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
   .logo-area { text-align: center; margin-bottom: 36px; }
-  .logo-mark { font-family: var(--font-display); font-size: 38px; color: var(--accent-gold); letter-spacing: 0.15em; }
+  .logo-mark { font-family: var(--font-display); font-size: 38px; color: var(--accent-teal); letter-spacing: 0.15em; font-weight: 700; }
   .logo-tag { font-size: 12px; color: var(--text-muted); letter-spacing: 0.14em; text-transform: uppercase; font-family: var(--font-mono); margin-top: 4px; }
 
-  .card { background: var(--bg-1); border: 1px solid var(--border); border-radius: 20px; padding: 32px; box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.04) inset; }
+  .card { background: rgba(255,255,255,0.62); backdrop-filter: blur(24px) saturate(200%); -webkit-backdrop-filter: blur(24px) saturate(200%); border: 1px solid rgba(255,255,255,0.8); border-radius: 24px; padding: 32px; box-shadow: 0 16px 48px rgba(56,120,180,0.14), 0 1px 0 rgba(255,255,255,0.9) inset; }
 
   /* View toggling */
   .view { display: none; }
@@ -42,16 +50,16 @@
   .view-title { font-size: 19px; font-weight: 600; margin-bottom: 6px; text-align: center; }
   .view-sub { font-size: 13px; color: var(--text-secondary); text-align: center; margin-bottom: 28px; line-height: 1.6; }
 
-  .btn-google { width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 20px; background: var(--bg-2); border: 1px solid var(--border-gold); border-radius: 12px; color: var(--text-primary); font-family: var(--font-main); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-  .btn-google:hover { background: var(--bg-3); border-color: rgba(245,200,66,0.45); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .btn-google { width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 20px; background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(56,189,198,0.35); border-radius: 14px; color: var(--text-primary); font-family: var(--font-main); font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 4px 14px rgba(56,120,180,0.1); }
+  .btn-google:hover { background: rgba(255,255,255,0.88); border-color: rgba(56,189,198,0.55); transform: translateY(-2px) scale(1.01); box-shadow: 0 8px 28px rgba(56,120,180,0.18); }
   .btn-google:active { transform: translateY(0); }
   .btn-google:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
   .google-icon { width: 20px; height: 20px; flex-shrink: 0; }
 
   .status { display: none; margin-top: 14px; padding: 10px 14px; border-radius: 10px; font-size: 13px; text-align: center; line-height: 1.5; }
-  .status.error { background: rgba(240,96,96,0.1); border: 1px solid rgba(240,96,96,0.25); color: var(--accent-red); display: block; }
-  .status.info { background: rgba(245,200,66,0.08); border: 1px solid rgba(245,200,66,0.2); color: var(--accent-gold); display: block; }
+  .status.error { background: rgba(224,92,92,0.08); border: 1px solid rgba(224,92,92,0.25); color: var(--accent-red); display: block; }
+  .status.info { background: rgba(56,189,198,0.08); border: 1px solid rgba(56,189,198,0.25); color: var(--accent-teal); display: block; }
 
   /* Pending view */
   .state-icon { font-size: 40px; text-align: center; margin-bottom: 12px; }
@@ -61,12 +69,12 @@
   .dots span:nth-child(3) { animation-delay: 0.4s; }
   @keyframes dot { 0%,80%,100% { transform: scale(0.5); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
 
-  .email-pill { display: inline-block; margin-top: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--accent-gold); background: rgba(245,200,66,0.08); border: 1px solid rgba(245,200,66,0.2); border-radius: 99px; padding: 4px 14px; }
+  .email-pill { display: inline-block; margin-top: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--accent-teal); background: rgba(56,189,198,0.08); border: 1px solid rgba(56,189,198,0.2); border-radius: 99px; padding: 4px 14px; }
 
   .btn-out { display: block; width: 100%; margin-top: 16px; padding: 9px; background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-family: var(--font-main); font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center; }
   .btn-out:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.15); }
 
-  .footer { text-align: center; margin-top: 22px; font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.06em; line-height: 1.9; }
+  .footer { text-align: center; margin-top: 22px; font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; line-height: 1.9; }
 </style>
 </head>
 <body>
@@ -121,7 +129,7 @@
   <div class="footer">🔒 Secured with Google OAuth<br>FLOW © 2025 — Invite-only access</div>
 </div>
 
-<script>
+<script data-cfasync="false">
   // ── CONFIG ──
   // Replace with your Google OAuth Client ID
   var GOOGLE_CLIENT_ID = '387362798277-hljh6f7alu3tf85dpee6pvn4c2c3klk6.apps.googleusercontent.com';
@@ -229,8 +237,12 @@
     if (user.token) {
       localStorage.setItem('flow_gcal_token', user.token);
       localStorage.setItem('flow_gcal_expiry', String(user.expiry));
+      // Share token with admin calendar view (keyed by email)
+      var emailKey = user.email.replace(/[^a-z0-9]/gi, '_');
+      localStorage.setItem('flow_gcal_token_' + emailKey, user.token);
+      localStorage.setItem('flow_gcal_expiry_' + emailKey, String(user.expiry));
     }
-    window.location.href = '/index.html';
+    window.location.href = 'index.html';
   }
 
   // ── PENDING POLL ──
