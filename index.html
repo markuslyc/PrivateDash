@@ -1757,11 +1757,11 @@ function togglePaPanel() {
 
 function updatePaShareLink() {
   var el = document.getElementById('paShareLink');
-  if (el) el.textContent = 'https://maspaceship.netlify.app/?pa=view&token=abc123';
+  if (el) el.textContent = 'https://markuslyc.github.io/PrivateDash/?pa=view&token=abc123';
 }
 
 function copyPaLink() {
-  var link = 'https://maspaceship.netlify.app/?pa=view&token=abc123';
+  var link = 'https://markuslyc.github.io/PrivateDash/?pa=view&token=abc123';
   navigator.clipboard.writeText(link)
     .then(function(){ showToast('PA link copied! ✓'); })
     .catch(function(){ showToast('Select the link above and copy manually'); });

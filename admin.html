@@ -158,7 +158,7 @@
       <div class="s-section">System</div>
       <div class="s-item" onclick="nav('howto')" id="n-howto">📖 How to Approve</div>
       <div class="s-item" onclick="nav('log')" id="n-log">📋 Activity Log</div>
-      <div class="s-item" onclick="window.location.href='/index.html'">🏠 Dashboard</div>
+      <div class="s-item" onclick="window.location.href='/PrivateDash/index.html'">🏠 Dashboard</div>
       <div class="s-footer">
         <div class="s-user">
           <div class="s-avatar" id="adminAvatar">A</div>
@@ -262,8 +262,8 @@
               <button class="copy-code-btn" onclick="copyExample()">Copy</button>
               <span id="exampleCode">
 <span class="k">var</span> APPROVED_USERS = {<br>
-&nbsp;&nbsp;<span class="s">'markus@email.com'</span>: { role: <span class="s">'admin'</span>, name: <span class="s">'Markus'</span> },<br>
-&nbsp;&nbsp;<span class="s">'ryan@email.com'</span>: { role: <span class="s">'user'</span>, name: <span class="s">'Ryan'</span> },<br>
+&nbsp;&nbsp;<span class="s">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="543935263f2127143139353d387a373b39">[email&#160;protected]</a>'</span>: { role: <span class="s">'admin'</span>, name: <span class="s">'Markus'</span> },<br>
+&nbsp;&nbsp;<span class="s">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ee9c978f80ae8b838f8782c08d8183">[email&#160;protected]</a>'</span>: { role: <span class="s">'user'</span>, name: <span class="s">'Ryan'</span> },<br>
 &nbsp;&nbsp;<span class="c">// Add more users here</span><br>
 };
               </span>
@@ -294,7 +294,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // ── AUTH CHECK ──
   var adminUser = null;
   try {
@@ -500,13 +500,4 @@
   }
 
   // ── UTILS ──
-  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-  function toast(msg) {
-    var t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    clearTimeout(t._t); t._t = setTimeout(function() { t.classList.remove('show'); }, 3000);
-  }
-</script>
-</body>
-</html>
+  function esc(s) { return 
