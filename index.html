@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FLOW — Personal Command Centre</title>
+<title>FLOW â Personal Command Centre</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
 <style>
-  /* ── LIQUID GLASS MORPHISM THEME ── */
+  /* ââ LIQUID GLASS MORPHISM THEME ââ */
   @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
   :root {
-    /* Base palette — soft sky gradient world */
+    /* Base palette â soft sky gradient world */
     --bg-base: #e8f4f8;
     --bg-gradient: linear-gradient(135deg, #dff0f7 0%, #e8f0ff 40%, #f0eeff 70%, #e0f5ee 100%);
     --bg-card: rgba(255,255,255,0.55);
@@ -28,12 +28,12 @@
     --border-subtle: rgba(180,210,240,0.4);
     --border-active: rgba(56,189,198,0.7);
 
-    /* Text — warm dark on light, dyslexia-friendly */
+    /* Text â warm dark on light, dyslexia-friendly */
     --text-primary: #1a2332;
     --text-secondary: #3d5a73;
     --text-muted: #7a99b0;
 
-    /* Accent palette — teal/mint/sky */
+    /* Accent palette â teal/mint/sky */
     --accent-gold: #38bdc6;
     --accent-gold-dim: #2a9da6;
     --accent-amber: #f59e4a;
@@ -199,7 +199,7 @@
   .task-check { width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--border-active); flex-shrink: 0; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; margin-top: 2px; }
   .task-check:hover { background: rgba(245,200,66,0.1); }
   .task-check.done { background: var(--accent-green); border-color: var(--accent-green); }
-  .task-check.done::after { content: '✓'; font-size: 11px; color: var(--bg-0); font-weight: 700; }
+  .task-check.done::after { content: 'â'; font-size: 11px; color: var(--bg-0); font-weight: 700; }
   .task-text { flex: 1; }
   .task-name { font-size: 15px; font-weight: 500; line-height: 1.4; }
   .task-name.done { text-decoration: line-through; color: var(--text-muted); }
@@ -399,7 +399,7 @@
   .gmail-summary-box h4{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-gold);margin-bottom:10px;font-weight:600;}
   .gmail-summary-box ul{list-style:none;padding:0;}
   .gmail-summary-box li{font-size:13px;color:var(--text-secondary);padding:3px 0 3px 16px;position:relative;line-height:1.5;}
-  .gmail-summary-box li::before{content:"•";position:absolute;left:0;color:var(--accent-gold);}
+  .gmail-summary-box li::before{content:"â¢";position:absolute;left:0;color:var(--accent-gold);}
   .gmail-body-raw{margin:0 16px 14px;padding:14px;background:var(--bg-2);border-radius:var(--radius-md);font-size:12px;color:var(--text-secondary);line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:180px;overflow-y:auto;}
   .gmail-reply-area{padding:14px 16px;border-top:1px solid var(--border);background:var(--bg-1);}
   .gmail-reply-area h4{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:8px;font-weight:600;}
@@ -486,7 +486,7 @@
 
 <!-- FOCUS MODE -->
 <div class="focus-overlay" id="focusOverlay">
-  <div class="focus-title">⚡ Focus Mode</div>
+  <div class="focus-title">â¡ Focus Mode</div>
   <div class="focus-clock" id="focusClock">00:00</div>
   <div class="focus-task-display" id="focusTaskDisplay">Select a task to focus on</div>
   <div style="display:flex;gap:12px;margin-top:8px;">
@@ -499,27 +499,27 @@
 <!-- PA PANEL -->
 <div class="pa-panel" id="paPanel">
   <div class="pa-panel-header">
-    <div style="font-size:20px;">👤</div>
+    <div style="font-size:20px;">ð¤</div>
     <div class="pa-panel-title">PA Access Settings</div>
-    <div class="pa-close" onclick="togglePaPanel()">✕</div>
+    <div class="pa-close" onclick="togglePaPanel()">â</div>
   </div>
   <div class="pa-panel-body">
     <div class="pa-section-title">What can your PA see?</div>
-    <div class="pa-access-item"><span class="pa-access-icon">📋</span><span class="pa-access-label">Tasks & To-Dos</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
-    <div class="pa-access-item"><span class="pa-access-icon">📅</span><span class="pa-access-label">Calendar</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
-    <div class="pa-access-item"><span class="pa-access-icon">🏢</span></div>
-    <div class="pa-access-item"><span class="pa-access-icon">📊</span><span class="pa-access-label">HubSpot CRM</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
-    <div class="pa-access-item"><span class="pa-access-icon">🤖</span><span class="pa-access-label">AI Assistant</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
-    <div class="pa-access-item"><span class="pa-access-icon">📝</span><span class="pa-access-label">Notes</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">ð</span><span class="pa-access-label">Tasks & To-Dos</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">ð</span><span class="pa-access-label">Calendar</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">ð¢</span></div>
+    <div class="pa-access-item"><span class="pa-access-icon">ð</span><span class="pa-access-label">HubSpot CRM</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">ð¤</span><span class="pa-access-label">AI Assistant</span><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
+    <div class="pa-access-item"><span class="pa-access-icon">ð</span><span class="pa-access-label">Notes</span><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
     <div class="pa-section-title" style="margin-top:24px;">Share Link</div>
-    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Send this to your PA — they see only what you've enabled above.</p>
-    <div class="share-link-box" id="paShareLink">—</div>
-    <button class="btn btn-gold" style="width:100%;margin-top:10px;" onclick="copyPaLink()">📋 Copy Link</button>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Send this to your PA â they see only what you've enabled above.</p>
+    <div class="share-link-box" id="paShareLink">â</div>
+    <button class="btn btn-gold" style="width:100%;margin-top:10px;" onclick="copyPaLink()">ð Copy Link</button>
     <div class="pa-section-title" style="margin-top:24px;">PA Profile</div>
     <div class="pa-access-item">
       <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#b07cf0,#5ab4f0);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;">PA</div>
       <div><div style="font-size:13px;font-weight:600;">Your PA</div><div style="font-size:11px;color:var(--text-muted);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="98e8f9d8e1f7edeafbf7f5e8f9f6e1b6fbf7f5">[email&#160;protected]</a></div></div>
-      <div style="margin-left:auto;font-size:11px;color:var(--accent-green);">● Active</div>
+      <div style="margin-left:auto;font-size:11px;color:var(--accent-green);">â Active</div>
     </div>
   </div>
 </div>
@@ -528,27 +528,27 @@
 <div class="shell">
   <nav class="sidebar">
     <div class="logo-mark">FLOW</div>
-    <button class="nav-btn active" onclick="showView('home')" id="nav-home">🏠<span class="tooltip">Home</span></button>
-    <button class="nav-btn" onclick="showView('tasks')" id="nav-tasks">📋<span class="tooltip">Tasks</span></button>
-    <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar">📅<span class="tooltip">Calendar</span></button>
-    <button class="nav-btn" onclick="showView('ai')" id="nav-ai">🤖<span class="tooltip">AI Assistant</span></button>
-    <button class="nav-btn" onclick="showView('integrations')" id="nav-integrations">🔌<span class="tooltip">Integrations</span></button>
-    <button class="nav-btn" onclick="showView('gmail')" id="nav-gmail">✉️<span class="tooltip">Gmail</span></button>
-  <button class="nav-btn" onclick="showView('settings')" id="nav-settings">⚙️<span class="tooltip">Settings</span></button>
+    <button class="nav-btn active" onclick="showView('home')" id="nav-home">ð <span class="tooltip">Home</span></button>
+    <button class="nav-btn" onclick="showView('tasks')" id="nav-tasks">ð<span class="tooltip">Tasks</span></button>
+    <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar">ð<span class="tooltip">Calendar</span></button>
+    <button class="nav-btn" onclick="showView('ai')" id="nav-ai">ð¤<span class="tooltip">AI Assistant</span></button>
+    <button class="nav-btn" onclick="showView('integrations')" id="nav-integrations">ð<span class="tooltip">Integrations</span></button>
+    <button class="nav-btn" onclick="showView('gmail')" id="nav-gmail">âï¸<span class="tooltip">Gmail</span></button>
+  <button class="nav-btn" onclick="showView('settings')" id="nav-settings">âï¸<span class="tooltip">Settings</span></button>
   <div class="sidebar-spacer"></div>
     <div class="pa-badge" onclick="togglePaPanel()" title="PA Access">PA</div>
-    <button class="nav-btn" onclick="openFocusMode()">⚡<span class="tooltip">Focus Mode</span></button>
+    <button class="nav-btn" onclick="openFocusMode()">â¡<span class="tooltip">Focus Mode</span></button>
   </nav>
 
   <header class="topbar">
     <div>
-      <div class="topbar-greeting">Good <span id="timeOfDay">morning</span> ✦</div>
-      <div class="topbar-date" id="currentDate">—</div>
+      <div class="topbar-greeting">Good <span id="timeOfDay">morning</span> â¦</div>
+      <div class="topbar-date" id="currentDate">â</div>
     </div>
     <div class="topbar-spacer"></div>
     <div class="font-size-ctrl">
       <span>Aa</span>
-      <button onclick="changeFontSize(-1)">−</button>
+      <button onclick="changeFontSize(-1)">â</button>
       <span id="fontSizeLabel">18</span>
       <button onclick="changeFontSize(1)">+</button>
     </div>
@@ -556,7 +556,7 @@
       <button class="focus-btn active" onclick="setLayout('all',this)">All</button>
       <button class="focus-btn" onclick="setLayout('work',this)">Work</button>
       <button class="focus-btn" onclick="setLayout('personal',this)">Personal</button>
-      <button class="focus-btn" onclick="setLayout('biz',this)">Biz</button>
+      
     </div>
     <div class="topbar-avatar" title="Your profile">Y</div>
   </header>
@@ -569,16 +569,16 @@
         <div class="stat-pill" style="border-color:rgba(245,200,66,0.2);">
           <div class="stat-pill-label">Tasks Today</div>
           <div class="stat-pill-value" style="color:var(--accent-gold);" id="stat-tasks">0</div>
-          <div class="stat-pill-sub" id="stat-tasks-sub">loading…</div>
+          <div class="stat-pill-sub" id="stat-tasks-sub">loadingâ¦</div>
         </div>
         <div class="stat-pill" style="border-color:rgba(94,203,138,0.2);">
           <div class="stat-pill-label">Meetings</div>
-          <div class="stat-pill-value" style="color:var(--accent-green);" id="stat-meetings">—</div>
-          <div class="stat-pill-sub" id="stat-next-meeting">connecting…</div>
+          <div class="stat-pill-value" style="color:var(--accent-green);" id="stat-meetings">â</div>
+          <div class="stat-pill-sub" id="stat-next-meeting">connectingâ¦</div>
         </div>
         <div class="stat-pill" style="border-color:rgba(90,180,240,0.2);">
           <div class="stat-pill-label">Open Deals</div>
-          <div class="stat-pill-value" style="color:var(--accent-blue);">—</div>
+          <div class="stat-pill-value" style="color:var(--accent-blue);">â</div>
           <div class="stat-pill-sub">HubSpot CRM</div>
         </div>
         <div class="stat-pill" style="border-color:rgba(176,124,240,0.2);">
@@ -590,10 +590,10 @@
 
       <div class="widget-bar">
         <span style="font-size:12px;color:var(--text-muted);line-height:30px;">Show:</span>
-        <button class="widget-toggle on" onclick="toggleWidget('tasks-widget',this)">📋 Tasks</button>
-        <button class="widget-toggle on" onclick="toggleWidget('cal-widget',this)">📅 Calendar</button>
-        <button class="widget-toggle on" onclick="toggleWidget('ai-widget',this)">🤖 AI Quick Ask</button>
-        <button class="widget-toggle on" onclick="toggleWidget('notes-widget',this)">📝 Notes</button>
+        <button class="widget-toggle on" onclick="toggleWidget('tasks-widget',this)">ð Tasks</button>
+        <button class="widget-toggle on" onclick="toggleWidget('cal-widget',this)">ð Calendar</button>
+        <button class="widget-toggle on" onclick="toggleWidget('ai-widget',this)">ð¤ AI Quick Ask</button>
+        <button class="widget-toggle on" onclick="toggleWidget('notes-widget',this)">ð Notes</button>
       </div>
 
       <div class="grid-area cols-3">
@@ -602,12 +602,12 @@
 
         <div class="card widget" id="notes-widget">
           <div class="card-header">
-            <div class="card-icon" style="background:rgba(240,137,42,0.1);">📝</div>
+            <div class="card-icon" style="background:rgba(240,137,42,0.1);">ð</div>
             <div class="card-title">Quick Notes</div>
             <div style="margin-left:auto;font-size:11px;color:var(--accent-green);" id="notes-saved"></div>
           </div>
           <div class="card-body">
-            <textarea id="quickNotes" class="add-task-input" style="width:100%;resize:vertical;min-height:130px;line-height:1.7;" placeholder="Type a note… auto-saved as you type" oninput="saveNotes()"></textarea>
+            <textarea id="quickNotes" class="add-task-input" style="width:100%;resize:vertical;min-height:130px;line-height:1.7;" placeholder="Type a noteâ¦ auto-saved as you type" oninput="saveNotes()"></textarea>
           </div>
         </div>
       </div>
@@ -618,20 +618,20 @@
       <div class="section-label">All Tasks</div>
       <div class="card">
         <div class="card-header">
-          <div class="card-icon" style="background:rgba(245,200,66,0.1);">📋</div>
+          <div class="card-icon" style="background:rgba(245,200,66,0.1);">ð</div>
           <div class="card-title">Task Manager</div>
-          <div class="card-badge" style="background:rgba(245,200,66,0.1);color:var(--accent-gold);" id="full-task-counter">—</div>
-          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;margin-left:8px;" onclick="openFocusMode()">⚡ Focus Mode</button>
-          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;" onclick="clearDoneTasks()">🗑 Clear done</button>
+          <div class="card-badge" style="background:rgba(245,200,66,0.1);color:var(--accent-gold);" id="full-task-counter">â</div>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;margin-left:8px;" onclick="openFocusMode()">â¡ Focus Mode</button>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;" onclick="clearDoneTasks()">ð Clear done</button>
         </div>
         <div class="card-body">
           <div id="full-task-list"></div>
           <div class="add-task-row">
-            <input class="add-task-input" id="fullNewTaskInput" type="text" placeholder="Add a task… (Enter to add)" onkeydown="if(event.key==='Enter')addTask(true)">
+            <input class="add-task-input" id="fullNewTaskInput" type="text" placeholder="Add a taskâ¦ (Enter to add)" onkeydown="if(event.key==='Enter')addTask(true)">
             <select class="ai-model-select" id="newTaskPriority" style="padding:9px 10px;">
-              <option value="high">🔴 High</option>
-              <option value="med" selected>🟡 Medium</option>
-              <option value="low">🟢 Low</option>
+              <option value="high">ð´ High</option>
+              <option value="med" selected>ð¡ Medium</option>
+              <option value="low">ð¢ Low</option>
             </select>
             <button class="btn btn-gold" onclick="addTask(true)">+ Add Task</button>
           </div>
@@ -645,7 +645,7 @@
       <div class="grid-area cols-2">
         <div class="card">
           <div class="card-header">
-            <div class="card-icon" style="background:rgba(94,203,138,0.1);">📅</div>
+            <div class="card-icon" style="background:rgba(94,203,138,0.1);">ð</div>
             <div class="card-title">This Month</div>
             <div id="gcal-badge-full" class="card-badge gcal-disconnected">Not connected</div>
             <button class="btn btn-green" style="padding:5px 12px;font-size:11px;" id="gcal-connect-btn" onclick="connectGoogleCalendar()">Connect Google</button>
@@ -653,32 +653,32 @@
           </div>
           <div class="card-body">
             <div class="cal-header">
-              <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
-              <div class="cal-month" id="calMonthLabelFull">—</div>
-              <button class="cal-nav" onclick="changeMonth(1)">›</button>
+              <button class="cal-nav" onclick="changeMonth(-1)">â¹</button>
+              <div class="cal-month" id="calMonthLabelFull">â</div>
+              <button class="cal-nav" onclick="changeMonth(1)">âº</button>
             </div>
             <div class="cal-grid" id="calGridFull"></div>
           </div>
         </div>
         <div class="card">
           <div class="card-header">
-            <div class="card-icon" style="background:rgba(90,180,240,0.1);">🕐</div>
+            <div class="card-icon" style="background:rgba(90,180,240,0.1);">ð</div>
             <div class="card-title" id="events-panel-title">Events</div>
             <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;margin-left:auto;" onclick="openCreatePanel()">+ New</button>
           </div>
           <div class="card-body">
             <div id="account-list" style="margin-bottom:12px;"></div>
             <div class="event-list" id="fullEventList">
-              <div class="empty-state"><div class="icon">📅</div>Connect Google Calendar to see events</div>
+              <div class="empty-state"><div class="icon">ð</div>Connect Google Calendar to see events</div>
             </div>
             <div style="margin-top:20px;">
-              <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:600;margin-bottom:10px;">🍎 Apple iCloud Calendar</div>
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:600;margin-bottom:10px;">ð Apple iCloud Calendar</div>
               <div class="info-box">
-                <strong>Sync iCloud → Google in 3 steps:</strong><br><br>
-                <div class="info-step"><div class="info-step-num">1</div><div>On your iPhone/Mac open <strong>Calendar app</strong> → click the calendar you want to share</div></div>
-                <div class="info-step"><div class="info-step-num">2</div><div>Tap <strong>Share Calendar</strong> → add your Google email address as a subscriber</div></div>
-                <div class="info-step"><div class="info-step-num">3</div><div>Open Gmail → accept the invite → it appears in Google Calendar automatically</div></div>
-                It will then show up here automatically next time you connect. 🎉
+                <strong>Sync iCloud â Google in 3 steps:</strong><br><br>
+                <div class="info-step"><div class="info-step-num">1</div><div>On your iPhone/Mac open <strong>Calendar app</strong> â click the calendar you want to share</div></div>
+                <div class="info-step"><div class="info-step-num">2</div><div>Tap <strong>Share Calendar</strong> â add your Google email address as a subscriber</div></div>
+                <div class="info-step"><div class="info-step-num">3</div><div>Open Gmail â accept the invite â it appears in Google Calendar automatically</div></div>
+                It will then show up here automatically next time you connect. ð
               </div>
             </div>
           </div>
@@ -691,30 +691,30 @@
       <div class="section-label">AI Assistant</div>
       <div class="card" style="max-width:820px;">
         <div class="card-header">
-          <div class="card-icon" style="background:rgba(176,124,240,0.1);">🤖</div>
+          <div class="card-icon" style="background:rgba(176,124,240,0.1);">ð¤</div>
           <div class="card-title">AI Assistant</div>
           <select class="ai-model-select" id="aiModelSelectFull" style="margin-left:auto;">
-            <option value="claude">✦ Claude (Anthropic)</option>
-            <option value="gpt4">● GPT-4 (OpenAI)</option>
-            <option value="kimi">🌙 Kimi</option>
+            <option value="claude">â¦ Claude (Anthropic)</option>
+            <option value="gpt4">â GPT-4 (OpenAI)</option>
+            <option value="kimi">ð Kimi</option>
           </select>
           <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;" onclick="clearAiChat()">Clear chat</button>
         </div>
         <div class="card-body">
           <div class="ai-chat-area" id="fullAiChat" style="max-height:520px;">
-            <div class="ai-msg"><div class="ai-avatar">✦</div><div class="ai-bubble">Hello! I'm connected and ready. I can help you:
+            <div class="ai-msg"><div class="ai-avatar">â¦</div><div class="ai-bubble">Hello! I'm connected and ready. I can help you:
 
-• Draft and summarise emails
-• Prepare for meetings
-• Analyse your business data
-• Help with any task on your list
-• Answer questions about your schedule
+â¢ Draft and summarise emails
+â¢ Prepare for meetings
+â¢ Analyse your business data
+â¢ Help with any task on your list
+â¢ Answer questions about your schedule
 
 What would you like to work on?</div></div>
           </div>
           <div class="ai-input-row" style="margin-top:16px;">
-            <input class="add-task-input" id="fullAiInput" type="text" placeholder="Ask me anything…" style="flex:1;" onkeydown="if(event.key==='Enter')sendAiMessage('fullAiChat','fullAiInput','aiModelSelectFull')">
-            <button class="btn btn-gold" onclick="sendAiMessage('fullAiChat','fullAiInput','aiModelSelectFull')">Send →</button>
+            <input class="add-task-input" id="fullAiInput" type="text" placeholder="Ask me anythingâ¦" style="flex:1;" onkeydown="if(event.key==='Enter')sendAiMessage('fullAiChat','fullAiInput','aiModelSelectFull')">
+            <button class="btn btn-gold" onclick="sendAiMessage('fullAiChat','fullAiInput','aiModelSelectFull')">Send â</button>
           </div>
           <div id="ai-key-status" style="margin-top:10px;font-size:12px;color:var(--text-muted);"></div>
         </div>
@@ -726,59 +726,59 @@ What would you like to work on?</div></div>
       <div class="section-label">Integrations & API Keys</div>
       <div class="grid-area cols-2">
         <div class="card">
-          <div class="card-header"><div class="card-icon" style="background:rgba(240,137,42,0.1);">🔗</div><div class="card-title">CRM & Productivity</div></div>
+          <div class="card-header"><div class="card-icon" style="background:rgba(240,137,42,0.1);">ð</div><div class="card-title">CRM & Productivity</div></div>
           <div class="card-body"><div class="integration-grid" id="crmIntegrations"></div></div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="card-icon" style="background:rgba(176,124,240,0.1);">🤖</div><div class="card-title">AI Tools</div></div>
+          <div class="card-header"><div class="card-icon" style="background:rgba(176,124,240,0.1);">ð¤</div><div class="card-title">AI Tools</div></div>
           <div class="card-body"><div class="integration-grid" id="aiIntegrations"></div></div>
         </div>
         <div class="card col-span-2">
-          <div class="card-header"><div class="card-icon" style="background:rgba(94,203,138,0.1);">🔑</div><div class="card-title">API Keys & OAuth</div></div>
+          <div class="card-header"><div class="card-icon" style="background:rgba(94,203,138,0.1);">ð</div><div class="card-title">API Keys & OAuth</div></div>
           <div class="card-body">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
               <div>
                 <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em;">Claude (Anthropic)</div>
                 <div style="display:flex;gap:8px;align-items:center;">
-                  <input type="password" class="add-task-input" id="claudeApiKey" placeholder="sk-ant-api03-…" style="flex:1;">
+                  <input type="password" class="add-task-input" id="claudeApiKey" placeholder="sk-ant-api03-â¦" style="flex:1;">
                   <button class="btn btn-gold" onclick="saveApiKey('claude')">Save</button>
-                  <span id="claude-key-status" class="api-key-saved" style="display:none;">✓ Saved</span>
+                  <span id="claude-key-status" class="api-key-saved" style="display:none;">â Saved</span>
                 </div>
               </div>
               <div>
                 <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em;">OpenAI (GPT-4)</div>
                 <div style="display:flex;gap:8px;align-items:center;">
-                  <input type="password" class="add-task-input" id="openaiApiKey" placeholder="sk-…" style="flex:1;">
+                  <input type="password" class="add-task-input" id="openaiApiKey" placeholder="sk-â¦" style="flex:1;">
                   <button class="btn btn-gold" onclick="saveApiKey('openai')">Save</button>
-                  <span id="openai-key-status" class="api-key-saved" style="display:none;">✓ Saved</span>
+                  <span id="openai-key-status" class="api-key-saved" style="display:none;">â Saved</span>
                 </div>
               </div>
               <div>
                 <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em;">Kimi API</div>
                 <div style="display:flex;gap:8px;align-items:center;">
-                  <input type="password" class="add-task-input" id="kimiApiKey" placeholder="kimi-api-…" style="flex:1;">
+                  <input type="password" class="add-task-input" id="kimiApiKey" placeholder="kimi-api-â¦" style="flex:1;">
                   <button class="btn btn-gold" onclick="saveApiKey('kimi')">Save</button>
-                  <span id="kimi-key-status" class="api-key-saved" style="display:none;">✓ Saved</span>
+                  <span id="kimi-key-status" class="api-key-saved" style="display:none;">â Saved</span>
                 </div>
               </div>
               <div>
                 <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em;">HubSpot</div>
                 <div style="display:flex;gap:8px;align-items:center;">
-                  <input type="password" class="add-task-input" id="hubspotKey" placeholder="pat-na1-…" style="flex:1;">
+                  <input type="password" class="add-task-input" id="hubspotKey" placeholder="pat-na1-â¦" style="flex:1;">
                   <button class="btn btn-gold" onclick="saveApiKey('hubspot')">Save</button>
-                  <span id="hubspot-key-status" class="api-key-saved" style="display:none;">✓ Saved</span>
+                  <span id="hubspot-key-status" class="api-key-saved" style="display:none;">â Saved</span>
                 </div>
               </div>
             </div>
             <div style="margin-top:20px;">
               <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.07em;">Google Calendar</div>
               <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-                <button class="btn btn-green" id="gcal-main-btn" onclick="connectGoogleCalendar()">🔗 Connect Google Calendar</button>
+                <button class="btn btn-green" id="gcal-main-btn" onclick="connectGoogleCalendar()">ð Connect Google Calendar</button>
                 <div id="gcal-main-status" style="font-size:13px;color:var(--text-muted);">Not connected</div>
               </div>
             </div>
             <div style="margin-top:16px;padding:12px 16px;background:var(--bg-2);border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);border:1px solid var(--border);">
-              <strong style="color:var(--accent-gold);">🔒 Security:</strong> All API keys are stored in your browser's local storage only. They are never sent anywhere except directly to each service's official API.
+              <strong style="color:var(--accent-gold);">ð Security:</strong> All API keys are stored in your browser's local storage only. They are never sent anywhere except directly to each service's official API.
             </div>
           </div>
         </div>
@@ -789,11 +789,11 @@ What would you like to work on?</div></div>
     <!-- GMAIL VIEW -->
     <div class="view" id="view-gmail">
       <div style="margin-bottom:20px;">
-        <div style="font-family:var(--font-display);font-size:18px;letter-spacing:0.06em;margin-bottom:4px;">✉️ Gmail Agent</div>
-        <div style="font-size:13px;color:var(--text-muted);">AI-powered inbox — summarise, draft, send</div>
+        <div style="font-family:var(--font-display);font-size:18px;letter-spacing:0.06em;margin-bottom:4px;">âï¸ Gmail Agent</div>
+        <div style="font-size:13px;color:var(--text-muted);">AI-powered inbox â summarise, draft, send</div>
       </div>
       <div id="gmail-connect-area" class="gmail-connect-box" style="display:none;">
-        <div class="big-icon">📬</div>
+        <div class="big-icon">ð¬</div>
         <h3>Gmail Access Needed</h3>
         <p>Sign out and sign back in to grant Gmail scope,<br>or your current token may already include it.</p>
         <button class="btn-gold" onclick="refreshGmail()">Try Anyway</button>
@@ -803,16 +803,16 @@ What would you like to work on?</div></div>
           <button class="gmail-filter-btn active" onclick="setGmailFilter('all',this)">All</button>
           <button class="gmail-filter-btn" onclick="setGmailFilter('unread',this)">Unread</button>
           <button class="gmail-filter-btn" onclick="setGmailFilter('important',this)">Important</button>
-          <button class="gmail-filter-btn" style="margin-left:auto;" onclick="refreshGmail()">🔄 Refresh</button>
+          <button class="gmail-filter-btn" style="margin-left:auto;" onclick="refreshGmail()">ð Refresh</button>
         </div>
         <div class="gmail-layout">
           <div class="gmail-list">
             <div class="gmail-list-header"><span id="gmail-count">Inbox</span></div>
-            <div id="gmail-email-list"><div class="gmail-loading">Loading…</div></div>
+            <div id="gmail-email-list"><div class="gmail-loading">Loadingâ¦</div></div>
           </div>
           <div class="gmail-detail" id="gmail-detail-panel">
             <div class="gmail-empty-state">
-              <div style="font-size:40px;">✉️</div>
+              <div style="font-size:40px;">âï¸</div>
               <div style="font-size:14px;font-weight:500;">Select an email to read</div>
               <div style="font-size:12px;">AI will summarise it instantly</div>
             </div>
@@ -824,24 +824,24 @@ What would you like to work on?</div></div>
     <!-- SETTINGS VIEW -->
     <div class="view" id="view-settings">
       <div style="margin-bottom:20px;">
-        <div style="font-family:var(--font-display);font-size:18px;letter-spacing:0.06em;margin-bottom:4px;">⚙️ Settings</div>
+        <div style="font-family:var(--font-display);font-size:18px;letter-spacing:0.06em;margin-bottom:4px;">âï¸ Settings</div>
         <div style="font-size:13px;color:var(--text-muted);">Customise your FLOW dashboard</div>
       </div>
       <div class="settings-grid">
         <div class="settings-card">
-          <h3>🧩 Widgets</h3>
+          <h3>ð§© Widgets</h3>
           <p>Show or hide dashboard sections</p>
           <div id="widget-toggles">
-            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">📋 Tasks</div><div class="widget-toggle-desc">Today's task list</div></div><div class="toggle-sw on" id="toggle-tasks" onclick="toggleWidget('tasks',this)"></div></div>
-            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">📅 Calendar</div><div class="widget-toggle-desc">Events and scheduling</div></div><div class="toggle-sw on" id="toggle-calendar" onclick="toggleWidget('calendar',this)"></div></div>
-            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">✉️ Gmail Agent</div><div class="widget-toggle-desc">AI email assistant</div></div><div class="toggle-sw on" id="toggle-gmail" onclick="toggleWidget('gmail',this)"></div></div>
-            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">🤖 AI Assistant</div><div class="widget-toggle-desc">Chat with Claude, GPT-4</div></div><div class="toggle-sw on" id="toggle-ai" onclick="toggleWidget('ai',this)"></div></div>
+            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">ð Tasks</div><div class="widget-toggle-desc">Today's task list</div></div><div class="toggle-sw on" id="toggle-tasks" onclick="toggleWidget('tasks',this)"></div></div>
+            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">ð Calendar</div><div class="widget-toggle-desc">Events and scheduling</div></div><div class="toggle-sw on" id="toggle-calendar" onclick="toggleWidget('calendar',this)"></div></div>
+            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">âï¸ Gmail Agent</div><div class="widget-toggle-desc">AI email assistant</div></div><div class="toggle-sw on" id="toggle-gmail" onclick="toggleWidget('gmail',this)"></div></div>
+            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">ð¤ AI Assistant</div><div class="widget-toggle-desc">Chat with Claude, GPT-4</div></div><div class="toggle-sw on" id="toggle-ai" onclick="toggleWidget('ai',this)"></div></div>
 
-            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">🔌 Integrations</div><div class="widget-toggle-desc">API keys and connections</div></div><div class="toggle-sw on" id="toggle-integrations" onclick="toggleWidget('integrations',this)"></div></div>
+            <div class="widget-toggle-row"><div class="widget-toggle-info"><div class="widget-toggle-name">ð Integrations</div><div class="widget-toggle-desc">API keys and connections</div></div><div class="toggle-sw on" id="toggle-integrations" onclick="toggleWidget('integrations',this)"></div></div>
           </div>
         </div>
         <div class="settings-card">
-          <h3>🎨 Accent Colour</h3>
+          <h3>ð¨ Accent Colour</h3>
           <p>Pick your dashboard accent</p>
           <div class="color-swatches" id="color-swatches">
             <div class="color-swatch active" style="background:#f5c842;" onclick="setAccent('#f5c842','#c89d28',this)" title="Gold"></div>
@@ -852,7 +852,7 @@ What would you like to work on?</div></div>
             <div class="color-swatch" style="background:#f06060;" onclick="setAccent('#f06060','#d04040',this)" title="Red"></div>
           </div>
           <div style="margin-top:18px;">
-            <h3 style="margin-bottom:4px;">📐 Layout Density</h3>
+            <h3 style="margin-bottom:4px;">ð Layout Density</h3>
             <p style="margin-bottom:10px;">Adjust spacing and font size</p>
             <div style="display:flex;gap:8px;">
               <button class="gmail-filter-btn" onclick="setDensity('compact',this)">Compact</button>
@@ -862,18 +862,18 @@ What would you like to work on?</div></div>
           </div>
         </div>
         <div class="settings-card">
-          <h3>👤 Profile</h3>
+          <h3>ð¤ Profile</h3>
           <p>Your current session</p>
           <div id="profile-info" style="font-size:13px;color:var(--text-secondary);line-height:2;"></div>
           <button style="margin-top:12px;width:100%;padding:9px;background:rgba(240,96,96,0.15);color:var(--accent-red);border:1px solid rgba(240,96,96,0.25);border-radius:var(--radius-md);font-family:var(--font-main);font-size:13px;font-weight:600;cursor:pointer;" onclick="signOutFlow()">Sign Out</button>
         </div>
         <div class="settings-card">
-          <h3>💾 Data</h3>
+          <h3>ð¾ Data</h3>
           <p>Manage your local data</p>
           <div style="display:flex;flex-direction:column;gap:8px;">
-            <button class="gmail-filter-btn" onclick="exportData()">📤 Export my data</button>
-            <button class="gmail-filter-btn" onclick="clearTasks()">🗑 Clear completed tasks</button>
-            <button class="gmail-filter-btn" onclick="clearNotes()">🗑 Clear all notes</button>
+            <button class="gmail-filter-btn" onclick="exportData()">ð¤ Export my data</button>
+            <button class="gmail-filter-btn" onclick="clearTasks()">ð Clear completed tasks</button>
+            <button class="gmail-filter-btn" onclick="clearNotes()">ð Clear all notes</button>
           </div>
         </div>
       </div>
@@ -885,9 +885,9 @@ What would you like to work on?</div></div>
 <!-- CREATE EVENT PANEL -->
 <div class="create-panel" id="createPanel">
   <div class="create-panel-header">
-    <div style="font-size:20px;">✨</div>
+    <div style="font-size:20px;">â¨</div>
     <div class="create-panel-title">New Event</div>
-    <div class="pa-close" onclick="closeCreatePanel()">✕</div>
+    <div class="pa-close" onclick="closeCreatePanel()">â</div>
   </div>
   <div class="create-panel-body">
     <div class="form-field">
@@ -927,7 +927,7 @@ What would you like to work on?</div></div>
     </div>
     <div class="form-field">
       <div class="form-label">Notes / Description</div>
-      <textarea class="form-input" id="new-ev-desc" rows="3" placeholder="Agenda, links, anything relevant…"></textarea>
+      <textarea class="form-input" id="new-ev-desc" rows="3" placeholder="Agenda, links, anything relevantâ¦"></textarea>
     </div>
     <div class="form-field">
       <div class="form-label">Repeat</div>
@@ -942,7 +942,7 @@ What would you like to work on?</div></div>
     <div id="new-ev-error" style="color:var(--accent-red);font-size:13px;display:none;padding:10px;background:rgba(240,96,96,0.08);border-radius:var(--radius-sm);border:1px solid rgba(240,96,96,0.2);line-height:1.6;"></div>
   </div>
   <div class="create-panel-footer">
-    <button class="btn btn-gold" id="create-event-btn" style="flex:1;" onclick="createEvent()">✨ Create Event</button>
+    <button class="btn btn-gold" id="create-event-btn" style="flex:1;" onclick="createEvent()">â¨ Create Event</button>
     <button class="btn btn-ghost" onclick="closeCreatePanel()">Cancel</button>
   </div>
 </div>
@@ -950,7 +950,7 @@ What would you like to work on?</div></div>
 <!-- DELETE CONFIRM MODAL -->
 <div class="confirm-modal" id="confirmModal">
   <div class="confirm-box">
-    <h3>🗑 Delete Event?</h3>
+    <h3>ð Delete Event?</h3>
     <p id="confirmModalText">This will permanently delete the event from Google Calendar.</p>
     <div class="confirm-actions">
       <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
@@ -961,11 +961,11 @@ What would you like to work on?</div></div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ============================================================
-// FLOW DASHBOARD — JavaScript (deduplicated & fixed)
+// FLOW DASHBOARD â JavaScript (deduplicated & fixed)
 // ============================================================
 
 
-// ── AUTH GATE ──
+// ââ AUTH GATE ââ
 (function() {
   try {
     var user = JSON.parse(localStorage.getItem('flow_user') || 'null');
@@ -991,24 +991,24 @@ let expandedEventId = null;
 
 
 const crmIntegrationsList = [
-  { name:'HubSpot', emoji:'🟠', key:'hubspot' },
-  { name:'Google Calendar', emoji:'📅', key:'gcal' },
-  { name:'Google Drive', emoji:'📂', key:'gdrive' },
-  { name:'Slack', emoji:'💬', key:'slack' },
-  { name:'Notion', emoji:'📄', key:'notion' },
-  { name:'Zapier', emoji:'⚡', key:'zapier' },
+  { name:'HubSpot', emoji:'ð ', key:'hubspot' },
+  { name:'Google Calendar', emoji:'ð', key:'gcal' },
+  { name:'Google Drive', emoji:'ð', key:'gdrive' },
+  { name:'Slack', emoji:'ð¬', key:'slack' },
+  { name:'Notion', emoji:'ð', key:'notion' },
+  { name:'Zapier', emoji:'â¡', key:'zapier' },
 ];
 
 const aiIntegrationsList = [
-  { name:'Claude', emoji:'✦', key:'claude' },
-  { name:'GPT-4', emoji:'🔵', key:'openai' },
-  { name:'Kimi', emoji:'🌙', key:'kimi' },
-  { name:'Gemini', emoji:'♊', key:'gemini' },
-  { name:'Mistral', emoji:'💨', key:'mistral' },
-  { name:'Custom API', emoji:'🔧', key:'custom' },
+  { name:'Claude', emoji:'â¦', key:'claude' },
+  { name:'GPT-4', emoji:'ðµ', key:'openai' },
+  { name:'Kimi', emoji:'ð', key:'kimi' },
+  { name:'Gemini', emoji:'â', key:'gemini' },
+  { name:'Mistral', emoji:'ð¨', key:'mistral' },
+  { name:'Custom API', emoji:'ð§', key:'custom' },
 ];
 
-// ── INIT ──
+// ââ INIT ââ
 document.addEventListener('DOMContentLoaded', function() {
   var now = new Date();
   calYear = now.getFullYear();
@@ -1028,7 +1028,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (sf) { fontSize = parseInt(sf); document.documentElement.style.fontSize = fontSize + 'px'; var fsl = document.getElementById('fontSizeLabel'); if (fsl) fsl.textContent = fontSize; }
 });
 
-// ── DATETIME ──
+// ââ DATETIME ââ
 function updateDateTime() {
   // Show logged-in user name
   if (window._flowUser && !window._flowUserShown) {
@@ -1042,7 +1042,7 @@ function updateDateTime() {
     if (window._flowUser.role === 'admin') {
       var adminBtn = document.createElement('button');
       adminBtn.className = 'nav-btn';
-      adminBtn.innerHTML = '🛡<span class="tooltip">Admin</span>';
+      adminBtn.innerHTML = 'ð¡<span class="tooltip">Admin</span>';
       adminBtn.onclick = function() { window.location.href = '/PrivateDash/admin.html'; };
       var spacer = document.querySelector('.sidebar-spacer');
       if (spacer) spacer.parentNode.insertBefore(adminBtn, spacer);
@@ -1056,7 +1056,7 @@ function updateDateTime() {
   if (cd) cd.textContent = now.toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 }
 
-// ── TASKS ──
+// ââ TASKS ââ
 function loadTasksFromStorage() {
   try {
     var saved = localStorage.getItem('flow_tasks');
@@ -1094,14 +1094,14 @@ function renderTasks() {
   ['task-list','full-task-list'].forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
-    el.innerHTML = tasks.length ? tasks.map(taskHtml).join('') : '<div class="empty-state"><div class="icon">✅</div>All done! Add a task above.</div>';
+    el.innerHTML = tasks.length ? tasks.map(taskHtml).join('') : '<div class="empty-state"><div class="icon">â</div>All done! Add a task above.</div>';
   });
   updateTaskStats();
 }
 
 function taskHtml(t) {
-  var reminderBadge = t.reminderTime ? '<span title="Reminder set" style="font-size:11px;margin-left:4px;">🔔</span>' : '';
-  var sourceBadge = t.source === 'gmail' ? '<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:rgba(90,180,240,0.15);color:var(--accent-blue);font-family:var(--font-mono);margin-left:4px;">✉️ Gmail</span>' : '';
+  var reminderBadge = t.reminderTime ? '<span title="Reminder set" style="font-size:11px;margin-left:4px;">ð</span>' : '';
+  var sourceBadge = t.source === 'gmail' ? '<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:rgba(90,180,240,0.15);color:var(--accent-blue);font-family:var(--font-mono);margin-left:4px;">âï¸ Gmail</span>' : '';
   var dueStr = t.dueDate ? t.dueDate + (t.dueTime ? ' ' + t.dueTime : '') : t.date;
   return '<div class="task-item" id="task-' + t.id + '">' +
     '<div class="task-check ' + (t.done ? 'done' : '') + '" onclick="toggleTask(' + t.id + ')"></div>' +
@@ -1110,7 +1110,7 @@ function taskHtml(t) {
     '<div class="task-meta">' + escHtml(dueStr) + '</div>' +
     '</div>' +
     '<span class="task-priority priority-' + t.priority + '">' + t.priority.toUpperCase() + '</span>' +
-    '<button class="task-del" onclick="deleteTask(' + t.id + ')" title="Delete">✕</button>' +
+    '<button class="task-del" onclick="deleteTask(' + t.id + ')" title="Delete">â</button>' +
     '</div>';
 }
 
@@ -1127,7 +1127,7 @@ function deleteTask(id) {
 function clearDoneTasks() {
   tasks = tasks.filter(function(t){ return !t.done; });
   saveTasks(); renderTasks();
-  showToast('Completed tasks cleared ✓');
+  showToast('Completed tasks cleared â');
 }
 
 function addTask(fromFull) {
@@ -1162,7 +1162,7 @@ function addTaskFromGmail(taskText, priority, dueDate, reminderTime, emailSubjec
   tasks.unshift(task);
   if (task.dueDate && task.reminderTime) scheduleEmailReminder(task);
   saveTasks(); renderTasks();
-  showToast('✅ Task added: ' + taskText.substring(0, 40));
+  showToast('â Task added: ' + taskText.substring(0, 40));
 }
 
 function scheduleEmailReminder(task) {
@@ -1180,7 +1180,7 @@ function scheduleEmailReminder(task) {
   }[task.reminderTime] || 60;
 
   var event = {
-    summary: '🔔 FLOW Reminder: ' + task.text,
+    summary: 'ð FLOW Reminder: ' + task.text,
     description: 'Task reminder from FLOW dashboard.' + (task.emailRef ? '\n\nFrom email: ' + task.emailRef : ''),
     start: { dateTime: startTime, timeZone: tz },
     end: { dateTime: endTime, timeZone: tz },
@@ -1192,8 +1192,8 @@ function scheduleEmailReminder(task) {
     body: JSON.stringify(event)
   }).then(function(r) { return r.json(); })
   .then(function(d) {
-    if (d.id) showToast('🔔 Reminder set in Google Calendar!');
-    else showToast('⚠️ Could not set reminder: ' + (d.error && d.error.message || 'Check calendar access'));
+    if (d.id) showToast('ð Reminder set in Google Calendar!');
+    else showToast('â ï¸ Could not set reminder: ' + (d.error && d.error.message || 'Check calendar access'));
   }).catch(function() { showToast('Network error setting reminder'); });
 }
 
@@ -1203,7 +1203,7 @@ function addMinutes(timeStr, mins) {
   return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
 }
 
-// ── CALENDAR ──
+// ââ CALENDAR ââ
 function changeMonth(delta) {
   calMonth += delta;
   if (calMonth > 11) { calMonth = 0; calYear++; }
@@ -1244,7 +1244,7 @@ function selectCalDay(dateStr, el) {
   renderEventsForDate(dateStr, 'fullEventList');
 }
 
-// ── GOOGLE CALENDAR ──
+// ââ GOOGLE CALENDAR ââ
 function initGoogleCalendar() {
   var attempts = 0;
   function tryInit() {
@@ -1274,7 +1274,7 @@ function initGoogleCalendar() {
 
 function connectGoogleCalendar() {
   if (!googleTokenClient) {
-    showToast('Still loading Google… please wait a moment and try again');
+    showToast('Still loading Googleâ¦ please wait a moment and try again');
     initGoogleCalendar();
     return;
   }
@@ -1348,7 +1348,7 @@ async function fetchCalendarEvents() {
     if (statM) statM.textContent = todayEvents.length;
     var nextM = document.getElementById('stat-next-meeting');
     if (nextM) nextM.textContent = todayEvents.length > 0 ? 'Next: ' + todayEvents[0].time : 'None today';
-    showToast('Google Calendar connected ✓ — ' + items.length + ' events loaded');
+    showToast('Google Calendar connected â â ' + items.length + ' events loaded');
   } catch(e) {
     console.error('Calendar fetch error:', e);
     showToast('Calendar error: ' + (e.message || JSON.stringify(e)));
@@ -1365,14 +1365,14 @@ function updateGCalUI() {
     var el = document.getElementById(id);
     if (!el) return;
     el.className = 'card-badge ' + (gcalConnected ? 'gcal-connected' : 'gcal-disconnected');
-    el.textContent = gcalConnected ? '● Google Connected' : 'Not connected';
+    el.textContent = gcalConnected ? 'â Google Connected' : 'Not connected';
   });
   var btn = document.getElementById('gcal-connect-btn');
-  if (btn) { btn.textContent = gcalConnected ? '✓ Connected' : 'Connect Google'; btn.disabled = gcalConnected; }
+  if (btn) { btn.textContent = gcalConnected ? 'â Connected' : 'Connect Google'; btn.disabled = gcalConnected; }
   var mainBtn = document.getElementById('gcal-main-btn');
-  if (mainBtn) { mainBtn.textContent = gcalConnected ? '✓ Connected' : '🔗 Connect Google Calendar'; mainBtn.disabled = gcalConnected; }
+  if (mainBtn) { mainBtn.textContent = gcalConnected ? 'â Connected' : 'ð Connect Google Calendar'; mainBtn.disabled = gcalConnected; }
   var mainStatus = document.getElementById('gcal-main-status');
-  if (mainStatus) mainStatus.textContent = gcalConnected ? '● Connected' : 'Not connected';
+  if (mainStatus) mainStatus.textContent = gcalConnected ? 'â Connected' : 'Not connected';
   renderIntegrations();
 }
 
@@ -1383,12 +1383,12 @@ function renderEventsForDate(dateStr, containerId) {
   var d = dateStr ? new Date(dateStr + 'T12:00:00') : null;
   var label = d ? d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }) : '';
   if (!gcalConnected) {
-    el.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Connect Google Calendar to see events</div>';
+    el.innerHTML = '<div class="empty-state"><div class="icon">ð</div>Connect Google Calendar to see events</div>';
     return;
   }
   var header = dateStr ? '<div class="day-header">' + label + '</div>' : '';
   if (events.length === 0) {
-    el.innerHTML = header + '<div class="no-events-msg">Nothing scheduled — enjoy the free time! 🌿</div>';
+    el.innerHTML = header + '<div class="no-events-msg">Nothing scheduled â enjoy the free time! ð¿</div>';
     return;
   }
   el.innerHTML = header + events.map(function(e){ return eventItemHtml(e); }).join('');
@@ -1396,44 +1396,44 @@ function renderEventsForDate(dateStr, containerId) {
 
 function eventItemHtml(e) {
   var attendeeHtml = e.attendees.length > 0
-    ? e.attendees.slice(0,5).map(function(a){ return '<span class="attendee-pill">👤 ' + escHtml(a) + '</span>'; }).join('')
+    ? e.attendees.slice(0,5).map(function(a){ return '<span class="attendee-pill">ð¤ ' + escHtml(a) + '</span>'; }).join('')
       + (e.attendees.length > 5 ? '<span class="attendee-pill">+' + (e.attendees.length-5) + ' more</span>' : '')
     : '<span style="color:var(--text-muted);font-size:12px;">No attendees listed</span>';
-  var timeStr = e.isAllDay ? 'All day' : (e.time + (e.endTime ? ' – ' + e.endTime : ''));
+  var timeStr = e.isAllDay ? 'All day' : (e.time + (e.endTime ? ' â ' + e.endTime : ''));
   var eid = e.id;
-  var recurBadge = e.isRecurring ? '<span class="recurring-badge">↻ Recurring</span>' : '';
+  var recurBadge = e.isRecurring ? '<span class="recurring-badge">â» Recurring</span>' : '';
   var accountDot = e.account === 'second' ? '<span style="width:8px;height:8px;border-radius:50%;background:#b07cf0;display:inline-block;margin-left:4px;" title="' + escHtml(e.calendar) + '"></span>' : '';
   var html = '<div class="event-item" id="evitem-' + eid + '" style="border-left-color:' + e.color + '">';
   html += '<div class="event-row" data-eid="' + eid + '" onclick="toggleEventExpand(this.dataset.eid)">';
   html += '<div class="event-time">' + e.time + '</div>';
   html += '<div class="event-name">' + escHtml(e.title) + accountDot + '</div>';
   html += recurBadge;
-  html += '<div class="event-chevron">▼</div>';
+  html += '<div class="event-chevron">â¼</div>';
   html += '</div>';
   html += '<div class="event-detail">';
   html += '<div class="event-detail-grid">';
-  html += '<div class="event-detail-field"><div class="event-detail-label">🕐 Time</div><div class="event-detail-value">' + timeStr + '</div></div>';
-  html += '<div class="event-detail-field"><div class="event-detail-label">👤 Organiser</div><div class="event-detail-value muted">' + escHtml(e.organizer || '—') + '</div></div>';
-  html += '<div class="event-detail-field"><div class="event-detail-label">📍 Location</div>';
+  html += '<div class="event-detail-field"><div class="event-detail-label">ð Time</div><div class="event-detail-value">' + timeStr + '</div></div>';
+  html += '<div class="event-detail-field"><div class="event-detail-label">ð¤ Organiser</div><div class="event-detail-value muted">' + escHtml(e.organizer || 'â') + '</div></div>';
+  html += '<div class="event-detail-field"><div class="event-detail-label">ð Location</div>';
   html += '<div class="event-view-mode event-detail-value muted" id="ev-loc-view-' + eid + '">' + escHtml(e.location || 'No location') + '</div>';
-  html += '<input class="event-edit-input event-edit-mode" id="ev-loc-edit-' + eid + '" value="' + escHtml(e.location) + '" placeholder="Add location…">';
+  html += '<input class="event-edit-input event-edit-mode" id="ev-loc-edit-' + eid + '" value="' + escHtml(e.location) + '" placeholder="Add locationâ¦">';
   html += '</div>';
-  html += '<div class="event-detail-field"><div class="event-detail-label">📅 Calendar</div><div class="event-detail-value muted">' + escHtml(e.calendar || 'Google') + '</div></div>';
+  html += '<div class="event-detail-field"><div class="event-detail-label">ð Calendar</div><div class="event-detail-value muted">' + escHtml(e.calendar || 'Google') + '</div></div>';
   html += '</div>';
-  html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">📝 Notes</div>';
+  html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">ð Notes</div>';
   html += '<div class="event-view-mode event-detail-value muted" id="ev-desc-view-' + eid + '">' + escHtml(e.description || 'No notes') + '</div>';
-  html += '<textarea class="event-edit-input event-edit-mode" id="ev-desc-edit-' + eid + '" placeholder="Add notes…" rows="2">' + escHtml(e.description) + '</textarea>';
+  html += '<textarea class="event-edit-input event-edit-mode" id="ev-desc-edit-' + eid + '" placeholder="Add notesâ¦" rows="2">' + escHtml(e.description) + '</textarea>';
   html += '</div>';
-  html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">👥 Attendees (' + e.attendees.length + ')</div>';
+  html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">ð¥ Attendees (' + e.attendees.length + ')</div>';
   html += '<div class="event-attendees">' + attendeeHtml + '</div></div>';
   if (e.isRecurring) {
-    html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">↻ Recurring</div><div class="event-detail-value muted">This is a repeating event</div></div>';
+    html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">â» Recurring</div><div class="event-detail-value muted">This is a repeating event</div></div>';
   }
   html += '<div class="event-actions">';
-  html += '<button class="btn btn-ghost event-view-mode" style="padding:6px 14px;font-size:12px;" id="ev-edit-btn-' + eid + '" data-eid="' + eid + '" onclick="startEditEvent(this.dataset.eid)">✏️ Edit</button>';
-  html += '<button class="btn btn-gold event-edit-mode" style="padding:6px 14px;font-size:12px;" id="ev-save-btn-' + eid + '" data-eid="' + eid + '" onclick="saveEventEdit(this.dataset.eid)">💾 Save to Google</button>';
+  html += '<button class="btn btn-ghost event-view-mode" style="padding:6px 14px;font-size:12px;" id="ev-edit-btn-' + eid + '" data-eid="' + eid + '" onclick="startEditEvent(this.dataset.eid)">âï¸ Edit</button>';
+  html += '<button class="btn btn-gold event-edit-mode" style="padding:6px 14px;font-size:12px;" id="ev-save-btn-' + eid + '" data-eid="' + eid + '" onclick="saveEventEdit(this.dataset.eid)">ð¾ Save to Google</button>';
   html += '<button class="btn btn-ghost event-edit-mode" style="padding:6px 14px;font-size:12px;" data-eid="' + eid + '" onclick="cancelEditEvent(this.dataset.eid)">Cancel</button>';
-  html += '<button class="btn" style="padding:6px 14px;font-size:12px;background:rgba(240,96,96,0.12);color:var(--accent-red);border:1px solid rgba(240,96,96,0.2);margin-left:auto;" data-eid="' + eid + '" onclick="confirmDeleteEvent(this.dataset.eid)">🗑 Delete</button>';
+  html += '<button class="btn" style="padding:6px 14px;font-size:12px;background:rgba(240,96,96,0.12);color:var(--accent-red);border:1px solid rgba(240,96,96,0.2);margin-left:auto;" data-eid="' + eid + '" onclick="confirmDeleteEvent(this.dataset.eid)">ð Delete</button>';
   html += '</div></div></div>';
   return html;
 }
@@ -1469,7 +1469,7 @@ async function saveEventEdit(eventId) {
   var newLoc = locEl ? locEl.value : ev.location;
   var newDesc = descEl ? descEl.value : ev.description;
   var btn = document.getElementById('ev-save-btn-' + eventId);
-  if (btn) { btn.textContent = '⏳ Saving…'; btn.disabled = true; }
+  if (btn) { btn.textContent = 'â³ Savingâ¦'; btn.disabled = true; }
   try {
     var token = localStorage.getItem('flow_gcal_token');
     var patchRes = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/' + eventId, {
@@ -1486,15 +1486,15 @@ async function saveEventEdit(eventId) {
     cancelEditEvent(eventId);
     document.getElementById('ev-loc-view-' + eventId).textContent = newLoc || 'No location';
     document.getElementById('ev-desc-view-' + eventId).textContent = newDesc || 'No notes';
-    if (btn) { btn.textContent = '💾 Save to Google'; btn.disabled = false; }
-    showToast('Event updated in Google Calendar ✓');
+    if (btn) { btn.textContent = 'ð¾ Save to Google'; btn.disabled = false; }
+    showToast('Event updated in Google Calendar â');
   } catch(e) {
-    if (btn) { btn.textContent = '💾 Save to Google'; btn.disabled = false; }
+    if (btn) { btn.textContent = 'ð¾ Save to Google'; btn.disabled = false; }
     showToast('Save failed: ' + (e.message || 'Check permissions'));
   }
 }
 
-// ── AI ──
+// ââ AI ââ
 async function sendAiMessage(chatAreaId, inputId, modelSelectId) {
   var input = document.getElementById(inputId);
   var modelEl = document.getElementById(modelSelectId);
@@ -1519,12 +1519,12 @@ async function sendAiMessage(chatAreaId, inputId, modelSelectId) {
 
 async function callClaude(message) {
   var key = localStorage.getItem('flow_claude_key');
-  if (!key) return 'No Claude key saved yet.\n\nGo to Integrations tab → paste your Claude API key → click Save.';
+  if (!key) return 'No Claude key saved yet.\n\nGo to Integrations tab â paste your Claude API key â click Save.';
   var res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1024,
-      system: 'You are a helpful personal assistant in the FLOW dashboard. The user has dyslexia — be clear, concise, use short paragraphs. Be practical.',
+      system: 'You are a helpful personal assistant in the FLOW dashboard. The user has dyslexia â be clear, concise, use short paragraphs. Be practical.',
       messages: [{ role: 'user', content: message }] })
   });
   var data = await res.json();
@@ -1534,7 +1534,7 @@ async function callClaude(message) {
 
 async function callOpenAI(message) {
   var key = localStorage.getItem('flow_openai_key');
-  if (!key) return 'No GPT-4 key saved yet.\n\nGo to Integrations tab → paste your OpenAI API key → click Save.';
+  if (!key) return 'No GPT-4 key saved yet.\n\nGo to Integrations tab â paste your OpenAI API key â click Save.';
   var res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
@@ -1548,7 +1548,7 @@ async function callOpenAI(message) {
 
 async function callKimi(message) {
   var key = localStorage.getItem('flow_kimi_key');
-  if (!key) return 'No Kimi key saved yet.\n\nGo to Integrations tab → paste your Kimi API key → click Save.';
+  if (!key) return 'No Kimi key saved yet.\n\nGo to Integrations tab â paste your Kimi API key â click Save.';
   var res = await fetch('https://api.moonshot.cn/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
@@ -1565,7 +1565,7 @@ function addAiMsg(containerId, text, isUser) {
   if (!container) return null;
   var div = document.createElement('div');
   div.className = 'ai-msg' + (isUser ? ' user' : '');
-  div.innerHTML = '<div class="ai-avatar ' + (isUser ? 'user-av' : '') + '">' + (isUser ? 'Y' : '✦') + '</div><div class="ai-bubble">' + escHtml(text) + '</div>';
+  div.innerHTML = '<div class="ai-avatar ' + (isUser ? 'user-av' : '') + '">' + (isUser ? 'Y' : 'â¦') + '</div><div class="ai-bubble">' + escHtml(text) + '</div>';
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
   return div;
@@ -1575,7 +1575,7 @@ function addThinkingMsg(containerId) {
   var container = document.getElementById(containerId);
   var div = document.createElement('div');
   div.className = 'ai-msg';
-  div.innerHTML = '<div class="ai-avatar">✦</div><div class="ai-bubble"><div class="ai-thinking"><span></span><span></span><span></span></div></div>';
+  div.innerHTML = '<div class="ai-avatar">â¦</div><div class="ai-bubble"><div class="ai-thinking"><span></span><span></span><span></span></div></div>';
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
   return div;
@@ -1583,21 +1583,21 @@ function addThinkingMsg(containerId) {
 
 function clearAiChat() {
   var el = document.getElementById('fullAiChat');
-  if (el) el.innerHTML = '<div class="ai-msg"><div class="ai-avatar">✦</div><div class="ai-bubble">Chat cleared. What can I help with?</div></div>';
+  if (el) el.innerHTML = '<div class="ai-msg"><div class="ai-avatar">â¦</div><div class="ai-bubble">Chat cleared. What can I help with?</div></div>';
 }
 
 function checkSavedKeys() {
   var statusEl = document.getElementById('ai-key-status');
   if (!statusEl) return;
   var keys = [];
-  if (localStorage.getItem('flow_claude_key')) keys.push('✦ Claude');
-  if (localStorage.getItem('flow_openai_key')) keys.push('● GPT-4');
-  if (localStorage.getItem('flow_kimi_key')) keys.push('🌙 Kimi');
-  statusEl.textContent = keys.length ? 'Connected: ' + keys.join(' · ') : 'No AI keys saved yet — add them below.';
+  if (localStorage.getItem('flow_claude_key')) keys.push('â¦ Claude');
+  if (localStorage.getItem('flow_openai_key')) keys.push('â GPT-4');
+  if (localStorage.getItem('flow_kimi_key')) keys.push('ð Kimi');
+  statusEl.textContent = keys.length ? 'Connected: ' + keys.join(' Â· ') : 'No AI keys saved yet â add them below.';
   statusEl.style.color = keys.length ? 'var(--accent-green)' : 'var(--text-muted)';
 }
 
-// ── API KEYS ──
+// ââ API KEYS ââ
 function saveApiKey(service) {
   var inputMap = { claude:'claudeApiKey', openai:'openaiApiKey', kimi:'kimiApiKey', hubspot:'hubspotKey' };
   var storageMap = { claude:'flow_claude_key', openai:'flow_openai_key', kimi:'flow_kimi_key', hubspot:'flow_hubspot_key' };
@@ -1609,10 +1609,10 @@ function saveApiKey(service) {
   if (statusEl) { statusEl.style.display = 'inline-flex'; setTimeout(function(){ statusEl.style.display = 'none'; }, 3000); }
   checkSavedKeys();
   renderIntegrations();
-  showToast(service + ' API key saved ✓');
+  showToast(service + ' API key saved â');
 }
 
-// ── INTEGRATIONS ──
+// ââ INTEGRATIONS ââ
 function integStatus(key) {
   if (key === 'gcal') return gcalConnected ? 'connected' : 'connect';
   var storageMap = { claude:'flow_claude_key', openai:'flow_openai_key', kimi:'flow_kimi_key', hubspot:'flow_hubspot_key' };
@@ -1623,7 +1623,7 @@ function integStatus(key) {
 
 function integHtml(i) {
   var s = integStatus(i.key);
-  var labels = { connected:'● Connected', connect:'+ Connect', coming:'Coming soon' };
+  var labels = { connected:'â Connected', connect:'+ Connect', coming:'Coming soon' };
   var cls = { connected:'status-connected', connect:'status-connect', coming:'status-coming' };
   return '<div class="integ-card ' + s + '" onclick="handleIntegClick(\'' + i.key + '\')">' +
     '<div class="integ-logo">' + i.emoji + '</div>' +
@@ -1645,9 +1645,9 @@ function renderIntegrations() {
   if (aiEl) aiEl.innerHTML = aiIntegrationsList.map(integHtml).join('');
 }
 
-// ── BUSINESSES ──
+// ââ BUSINESSES ââ
 
-// ── NOTES ──
+// ââ NOTES ââ
 function loadNotes() {
   var saved = localStorage.getItem('flow_notes');
   var el = document.getElementById('quickNotes');
@@ -1661,11 +1661,11 @@ function saveNotes() {
     var el = document.getElementById('quickNotes');
     if (el) localStorage.setItem('flow_notes', el.value);
     var s = document.getElementById('notes-saved');
-    if (s) { s.textContent = '✓ Saved'; setTimeout(function(){ s.textContent = ''; }, 1500); }
+    if (s) { s.textContent = 'â Saved'; setTimeout(function(){ s.textContent = ''; }, 1500); }
   }, 600);
 }
 
-// ── WIDGET TOGGLES ──
+// ââ WIDGET TOGGLES ââ
 function toggleWidget(id, btn) {
   var el = document.getElementById(id);
   if (!el) return;
@@ -1675,9 +1675,9 @@ function toggleWidget(id, btn) {
 
 function setLayout(mode, btn) {
   document.querySelectorAll('.focus-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  var all = ['tasks-widget','cal-widget','ai-widget','biz-widget','notes-widget'];
-  var show = mode === 'all' ? all : mode === 'work' ? ['tasks-widget','cal-widget','biz-widget'] : mode === 'personal' ? ['tasks-widget','cal-widget','notes-widget'] : ['biz-widget','tasks-widget','ai-widget'];
+  if (btn) btn.classList.add('active');
+  var all = ['tasks-widget','cal-widget','ai-widget','notes-widget'];
+  var show = mode === 'all' ? all : mode === 'work' ? ['tasks-widget','cal-widget','ai-widget'] : mode === 'personal' ? ['tasks-widget','cal-widget','notes-widget'] : ['tasks-widget','ai-widget'];
   all.forEach(function(w) {
     var el = document.getElementById(w);
     if (el) el.classList.toggle('hidden', show.indexOf(w) < 0);
@@ -1688,14 +1688,14 @@ function setLayout(mode, btn) {
   });
 }
 
-// ── SECOND GOOGLE ACCOUNT ──
+// ââ SECOND GOOGLE ACCOUNT ââ
 var secondTokenClient = null;
 var secondCalEvents = [];
 var secondConnected = false;
 var secondAccountEmail = '';
 
 function connectSecondAccount() {
-  if (typeof google === 'undefined') { showToast('Google not loaded yet — try again in a moment'); return; }
+  if (typeof google === 'undefined') { showToast('Google not loaded yet â try again in a moment'); return; }
   try {
     secondTokenClient = google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
@@ -1754,16 +1754,16 @@ async function fetchSecondAccountEvents(token) {
     if (selectedDate) renderEventsForDate(selectedDate, 'eventList');
     if (selectedDate) renderEventsForDate(selectedDate, 'fullEventList');
     updateAccountList();
-    showToast('Second account connected: ' + secondAccountEmail + ' ✓');
+    showToast('Second account connected: ' + secondAccountEmail + ' â');
   } catch(e) { showToast('Error: ' + e.message); console.error(e); }
 }
 
 function updateAccountList() {
   var el = document.getElementById('account-list');
   if (!el) return;
-  var html = '<div class="account-item"><div class="account-dot"></div><div class="account-color" style="background:#5ab4f0;"></div><div style="flex:1;"><div style="font-weight:600;font-size:13px;">Primary Google Account</div><div style="font-size:11px;color:var(--text-muted);">Connected ●</div></div></div>';
+  var html = '<div class="account-item"><div class="account-dot"></div><div class="account-color" style="background:#5ab4f0;"></div><div style="flex:1;"><div style="font-weight:600;font-size:13px;">Primary Google Account</div><div style="font-size:11px;color:var(--text-muted);">Connected â</div></div></div>';
   if (secondConnected) {
-    html += '<div class="account-item"><div class="account-dot"></div><div class="account-color" style="background:#b07cf0;"></div><div style="flex:1;"><div style="font-weight:600;font-size:13px;">' + escHtml(secondAccountEmail) + '</div><div style="font-size:11px;color:var(--text-muted);">Connected ●</div></div><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="disconnectSecond()">Disconnect</button></div>';
+    html += '<div class="account-item"><div class="account-dot"></div><div class="account-color" style="background:#b07cf0;"></div><div style="flex:1;"><div style="font-weight:600;font-size:13px;">' + escHtml(secondAccountEmail) + '</div><div style="font-size:11px;color:var(--text-muted);">Connected â</div></div><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="disconnectSecond()">Disconnect</button></div>';
   } else {
     html += '<div class="account-item"><div class="account-dot inactive"></div><div class="account-color" style="background:var(--bg-3);"></div><div style="flex:1;"><div style="font-weight:600;font-size:13px;">Second Google Account</div><div style="font-size:11px;color:var(--text-muted);">Not connected</div></div><button class="btn btn-green" style="padding:4px 10px;font-size:11px;" onclick="connectSecondAccount()">+ Connect</button></div>';
   }
@@ -1781,7 +1781,7 @@ function disconnectSecond() {
   showToast('Second account disconnected');
 }
 
-// ── CREATE EVENT ──
+// ââ CREATE EVENT ââ
 function openCreatePanel(dateStr) {
   var panel = document.getElementById('createPanel');
   if (!panel) return;
@@ -1809,7 +1809,7 @@ async function createEvent() {
 
   function showErr(msg) {
     if (errEl) { errEl.innerHTML = msg; errEl.style.display = 'block'; }
-    if (createBtn) { createBtn.textContent = '✨ Create Event'; createBtn.disabled = false; }
+    if (createBtn) { createBtn.textContent = 'â¨ Create Event'; createBtn.disabled = false; }
   }
 
   if (errEl) { errEl.style.display = 'none'; errEl.innerHTML = ''; }
@@ -1819,8 +1819,8 @@ async function createEvent() {
   var title   = titleEl ? titleEl.value.trim() : '';
   var date    = dateEl  ? dateEl.value.trim()  : '';
 
-  if (!title) { showErr('⚠️ Please enter a title for the event.'); return; }
-  if (!date)  { showErr('⚠️ Please pick a date.'); return; }
+  if (!title) { showErr('â ï¸ Please enter a title for the event.'); return; }
+  if (!date)  { showErr('â ï¸ Please pick a date.'); return; }
 
   var startTime    = (document.getElementById('new-ev-start') || {}).value || '09:00';
   var endTime      = (document.getElementById('new-ev-end')   || {}).value || '10:00';
@@ -1831,20 +1831,20 @@ async function createEvent() {
 
   var token = localStorage.getItem('flow_gcal_token');
   if (!token) {
-    showErr('⚠️ Not connected to Google Calendar. Click <strong>Connect Google</strong> first, then try again.');
+    showErr('â ï¸ Not connected to Google Calendar. Click <strong>Connect Google</strong> first, then try again.');
     return;
   }
 
   // Check token expiry
   var expiry = localStorage.getItem('flow_gcal_expiry');
   if (expiry && Date.now() > parseInt(expiry)) {
-    showErr('⚠️ Google session has expired. Please click <strong>Connect Google</strong> again to refresh.');
+    showErr('â ï¸ Google session has expired. Please click <strong>Connect Google</strong> again to refresh.');
     gcalConnected = false;
     updateGCalUI();
     return;
   }
 
-  if (createBtn) { createBtn.textContent = '⏳ Creating…'; createBtn.disabled = true; }
+  if (createBtn) { createBtn.textContent = 'â³ Creatingâ¦'; createBtn.disabled = true; }
 
   var attendees = [];
   if (attendeesRaw) {
@@ -1884,18 +1884,18 @@ async function createEvent() {
     try { data = JSON.parse(responseText); } catch(e) { data = {}; }
 
     if (res.status === 401) {
-      showErr('⚠️ Google session expired (401). Please click <strong>Connect Google</strong> again to re-authenticate.');
+      showErr('â ï¸ Google session expired (401). Please click <strong>Connect Google</strong> again to re-authenticate.');
       gcalConnected = false;
       updateGCalUI();
       return;
     }
     if (res.status === 403) {
-      showErr('⚠️ Permission denied (403). Your OAuth token may be read-only. Please:<br>1. Go to <a href="https://myaccount.google.com/permissions" target="_blank" style="color:var(--accent-gold)">myaccount.google.com/permissions</a><br>2. Remove this app<br>3. Click Connect Google Calendar again to grant full access.');
+      showErr('â ï¸ Permission denied (403). Your OAuth token may be read-only. Please:<br>1. Go to <a href="https://myaccount.google.com/permissions" target="_blank" style="color:var(--accent-gold)">myaccount.google.com/permissions</a><br>2. Remove this app<br>3. Click Connect Google Calendar again to grant full access.');
       return;
     }
     if (!res.ok) {
       var errMsg = (data.error && data.error.message) ? data.error.message : ('HTTP ' + res.status + ': ' + responseText.substring(0, 200));
-      showErr('⚠️ Google error: ' + errMsg);
+      showErr('â ï¸ Google error: ' + errMsg);
       return;
     }
 
@@ -1918,21 +1918,21 @@ async function createEvent() {
       account: 'primary',
     });
 
-    if (createBtn) { createBtn.textContent = '✨ Create Event'; createBtn.disabled = false; }
+    if (createBtn) { createBtn.textContent = 'â¨ Create Event'; createBtn.disabled = false; }
     closeCreatePanel();
     selectedDate = date;
     renderCalendar();
     renderEventsForDate(date, 'eventList');
     renderEventsForDate(date, 'fullEventList');
-    showToast('✓ Event created in Google Calendar!');
+    showToast('â Event created in Google Calendar!');
 
   } catch(e) {
-    showErr('⚠️ Network error: ' + (e.message || 'Check your internet connection.'));
+    showErr('â ï¸ Network error: ' + (e.message || 'Check your internet connection.'));
     console.error('createEvent error:', e);
   }
 }
 
-// ── DELETE EVENT ──
+// ââ DELETE EVENT ââ
 var pendingDeleteId = null;
 
 function confirmDeleteEvent(eventId) {
@@ -1960,7 +1960,7 @@ async function confirmDeleteAction() {
   try {
     if (isSecond) {
       var token2 = localStorage.getItem('flow_gcal2_token');
-      if (!token2) { showToast('Second account token expired — reconnect'); return; }
+      if (!token2) { showToast('Second account token expired â reconnect'); return; }
       await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/' + eventId.replace('_2',''), {
         method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token2 }
       });
@@ -1979,14 +1979,14 @@ async function confirmDeleteAction() {
     renderCalendar();
     if (selectedDate) renderEventsForDate(selectedDate, 'eventList');
     if (selectedDate) renderEventsForDate(selectedDate, 'fullEventList');
-    showToast('Event deleted ✓');
+    showToast('Event deleted â');
   } catch(e) {
     showToast('Delete failed: ' + (e.message || 'Unknown error'));
     console.error(e);
   }
 }
 
-// ── VIEW SWITCHING ──
+// ââ VIEW SWITCHING ââ
 function showView(name) {
   if (name === 'gmail') setTimeout(initGmailView, 50);
   if (name === 'settings') setTimeout(initSettings, 50);
@@ -2002,11 +2002,11 @@ function showView(name) {
   if (name === 'calendar') { renderCalendar(); renderEventsForDate(selectedDate, 'fullEventList'); }
 }
 
-// ── FOCUS MODE ──
+// ââ FOCUS MODE ââ
 function openFocusMode() {
   var activeTask = tasks.find(function(t){ return !t.done; });
   var ftd = document.getElementById('focusTaskDisplay');
-  if (ftd) ftd.textContent = activeTask ? '🎯 ' + activeTask.text : 'No pending tasks — enjoy the moment!';
+  if (ftd) ftd.textContent = activeTask ? 'ð¯ ' + activeTask.text : 'No pending tasks â enjoy the moment!';
   var fo = document.getElementById('focusOverlay');
   if (fo) fo.classList.add('active');
   updateFocusClock();
@@ -2045,7 +2045,7 @@ function updateFocusClock() {
 
 document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeFocusMode(); });
 
-// ── FONT SIZE ──
+// ââ FONT SIZE ââ
 function changeFontSize(delta) {
   fontSize = Math.max(14, Math.min(26, fontSize + delta));
   document.documentElement.style.fontSize = fontSize + 'px';
@@ -2054,7 +2054,7 @@ function changeFontSize(delta) {
   localStorage.setItem('flow_fontsize', fontSize);
 }
 
-// ── PA PANEL ──
+// ââ PA PANEL ââ
 function togglePaPanel() {
   var pp = document.getElementById('paPanel');
   if (pp) pp.classList.toggle('open');
@@ -2068,11 +2068,11 @@ function updatePaShareLink() {
 function copyPaLink() {
   var link = 'https://markuslyc.github.io/PrivateDash/?pa=view&token=abc123';
   navigator.clipboard.writeText(link)
-    .then(function(){ showToast('PA link copied! ✓'); })
+    .then(function(){ showToast('PA link copied! â'); })
     .catch(function(){ showToast('Select the link above and copy manually'); });
 }
 
-// ── UTILS ──
+// ââ UTILS ââ
 function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -2090,9 +2090,9 @@ function showToast(msg) {
   clearTimeout(toast._t);
   toast._t = setTimeout(function(){ toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(10px)'; }, 2800);
 }
-// ════════════════════════════════
+// ââââââââââââââââââââââââââââââââ
 // GMAIL AGENT
-// ════════════════════════════════
+// ââââââââââââââââââââââââââââââââ
 var gmailMessages=[], gmailFilter='all', gmailActiveId=null;
 
 function initGmailView() {
@@ -2216,7 +2216,7 @@ function renderGmailDetail(id,h,body,msg){
     '</div>'+
     '<div style="padding:10px 16px;border-top:1px solid var(--border);background:var(--bg-2);display:flex;gap:8px;">'+
       '<button class="gmail-filter-btn" onclick="openAddTaskFromEmail(\'' + id + '\',\'' + (h['Subject']||'').replace(/'/g,'') + '\',\'' + (h['From']||'').replace(/'/g,'') + '\')">\U0001f4cb Add as Task</button>'+
-      '<button class="gmail-filter-btn" onclick="autoExtractAndAddAllTasks(\'' + id + '\',\'' + (h['Subject']||'').replace(/'/g,'') + '\')">✨ Extract All Tasks</button>'+
+      '<button class="gmail-filter-btn" onclick="autoExtractAndAddAllTasks(\'' + id + '\',\'' + (h['Subject']||'').replace(/'/g,'') + '\')">â¨ Extract All Tasks</button>'+
     '</div>'+
     '<div class="gmail-reply-area">'+
       '<h4>\u270d\ufe0f Draft Reply \u2014 type your points below</h4>'+
@@ -2241,7 +2241,7 @@ function autoSummariseEmail(id,h,body){
   .then(function(data){
     var text=data.content&&data.content[0]?data.content[0].text:'';
     var bullets=[];
-    try{bullets=JSON.parse(text.replace(/```json|```/g,'').trim());}catch(e){bullets=text.split('\n').filter(function(l){return l.trim();}).map(function(l){return l.replace(/^[-•\d.]\s*/,'');}).filter(function(l){return l.length>0;});}
+    try{bullets=JSON.parse(text.replace(/```json|```/g,'').trim());}catch(e){bullets=text.split('\n').filter(function(l){return l.trim();}).map(function(l){return l.replace(/^[-â¢\d.]\s*/,'');}).filter(function(l){return l.length>0;});}
     var el2=document.getElementById('gmail-sum-'+safeId);
     if(el2)el2.innerHTML='<h4>\u2728 AI Summary</h4><ul>'+bullets.map(function(b){return'<li>'+escHtml(String(b))+'</li>';}).join('')+'</ul>';
   }).catch(function(){var el2=document.getElementById('gmail-sum-'+safeId);if(el2)el2.innerHTML='<h4>\u2728 AI Summary</h4><div style="color:var(--text-muted);font-size:12px;">Could not summarise.</div>';});
@@ -2282,9 +2282,9 @@ function markAsRead(id,token){
   .then(function(){var m=gmailMessages.find(function(x){return x.id===id;});if(m){m.unread=false;renderGmailList();}}).catch(function(){});
 }
 
-// ════════════════════════════════
+// ââââââââââââââââââââââââââââââââ
 // SETTINGS & CUSTOMISATION
-// ════════════════════════════════
+// ââââââââââââââââââââââââââââââââ
 function initSettings(){
   var prefs=userLoad('flow_widget_prefs',{});
   ['tasks','calendar','gmail','ai','integrations'].forEach(function(w){
@@ -2365,9 +2365,9 @@ function clearNotes(){
 })();
 
 
-// ════════════════════════════════
-// GMAIL → TASK INTEGRATION
-// ════════════════════════════════
+// ââââââââââââââââââââââââââââââââ
+// GMAIL â TASK INTEGRATION
+// ââââââââââââââââââââââââââââââââ
 function openAddTaskFromEmail(emailId, subject, from) {
   // Show modal
   var modal = document.getElementById('gmail-task-modal');
@@ -2376,11 +2376,11 @@ function openAddTaskFromEmail(emailId, subject, from) {
   var today = new Date().toISOString().split('T')[0];
   var modalHtml = '<div class="gmail-task-modal" id="gmail-task-modal" onclick="if(event.target===this)closeGmailTaskModal()">' +
     '<div class="gmail-task-modal-card">' +
-      '<h3>📋 Add Task from Email</h3>' +
+      '<h3>ð Add Task from Email</h3>' +
       '<p>From: ' + escHtml(from || '') + '</p>' +
       '<div class="task-action-items" id="gtm-action-items" style="display:none;">' +
-        '<p>✨ AI extracted action items — check the ones to add:</p>' +
-        '<div id="gtm-items-list"><div style="color:var(--text-muted);font-size:12px;">Extracting…</div></div>' +
+        '<p>â¨ AI extracted action items â check the ones to add:</p>' +
+        '<div id="gtm-items-list"><div style="color:var(--text-muted);font-size:12px;">Extractingâ¦</div></div>' +
       '</div>' +
       '<div class="gtm-field">' +
         '<label>Task Title</label>' +
@@ -2388,18 +2388,18 @@ function openAddTaskFromEmail(emailId, subject, from) {
       '</div>' +
       '<div class="gtm-row">' +
         '<div class="gtm-field"><label>Priority</label>' +
-          '<select id="gtm-priority"><option value="high">🔴 High</option><option value="med" selected>🟡 Medium</option><option value="low">🟢 Low</option></select>' +
+          '<select id="gtm-priority"><option value="high">ð´ High</option><option value="med" selected>ð¡ Medium</option><option value="low">ð¢ Low</option></select>' +
         '</div>' +
         '<div class="gtm-field"><label>Due Date</label><input type="date" id="gtm-date" value="' + today + '" style="color-scheme:dark;"></div>' +
       '</div>' +
       '<div class="gtm-row">' +
         '<div class="gtm-field"><label>Due Time</label><input type="time" id="gtm-time" value="09:00" style="color-scheme:dark;"></div>' +
-        '<div class="gtm-field"><label>📧 Email Reminder</label>' +
+        '<div class="gtm-field"><label>ð§ Email Reminder</label>' +
           '<select id="gtm-reminder"><option value="">No reminder</option><option value="15min">15 min before</option><option value="1hr" selected>1 hour before</option><option value="3hr">3 hours before</option><option value="1day">1 day before</option><option value="2day">2 days before</option></select>' +
         '</div>' +
       '</div>' +
       '<div class="gtm-actions">' +
-        '<button class="btn-gold" onclick="saveGmailTask()">✅ Add Task + Set Reminder</button>' +
+        '<button class="btn-gold" onclick="saveGmailTask()">â Add Task + Set Reminder</button>' +
         '<button class="btn btn-ghost" onclick="closeGmailTaskModal()">Cancel</button>' +
       '</div>' +
     '</div>' +
@@ -2477,7 +2477,7 @@ function saveGmailTask() {
   // Add the main task
   addTaskFromGmail(title.trim(), priority, date, reminder, '');
   closeGmailTaskModal();
-  showToast('✅ ' + (addedCount + 1) + ' task(s) added' + (reminder ? ' + reminder set!' : '!'));
+  showToast('â ' + (addedCount + 1) + ' task(s) added' + (reminder ? ' + reminder set!' : '!'));
 
   // Switch to tasks view
   setTimeout(function(){ showView('tasks'); }, 600);
@@ -2493,14 +2493,14 @@ function autoExtractAndAddAllTasks(emailId, subject) {
   var key = localStorage.getItem('flow_claude_key');
   var token = localStorage.getItem('flow_gcal_token');
   if (!key) { showToast('Add Claude API key in Integrations first'); return; }
-  showToast('✨ Extracting action items…');
+  showToast('â¨ Extracting action itemsâ¦');
   openAddTaskFromEmail(emailId, subject, '');
 }
 
 
-// ════════════════════════════════
+// ââââââââââââââââââââââââââââââââ
 // PER-USER DATA ISOLATION
-// ════════════════════════════════
+// ââââââââââââââââââââââââââââââââ
 function getUserKey(key) {
   var u = window._flowUser;
   if (!u || !u.email) return key;
