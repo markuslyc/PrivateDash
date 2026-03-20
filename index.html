@@ -698,13 +698,13 @@ What would you like to work on?</div></div>
 (function() {
   try {
     var user = JSON.parse(localStorage.getItem('flow_user') || 'null');
-    if (!user || !user.email) { window.location.href = '/login.html'; return; }
+    if (!user || !user.email) { window.location.href = '/PrivateDash/login.html'; return; }
     window._flowUser = user;
-  } catch(e) { window.location.href = '/login.html'; }
+  } catch(e) { window.location.href = '/PrivateDash/login.html'; }
 })();
 
 
-const GOOGLE_CLIENT_ID = '387362798277-gvadscn8if9m6i3r78tm641tmnmtkd4e.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = '387362798277-hljh6f7alu3tf85dpee6pvn4c2c3klk6.apps.googleusercontent.com';
 const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar';
 
 let tasks = [];
@@ -778,7 +778,7 @@ function updateDateTime() {
       var adminBtn = document.createElement('button');
       adminBtn.className = 'nav-btn';
       adminBtn.innerHTML = '🛡<span class="tooltip">Admin</span>';
-      adminBtn.onclick = function() { window.location.href = '/admin.html'; };
+      adminBtn.onclick = function() { window.location.href = '/PrivateDash/admin.html'; };
       var spacer = document.querySelector('.sidebar-spacer');
       if (spacer) spacer.parentNode.insertBefore(adminBtn, spacer);
     }
