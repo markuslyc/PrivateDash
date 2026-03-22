@@ -618,7 +618,8 @@
           <div class="card-header">
             <div class="card-icon" style="background:rgba(56,189,198,0.1);">📅</div>
             <div class="card-title">Calendar</div>
-            <div style="margin-left:auto;">
+            <div style="margin-left:auto;display:flex;gap:6px;">
+              <button class="btn btn-gold" onclick="openCreatePanel()" style="font-size:11px;padding:4px 10px;">+ Add Event</button>
               <button class="btn-ghost btn" onclick="showView('calendar')" style="font-size:11px;padding:4px 10px;">Full view →</button>
             </div>
           </div>
@@ -1454,13 +1455,26 @@ function eventItemHtml(e) {
   html += '</div>';
   html += '<div class="event-detail">';
   html += '<div class="event-detail-grid">';
-  html += '<div class="event-detail-field"><div class="event-detail-label">🕐 Time</div><div class="event-detail-value">' + timeStr + '</div></div>';
+  html += '<div class="event-detail-field"><div class="event-detail-label">🕐 Time</div>';
+  html += '<div class="event-view-mode event-detail-value">' + timeStr + '</div>';
+  if (!e.isAllDay) {
+    html += '<div class="event-edit-mode"><div style="display:flex;gap:6px;align-items:center;">';
+    html += '<input class="event-edit-input" id="ev-start-edit-' + eid + '" type="time" value="' + e.time + '" style="flex:1;">';
+    html += '<span style="color:var(--text-muted);font-size:12px;flex-shrink:0;">–</span>';
+    html += '<input class="event-edit-input" id="ev-end-edit-' + eid + '" type="time" value="' + (e.endTime || '') + '" style="flex:1;">';
+    html += '</div></div>';
+  }
+  html += '</div>';
   html += '<div class="event-detail-field"><div class="event-detail-label">👤 Organiser</div><div class="event-detail-value muted">' + escHtml(e.organizer || '—') + '</div></div>';
   html += '<div class="event-detail-field"><div class="event-detail-label">📍 Location</div>';
   html += '<div class="event-view-mode event-detail-value muted" id="ev-loc-view-' + eid + '">' + escHtml(e.location || 'No location') + '</div>';
   html += '<input class="event-edit-input event-edit-mode" id="ev-loc-edit-' + eid + '" value="' + escHtml(e.location) + '" placeholder="Add location…">';
   html += '</div>';
   html += '<div class="event-detail-field"><div class="event-detail-label">📅 Calendar</div><div class="event-detail-value muted">' + escHtml(e.calendar || 'Google') + '</div></div>';
+  html += '</div>';
+  html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">✏️ Title</div>';
+  html += '<div class="event-view-mode event-detail-value" id="ev-title-view-' + eid + '">' + escHtml(e.title) + '</div>';
+  html += '<input class="event-edit-input event-edit-mode" id="ev-title-edit-' + eid + '" value="' + escHtml(e.title) + '" placeholder="Event title">';
   html += '</div>';
   html += '<div class="event-detail-field" style="margin-bottom:10px;"><div class="event-detail-label">📝 Notes</div>';
   html += '<div class="event-view-mode event-detail-value muted" id="ev-desc-view-' + eid + '">' + escHtml(e.description || 'No notes') + '</div>';
@@ -1506,29 +1520,43 @@ function cancelEditEvent(eventId) {
 async function saveEventEdit(eventId) {
   var ev = calEvents.find(function(e){ return e.id === eventId; });
   if (!ev) return;
-  var locEl = document.getElementById('ev-loc-edit-' + eventId);
-  var descEl = document.getElementById('ev-desc-edit-' + eventId);
-  var newLoc = locEl ? locEl.value : ev.location;
-  var newDesc = descEl ? descEl.value : ev.description;
+  var locEl   = document.getElementById('ev-loc-edit-'   + eventId);
+  var descEl  = document.getElementById('ev-desc-edit-'  + eventId);
+  var titleEl = document.getElementById('ev-title-edit-' + eventId);
+  var startEl = document.getElementById('ev-start-edit-' + eventId);
+  var endEl   = document.getElementById('ev-end-edit-'   + eventId);
+  var newLoc   = locEl   ? locEl.value          : ev.location;
+  var newDesc  = descEl  ? descEl.value         : ev.description;
+  var newTitle = titleEl ? titleEl.value.trim() : ev.title;
+  var newStart = startEl ? startEl.value        : ev.time;
+  var newEnd   = endEl   ? endEl.value          : ev.endTime;
+  if (!newTitle) { showToast('Title is required'); return; }
   var btn = document.getElementById('ev-save-btn-' + eventId);
   if (btn) { btn.textContent = '⏳ Saving…'; btn.disabled = true; }
   try {
     var token = localStorage.getItem('flow_gcal_token');
+    var tz = 'UTC';
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(err) {}
+    var patchBody = { summary: newTitle, location: newLoc, description: newDesc };
+    if (!ev.isAllDay && newStart) {
+      patchBody.start = { dateTime: ev.date + 'T' + newStart + ':00', timeZone: tz };
+      patchBody.end   = { dateTime: ev.date + 'T' + (newEnd || newStart) + ':00', timeZone: tz };
+    }
     var patchRes = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/' + eventId, {
       method: 'PATCH',
       headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ location: newLoc, description: newDesc }),
+      body: JSON.stringify(patchBody),
     });
     if (!patchRes.ok) {
       var patchData = await patchRes.json();
+      if (btn) { btn.textContent = '💾 Save to Google'; btn.disabled = false; }
       throw new Error(patchData.error ? patchData.error.message : ('HTTP ' + patchRes.status));
     }
-    ev.location = newLoc;
-    ev.description = newDesc;
-    cancelEditEvent(eventId);
-    document.getElementById('ev-loc-view-' + eventId).textContent = newLoc || 'No location';
-    document.getElementById('ev-desc-view-' + eventId).textContent = newDesc || 'No notes';
+    ev.location = newLoc; ev.description = newDesc; ev.title = newTitle;
+    if (!ev.isAllDay && newStart) { ev.time = newStart; ev.endTime = newEnd; }
     if (btn) { btn.textContent = '💾 Save to Google'; btn.disabled = false; }
+    renderEventsForDate(selectedDate, 'eventList');
+    renderEventsForDate(selectedDate, 'fullEventList');
     showToast('Event updated in Google Calendar ✓');
   } catch(e) {
     if (btn) { btn.textContent = '💾 Save to Google'; btn.disabled = false; }
