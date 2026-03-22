@@ -1662,6 +1662,15 @@ function handleGCalToken(tokenResponse) {
     gapi.client.setToken(tokenResponse);
     fetchCalendarEvents();
   });
+  // Re-trigger Gmail Agent and Email Agent if visible
+  var gmailMain = document.getElementById('gmail-main-area');
+  if (gmailMain && gmailMain.style.display !== 'none') {
+    setTimeout(function() { refreshGmail(); }, 500);
+  }
+  var eaMain = document.getElementById('ea-main-area');
+  if (eaMain && eaMain.style.display !== 'none') {
+    setTimeout(function() { eaMessages = []; fetchEaMessages(); }, 500);
+  }
 }
 
 async function fetchCalendarEvents() {
@@ -2510,7 +2519,7 @@ function fetchGmailList(token) {
   .then(function(r){return r.json();})
   .then(function(data){
     if(data.error){
-      el.innerHTML='<div class="gmail-loading" style="color:var(--accent-red);">\u26a0\ufe0f '+escHtml(data.error.message||'Gmail access denied')+'<br><small>Sign out and back in to grant Gmail scope.</small></div>';
+      el.innerHTML='<div class="gmail-loading" style="color:var(--accent-red);">\u26a0\ufe0f Gmail scope missing.<br><small style="display:block;margin:8px 0;">Your Google token needs Gmail access.</small><button class="btn btn-gold" style="margin-top:6px;" onclick="connectGoogleCalendar()">🔗 Re-connect Google (grant Gmail access)</button></div>';
       return;
     }
     var msgs=data.messages||[];
@@ -3024,7 +3033,7 @@ function fetchEaMessages() {
   .then(function(data) {
     if (data.error) {
       var listEl2 = document.getElementById('ea-email-list');
-      if (listEl2) listEl2.innerHTML = '<div class="ea-loading" style="color:var(--accent-red);">⚠️ ' + escHtml(data.error.message || 'Gmail access denied') + '<br><small>Click Connect Google in Settings → Integrations to re-authorise with Gmail scope.</small></div>';
+      if (listEl2) listEl2.innerHTML = '<div class="ea-loading" style="color:var(--accent-red);">⚠️ Gmail scope missing.<br><small style="display:block;margin:8px 0;">Your Google token needs Gmail access. Click below to re-authorise.</small><button class="btn btn-gold" style="margin-top:6px;" onclick="connectGoogleCalendar()">🔗 Re-connect Google (grant Gmail access)</button></div>';
       return;
     }
     var ids = (data.messages || []).map(function(m) { return m.id; });
