@@ -670,14 +670,14 @@
           <div class="stat-pill-sub" id="stat-next-meeting">connecting…</div>
         </div>
         <div class="stat-pill" style="border-color:rgba(90,180,240,0.2);">
-          <div class="stat-pill-label">Open Deals</div>
-          <div class="stat-pill-value" style="color:var(--accent-blue);">—</div>
-          <div class="stat-pill-sub">HubSpot CRM</div>
+          <div class="stat-pill-label">Today's Events</div>
+          <div class="stat-pill-value" style="color:var(--accent-blue);" id="stat-events">—</div>
+          <div class="stat-pill-sub" id="stat-events-sub">from calendar</div>
         </div>
         <div class="stat-pill" style="border-color:rgba(176,124,240,0.2);">
-          <div class="stat-pill-label">Businesses</div>
-          <div class="stat-pill-value" style="color:var(--accent-purple);" id="stat-biz">3</div>
-          <div class="stat-pill-sub">All active</div>
+          <div class="stat-pill-label">Needs Action</div>
+          <div class="stat-pill-value" style="color:var(--accent-purple);" id="stat-action">0</div>
+          <div class="stat-pill-sub" id="stat-action-sub">tasks flagged</div>
         </div>
       </div>
 
@@ -709,13 +709,16 @@
         <div class="card widget" id="cal-widget">
           <div class="card-header">
             <div class="card-icon" style="background:rgba(56,189,198,0.1);">📅</div>
-            <div class="card-title">Calendar</div>
-            <div style="margin-left:auto;display:flex;gap:6px;">
-              <button class="btn btn-gold" onclick="openCreatePanel()" style="font-size:11px;padding:4px 10px;">+ Add Event</button>
-              <button class="btn-ghost btn" onclick="showView('calendar')" style="font-size:11px;padding:4px 10px;">Full view →</button>
+            <div id="calHomeMonthLabel" class="card-title">Calendar</div>
+            <div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
+              <button class="btn btn-ghost" onclick="homeCalNav(-1)" style="font-size:13px;padding:3px 8px;">‹</button>
+              <button class="btn btn-ghost" onclick="homeCalNav(1)" style="font-size:13px;padding:3px 8px;">›</button>
+              <button class="btn btn-gold" onclick="openCreatePanel(homeSelectedDate||'')" style="font-size:11px;padding:4px 10px;margin-left:4px;">+ Event</button>
+              <button class="btn-ghost btn" onclick="showView('calendar')" style="font-size:11px;padding:4px 10px;">Full →</button>
             </div>
           </div>
-          <div id="calHome" style="padding:8px 14px 14px;"></div>
+          <div id="calHome" style="padding:8px 14px 4px;"></div>
+          <div id="calHomeEvents" style="padding:0 14px 14px;"></div>
         </div>
         <!-- AI WIDGET -->
         <div class="card widget" id="ai-widget">
@@ -3686,7 +3689,74 @@ function updateEaApprovalBadge() {
 }
 
 // ── HOME WIDGET HELPERS ──
+var homeCalYear = new Date().getFullYear();
+var homeCalMonth = new Date().getMonth();
+var homeSelectedDate = new Date().toISOString().substring(0,10);
+
+function homeCalNav(delta) {
+  homeCalMonth += delta;
+  if (homeCalMonth > 11) { homeCalMonth = 0; homeCalYear++; }
+  if (homeCalMonth < 0) { homeCalMonth = 11; homeCalYear--; }
+  renderHomeCalendar();
+}
+
+function selectHomeDate(ds) {
+  homeSelectedDate = ds;
+  renderHomeCalendar();
+  renderHomeDateEvents();
+}
+
+function renderHomeDateEvents() {
+  var evEl = document.getElementById('calHomeEvents');
+  if (!evEl) return;
+  var ds = homeSelectedDate;
+  var evs = calEvents && calEvents.filter ? calEvents.filter(function(e){ return e.date === ds; }) : [];
+  var label = ds === new Date().toISOString().substring(0,10) ? 'Today' : new Date(ds + 'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  if (!evs.length) {
+    evEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:4px 0 2px;">' + label + ' — no events. <span style="cursor:pointer;color:var(--accent-teal);" onclick="openCreatePanel(\''+ds+'\')">+ Add one</span></div>';
+    return;
+  }
+  evEl.innerHTML = '<div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">'+label+'</div>' +
+    evs.map(function(e){
+      return '<div style="display:flex;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border-subtle);">'+
+        '<span style="font-family:var(--font-mono);font-size:10px;color:var(--accent-teal);width:38px;flex-shrink:0;">'+e.time+'</span>'+
+        '<span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">'+escHtml(e.title)+'</span>'+
+        '<span style="font-size:10px;cursor:pointer;color:var(--text-muted);" onclick="openEditPanel(\''+e.id+'\')">✎</span>'+
+      '</div>';
+    }).join('');
+}
+
+function renderHomeCalendar() {
+  var calEl = document.getElementById('calHome');
+  var labelEl = document.getElementById('calHomeMonthLabel');
+  if (!calEl) return;
+  var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if (labelEl) labelEl.textContent = monthNames[homeCalMonth] + ' ' + homeCalYear;
+  var today = new Date().toISOString().substring(0,10);
+  var days = ['M','T','W','T','F','S','S'];
+  var html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:11px;">';
+  days.forEach(function(d){ html+='<div style="text-align:center;color:var(--text-muted);font-weight:600;padding:2px;">'+d+'</div>'; });
+  var first = (new Date(homeCalYear, homeCalMonth, 1).getDay() + 6) % 7;
+  var daysInMonth = new Date(homeCalYear, homeCalMonth + 1, 0).getDate();
+  for (var i = 0; i < first; i++) html += '<div></div>';
+  for (var d2 = 1; d2 <= daysInMonth; d2++) {
+    var ds = homeCalYear + '-' + String(homeCalMonth+1).padStart(2,'0') + '-' + String(d2).padStart(2,'0');
+    var hasEv = calEvents && calEvents.some && calEvents.some(function(e){ return e.date === ds; });
+    var isToday = ds === today;
+    var isSelected = ds === homeSelectedDate;
+    var bg = isSelected ? 'linear-gradient(135deg,var(--accent-teal),var(--accent-mint))' : isToday ? 'rgba(56,189,198,0.15)' : 'transparent';
+    var color = isSelected ? 'white' : isToday ? 'var(--accent-teal)' : hasEv ? 'var(--accent-teal)' : 'var(--text-secondary)';
+    html += '<div onclick="selectHomeDate(\''+ds+'\')" style="text-align:center;padding:3px 1px;border-radius:50%;cursor:pointer;font-weight:'+(isToday||isSelected?'700':'400')+';background:'+bg+';color:'+color+';position:relative;font-size:11px;">'
+      + d2
+      + (hasEv && !isSelected ? '<span style="position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--accent-teal);display:block;"></span>' : '')
+      + '</div>';
+  }
+  html += '</div>';
+  calEl.innerHTML = html;
+}
+
 function renderHomeWidgets() {
+  // Tasks
   var el = document.getElementById('taskListHome');
   if (el) {
     var pending = tasks.filter(function(t){return !t.done;}).slice(0,5);
@@ -3700,36 +3770,21 @@ function renderHomeWidgets() {
     var badge = document.getElementById('stat-tasks-badge');
     if (badge) badge.textContent = pending.length ? pending.length+' pending' : '';
   }
-  var calEl = document.getElementById('calHome');
-  if (calEl) {
-    var today = new Date();
-    var m = today.getMonth(); var y = today.getFullYear();
-    var days = ['M','T','W','T','F','S','S'];
-    var html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:11px;">';
-    days.forEach(function(d){ html+='<div style="text-align:center;color:var(--text-muted);font-weight:600;padding:2px;">'+d+'</div>'; });
-    var first=(new Date(y,m,1).getDay()+6)%7;
-    var daysInMonth=new Date(y,m+1,0).getDate();
-    var todayStr=today.toISOString().substring(0,10);
-    for(var i=0;i<first;i++) html+='<div></div>';
-    for(var d2=1;d2<=daysInMonth;d2++){
-      var ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d2).padStart(2,'0');
-      var hasEv=calEvents&&calEvents.some&&calEvents.some(function(e){return e.date===ds;});
-      var isToday=ds===todayStr;
-      html+='<div onclick="showView(\'calendar\');selectedDate=\''+ds+'\';renderCalendar();" style="text-align:center;padding:3px 1px;border-radius:50%;cursor:pointer;font-weight:'+(isToday?'700':'400')+';background:'+(isToday?'linear-gradient(135deg,var(--accent-teal),var(--accent-mint))':'transparent')+';color:'+(isToday?'white':hasEv?'var(--accent-teal)':'var(--text-secondary)')+';position:relative;font-size:11px;">'+d2+(hasEv&&!isToday?'<span style="position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--accent-teal);display:block;"></span>':'')+'</div>';
-    }
-    html+='</div>';
-    var todayEvs=calEvents&&calEvents.filter&&calEvents.filter(function(e){return e.date===todayStr;});
-    if(todayEvs&&todayEvs.length){
-      html+='<div style="margin-top:10px;font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Today</div>';
-      todayEvs.slice(0,3).forEach(function(e){
-        html+='<div style="display:flex;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);">'+
-          '<span style="font-family:var(--font-mono);font-size:10px;color:var(--accent-teal);width:40px;flex-shrink:0;">'+e.time+'</span>'+
-          '<span style="font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escHtml(e.title)+'</span>'+
-        '</div>';
-      });
-    }
-    calEl.innerHTML=html;
-  }
+  // Stats
+  var todayStr = new Date().toISOString().substring(0,10);
+  var todayEvs = calEvents && calEvents.filter ? calEvents.filter(function(e){ return e.date === todayStr; }) : [];
+  var evStat = document.getElementById('stat-events');
+  var evSub = document.getElementById('stat-events-sub');
+  if (evStat) evStat.textContent = todayEvs.length || '—';
+  if (evSub && todayEvs.length) evSub.textContent = todayEvs[0] ? todayEvs[0].title.substring(0,22) + (todayEvs[0].title.length > 22 ? '…' : '') : 'today';
+  var actionCount = tasks.filter(function(t){ return !t.done && (t.flag==='attention'||t.flag==='approval'); }).length;
+  var acStat = document.getElementById('stat-action');
+  var acSub = document.getElementById('stat-action-sub');
+  if (acStat) acStat.textContent = actionCount || '0';
+  if (acSub) acSub.textContent = actionCount ? 'need attention' : 'all clear';
+  // Calendar
+  renderHomeCalendar();
+  renderHomeDateEvents();
 }
 
 function sendHomeAI(text) {
@@ -3740,7 +3795,7 @@ function sendHomeAI(text) {
   chatEl.innerHTML += '<div style="margin:4px 0;padding:6px 10px;background:rgba(56,189,198,0.1);border-radius:8px;font-size:12px;color:var(--text-primary);">'+escHtml(text)+'</div>';
   chatEl.innerHTML += '<div id="homeAiThinking" style="color:var(--text-muted);font-size:12px;padding:4px 0;">Thinking...</div>';
   chatEl.scrollTop = chatEl.scrollHeight;
-  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:text}]})})
+  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:claudeHeaders(),body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:text}]})})
   .then(function(r){return r.json();})
   .then(function(data){
     var reply=data.content&&data.content[0]?data.content[0].text:'No response.';
