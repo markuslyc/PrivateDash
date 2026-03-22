@@ -1638,39 +1638,49 @@ function initGoogleCalendar() {
 }
 
 function connectGoogleCalendar(forceConsent) {
-  if (!googleTokenClient) {
-    showToast('Still loading Google… please wait a moment and try again');
-    initGoogleCalendar();
+  if (typeof google === 'undefined') {
+    showToast('Google not loaded yet — please wait a moment and try again');
     return;
   }
   try {
-    googleTokenClient.requestAccessToken(forceConsent ? { prompt: 'consent' } : {});
+    // Always re-init token client so we pick up the latest scopes and can force consent
+    var client = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: GCAL_SCOPES,
+      prompt: forceConsent ? 'consent' : '',
+      callback: handleGCalToken,
+    });
+    googleTokenClient = client;
+    client.requestAccessToken();
   } catch(e) {
     showToast('Google error: ' + e.message);
   }
 }
 
+var eaReauthPending = false;
+
 function handleGCalToken(tokenResponse) {
   if (tokenResponse.error) {
-    showToast('Google Calendar error: ' + tokenResponse.error);
+    showToast('Google auth error: ' + tokenResponse.error);
     return;
   }
   var expiry = Date.now() + (tokenResponse.expires_in * 1000);
   localStorage.setItem('flow_gcal_token', tokenResponse.access_token);
   localStorage.setItem('flow_gcal_expiry', expiry.toString());
+  showToast('✅ Google connected!');
   gapi.load('client', function() {
     gapi.client.setToken(tokenResponse);
     fetchCalendarEvents();
   });
-  // Re-trigger Gmail Agent and Email Agent if visible
-  var gmailMain = document.getElementById('gmail-main-area');
-  if (gmailMain && gmailMain.style.display !== 'none') {
-    setTimeout(function() { refreshGmail(); }, 500);
-  }
-  var eaMain = document.getElementById('ea-main-area');
-  if (eaMain && eaMain.style.display !== 'none') {
-    setTimeout(function() { eaMessages = []; fetchEaMessages(); }, 500);
-  }
+  // Re-trigger Gmail and Email Agent regardless of which view is visible
+  setTimeout(function() {
+    var gmailMain = document.getElementById('gmail-main-area');
+    if (gmailMain && gmailMain.style.display !== 'none') { refreshGmail(); }
+    var eaView = document.getElementById('view-emailagent');
+    if (eaView && eaView.classList.contains('active')) {
+      eaMessages = []; fetchEaMessages();
+    }
+  }, 300);
 }
 
 async function fetchCalendarEvents() {
