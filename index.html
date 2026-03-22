@@ -208,6 +208,17 @@
   .task-del { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 4px; transition: var(--transition); opacity: 0; }
   .task-item:hover .task-del { opacity: 1; }
   .task-del:hover { color: var(--accent-red); background: rgba(240,96,96,0.1); }
+  .flag-btn { background:none; border:1px solid var(--border); border-radius:var(--radius-sm); padding:2px 7px; font-size:10px; cursor:pointer; color:var(--text-muted); transition:var(--transition); font-family:var(--font-main); opacity:0; }
+  .task-item:hover .flag-btn { opacity:1; }
+  .flag-btn.flagged-attention { opacity:1; background:rgba(240,137,42,0.12); color:var(--accent-amber); border-color:rgba(240,137,42,0.3); }
+  .flag-btn.flagged-approval { opacity:1; background:rgba(176,124,240,0.12); color:var(--accent-purple); border-color:rgba(176,124,240,0.3); }
+  .nav-task-badge { position:absolute; top:5px; right:5px; background:var(--accent-red); color:white; border-radius:99px; font-size:9px; font-weight:700; padding:1px 4px; min-width:14px; text-align:center; line-height:14px; }
+  .action-q-item { display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+  .action-q-item:last-child { border-bottom:none; padding-bottom:0; }
+  .action-q-actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .delegate-modal { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:500; display:none; align-items:center; justify-content:center; backdrop-filter:blur(6px); }
+  .delegate-modal.open { display:flex; }
+  .delegate-box { background:var(--bg-1); border-radius:var(--radius-lg); border:1px solid var(--border); padding:24px; width:460px; max-width:95vw; display:flex; flex-direction:column; gap:14px; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
   .task-priority { font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 600; letter-spacing: 0.05em; align-self: flex-start; margin-top: 3px; }
   .priority-high { background: rgba(224,92,92,0.15); color: var(--accent-red); border: 1px solid rgba(224,92,92,0.2); }
   .priority-med { background: rgba(245,158,74,0.15); color: var(--accent-amber); border: 1px solid rgba(245,158,74,0.2); }
@@ -533,7 +544,7 @@
   <nav class="sidebar">
     <div class="logo-mark">FLOW</div>
     <button class="nav-btn active" onclick="showView('home')" id="nav-home">🏠<span class="tooltip">Home</span></button>
-    <button class="nav-btn" onclick="showView('tasks')" id="nav-tasks">📋<span class="tooltip">Tasks</span></button>
+    <button class="nav-btn" onclick="showView('tasks')" id="nav-tasks">📋<span class="nav-task-badge" id="nav-tasks-badge" style="display:none;">0</span><span class="tooltip">Tasks</span></button>
     <button class="nav-btn" onclick="showView('calendar')" id="nav-calendar">📅<span class="tooltip">Calendar</span></button>
     <button class="nav-btn" onclick="showView('ai')" id="nav-ai">🤖<span class="tooltip">AI Assistant</span></button>
     <button class="nav-btn" onclick="showView('integrations')" id="nav-integrations">🔌<span class="tooltip">Integrations</span></button>
@@ -661,6 +672,21 @@
     <!-- TASKS VIEW -->
     <div class="view" id="view-tasks">
       <div class="section-label">All Tasks</div>
+      <!-- ACTION QUEUE -->
+      <div id="action-queue-card" class="card" style="margin-bottom:16px;display:none;">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(240,96,96,0.1);">🚨</div>
+          <div class="card-title">Requires Your Action</div>
+          <div class="card-badge" style="background:rgba(240,96,96,0.1);color:var(--accent-red);" id="action-queue-count">0 pending</div>
+          <div style="margin-left:auto;display:flex;gap:6px;">
+            <button class="gmail-filter-btn active" onclick="setActionFilter('all',this)">All</button>
+            <button class="gmail-filter-btn" onclick="setActionFilter('attention',this)">🚩 Attention</button>
+            <button class="gmail-filter-btn" onclick="setActionFilter('approval',this)">✅ Approval</button>
+            <button class="gmail-filter-btn" onclick="setActionFilter('done',this)">Done</button>
+          </div>
+        </div>
+        <div class="card-body" id="action-queue-list"></div>
+      </div>
       <div class="card">
         <div class="card-header">
           <div class="card-icon" style="background:rgba(245,200,66,0.1);">📋</div>
@@ -992,6 +1018,20 @@ What would you like to work on?</div></div>
   </div>
 </div>
 
+<!-- DELEGATE MODAL -->
+<div class="delegate-modal" id="delegateModal">
+  <div class="delegate-box">
+    <h3>📤 Delegate Task</h3>
+    <div class="form-field"><div class="form-label">To</div><input class="form-input" id="del-to" type="email" placeholder="colleague@email.com"></div>
+    <div class="form-field"><div class="form-label">Subject</div><input class="form-input" id="del-subject" type="text"></div>
+    <div class="form-field"><div class="form-label">Message</div><textarea class="form-input" id="del-body" rows="5" style="resize:vertical;"></textarea></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-gold" style="flex:1;" onclick="sendDelegation()">📤 Send</button>
+      <button class="btn btn-ghost" onclick="closeDelegateModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- DELETE CONFIRM MODAL -->
 <div class="confirm-modal" id="confirmModal">
   <div class="confirm-box">
@@ -1025,6 +1065,8 @@ const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar';
 
 let tasks = [];
 let nextTaskId = 1;
+var actionFilter = 'all';
+var delegatingTaskId = null;
 let calYear, calMonth;
 let calEvents = [];
 let gcalConnected = false;
@@ -1134,6 +1176,12 @@ function updateTaskStats() {
   el = document.getElementById('stat-tasks-sub'); if (el) el.textContent = done + ' completed';
   el = document.getElementById('task-counter'); if (el) el.textContent = pending + ' pending';
   el = document.getElementById('full-task-counter'); if (el) el.textContent = pending + ' pending';
+  var flagged = tasks.filter(function(t){ return t.flag && !t.done; }).length;
+  var navBadge = document.getElementById('nav-tasks-badge');
+  if (navBadge) { navBadge.textContent = flagged; navBadge.style.display = flagged > 0 ? '' : 'none'; }
+  var qCount = document.getElementById('action-queue-count');
+  if (qCount) qCount.textContent = flagged + ' pending';
+  renderActionQueue();
 }
 
 function renderTasks() {
@@ -1156,6 +1204,8 @@ function taskHtml(t) {
     '<div class="task-meta">' + escHtml(dueStr) + '</div>' +
     '</div>' +
     '<span class="task-priority priority-' + t.priority + '">' + t.priority.toUpperCase() + '</span>' +
+    '<button class="flag-btn' + (t.flag === 'attention' ? ' flagged-attention' : '') + '" onclick="toggleFlag(' + t.id + ',\'attention\')" title="Flag: Needs Attention">🚩</button>' +
+    '<button class="flag-btn' + (t.flag === 'approval' ? ' flagged-approval' : '') + '" onclick="toggleFlag(' + t.id + ',\'approval\')" title="Flag: Needs Approval">✅</button>' +
     '<button class="task-del" onclick="deleteTask(' + t.id + ')" title="Delete">✕</button>' +
     '</div>';
 }
@@ -1168,6 +1218,104 @@ function toggleTask(id) {
 function deleteTask(id) {
   tasks = tasks.filter(function(t){ return t.id !== id; });
   saveTasks(); renderTasks();
+}
+
+function toggleFlag(id, flag) {
+  var t = tasks.find(function(t){ return t.id === id; });
+  if (!t) return;
+  t.flag = (t.flag === flag) ? '' : flag;
+  saveTasks(); renderTasks();
+}
+
+function setActionFilter(f, btn) {
+  actionFilter = f;
+  document.querySelectorAll('#action-queue-card .gmail-filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderActionQueue();
+}
+
+function renderActionQueue() {
+  var el = document.getElementById('action-queue-list');
+  var card = document.getElementById('action-queue-card');
+  if (!el || !card) return;
+  var flagged = tasks.filter(function(t){ return t.flag === 'attention' || t.flag === 'approval'; });
+  if (!flagged.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  var filtered;
+  if (actionFilter === 'attention') filtered = flagged.filter(function(t){ return t.flag === 'attention' && !t.done; });
+  else if (actionFilter === 'approval') filtered = flagged.filter(function(t){ return t.flag === 'approval' && !t.done; });
+  else if (actionFilter === 'done') filtered = flagged.filter(function(t){ return t.done; });
+  else filtered = flagged.filter(function(t){ return !t.done; });
+  el.innerHTML = filtered.length ? filtered.map(actionQueueItemHtml).join('') : '<div class="empty-state"><div class="icon">✅</div>Nothing here.</div>';
+}
+
+function actionQueueItemHtml(t) {
+  var flagBadge = t.flag === 'attention'
+    ? '<span style="font-size:10px;padding:2px 7px;border-radius:99px;background:rgba(240,137,42,0.15);color:var(--accent-amber);font-weight:600;">🚩 Attention</span>'
+    : '<span style="font-size:10px;padding:2px 7px;border-radius:99px;background:rgba(176,124,240,0.15);color:var(--accent-purple);font-weight:600;">✅ Approval</span>';
+  var srcBadge = t.source === 'gmail' ? ' <span style="font-size:10px;padding:1px 6px;border-radius:99px;background:rgba(90,180,240,0.15);color:var(--accent-blue);font-family:var(--font-mono);">✉️ Gmail</span>' : '';
+  var due = t.dueDate || t.date || '—';
+  return '<div class="action-q-item">' +
+    '<div style="flex:1;">' +
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">' + flagBadge + srcBadge + '</div>' +
+      '<div style="font-size:14px;font-weight:500;color:var(--text-primary);margin-bottom:3px;">' + escHtml(t.text) + '</div>' +
+      '<div style="font-size:11px;color:var(--text-muted);">Due: ' + escHtml(due) + ' &nbsp;·&nbsp; ' + t.priority.toUpperCase() + '</div>' +
+      '<div class="action-q-actions">' +
+        '<button class="btn btn-ghost" style="padding:4px 12px;font-size:12px;" onclick="toggleTask(' + t.id + ')">✓ Done</button>' +
+        '<button class="btn btn-ghost" style="padding:4px 12px;font-size:12px;" onclick="delegateTask(' + t.id + ')">📤 Delegate</button>' +
+        '<button class="btn btn-ghost" style="padding:4px 10px;font-size:12px;" onclick="toggleFlag(' + t.id + ',\'' + t.flag + '\')">✕ Unflag</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function delegateTask(id) {
+  var t = tasks.find(function(t){ return t.id === id; });
+  if (!t) return;
+  delegatingTaskId = id;
+  var toEl = document.getElementById('del-to');
+  var subEl = document.getElementById('del-subject');
+  var bodyEl = document.getElementById('del-body');
+  if (toEl) toEl.value = '';
+  if (subEl) subEl.value = 'Action needed: ' + t.text;
+  if (bodyEl) bodyEl.value = 'Hi,\n\nCould you please handle the following:\n\n' + t.text + (t.dueDate ? '\n\nDue: ' + t.dueDate : '') + '\n\nThanks,\nMarkus';
+  var modal = document.getElementById('delegateModal');
+  if (modal) modal.classList.add('open');
+  setTimeout(function(){ if(toEl) toEl.focus(); }, 100);
+}
+
+function closeDelegateModal() {
+  var modal = document.getElementById('delegateModal');
+  if (modal) modal.classList.remove('open');
+  delegatingTaskId = null;
+}
+
+function sendDelegation() {
+  var to = (document.getElementById('del-to') || {}).value || '';
+  var subject = (document.getElementById('del-subject') || {}).value || '';
+  var body = (document.getElementById('del-body') || {}).value || '';
+  if (!to || to.indexOf('@') < 0) { showToast('Enter a valid email address'); return; }
+  var token = localStorage.getItem('flow_gcal_token');
+  if (!token) { showToast('Not connected to Google'); return; }
+  var raw = 'To: ' + to + '\r\nSubject: ' + subject + '\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n' + body;
+  var enc = btoa(unescape(encodeURIComponent(raw))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ raw: enc })
+  }).then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.id) {
+      showToast('✅ Delegated!');
+      if (delegatingTaskId !== null) {
+        var t = tasks.find(function(t){ return t.id === delegatingTaskId; });
+        if (t) { t.flag = ''; t.done = true; saveTasks(); renderTasks(); }
+      }
+      closeDelegateModal();
+    } else {
+      showToast('⚠️ Send failed: ' + ((d.error && d.error.message) || 'Unknown'));
+    }
+  }).catch(function(){ showToast('Network error delegating task'); });
 }
 
 function clearDoneTasks() {
@@ -1197,13 +1345,14 @@ function addTask(fromFull) {
   saveTasks(); renderTasks();
 }
 
-function addTaskFromGmail(taskText, priority, dueDate, reminderTime, emailSubject, emailId) {
+function addTaskFromGmail(taskText, priority, dueDate, reminderTime, emailSubject, emailId, flag) {
   var task = {
     id: nextTaskId++, text: taskText, done: false,
     priority: priority || 'med',
     date: dueDate || 'Today', dueDate: dueDate || '', dueTime: '',
     reminderTime: reminderTime || '',
-    source: 'gmail', emailRef: emailSubject || '', emailId: emailId || ''
+    source: 'gmail', emailRef: emailSubject || '', emailId: emailId || '',
+    flag: flag || ''
   };
   tasks.unshift(task);
   if (task.dueDate && task.reminderTime) scheduleEmailReminder(task);
@@ -2399,7 +2548,7 @@ async function autoScanInboxForTasks(token) {
       var msg = gmailMessages.find(function(m){ return m.id === item.id; });
       if (!msg) return;
       var fromName = msg.from.replace(/<[^>]+>/,'').replace(/"/g,'').trim();
-      addTaskFromGmail(item.action || msg.subject, item.priority || 'med', item.dueDate || '', '', msg.subject, msg.id);
+      addTaskFromGmail(item.action || msg.subject, item.priority || 'med', item.dueDate || '', '', msg.subject, msg.id, 'attention');
       added++;
     });
     // Mark all scanned emails as processed (whether actionable or not)
