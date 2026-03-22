@@ -407,7 +407,10 @@
   .gmail-points-input{width:100%;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 14px;color:var(--text-primary);font-family:var(--font-main);font-size:13px;resize:none;outline:none;transition:border-color 0.2s;min-height:72px;}
   .gmail-points-input:focus{border-color:var(--accent-gold-dim);}
   .gmail-reply-actions{display:flex;gap:8px;margin-top:10px;}
-  .gmail-draft-box{margin-top:12px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;font-size:13px;color:var(--text-secondary);line-height:1.7;white-space:pre-wrap;display:none;}
+  .gmail-draft-box{margin-top:12px;width:100%;box-sizing:border-box;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;font-size:13px;color:var(--text-secondary);line-height:1.7;font-family:var(--font-main);resize:vertical;min-height:130px;outline:none;display:none;}
+  .gmail-draft-box:focus{border-color:var(--accent-gold-dim);}
+  .gmail-tone-bar{display:flex;gap:6px;margin-bottom:8px;}
+  .gmail-auto-tasks-banner{margin:0 0 12px;padding:10px 14px;background:rgba(94,203,138,0.08);border:1px solid rgba(94,203,138,0.2);border-radius:var(--radius-md);font-size:12px;color:var(--accent-green);line-height:1.6;}
   .gmail-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);gap:10px;}
   .gmail-loading{text-align:center;padding:20px;color:var(--text-muted);font-size:13px;}
   /* Settings */
@@ -1011,9 +1014,9 @@ What would you like to work on?</div></div>
 (function() {
   try {
     var user = JSON.parse(localStorage.getItem('flow_user') || 'null');
-    if (!user || !user.email) { window.location.href = '/PrivateDash/login.html'; return; }
+    if (!user || !user.email) { window.location.href = '/login.html'; return; }
     window._flowUser = user;
-  } catch(e) { window.location.href = '/PrivateDash/login.html'; }
+  } catch(e) { window.location.href = '/login.html'; }
 })();
 
 
@@ -1086,7 +1089,7 @@ function updateDateTime() {
       var adminBtn = document.createElement('button');
       adminBtn.className = 'nav-btn';
       adminBtn.innerHTML = '🛡<span class="tooltip">Admin</span>';
-      adminBtn.onclick = function() { window.location.href = '/PrivateDash/admin.html'; };
+      adminBtn.onclick = function() { window.location.href = '/admin.html'; };
       var spacer = document.querySelector('.sidebar-spacer');
       if (spacer) spacer.parentNode.insertBefore(adminBtn, spacer);
     }
@@ -1194,13 +1197,13 @@ function addTask(fromFull) {
   saveTasks(); renderTasks();
 }
 
-function addTaskFromGmail(taskText, priority, dueDate, reminderTime, emailSubject) {
+function addTaskFromGmail(taskText, priority, dueDate, reminderTime, emailSubject, emailId) {
   var task = {
     id: nextTaskId++, text: taskText, done: false,
     priority: priority || 'med',
     date: dueDate || 'Today', dueDate: dueDate || '', dueTime: '',
     reminderTime: reminderTime || '',
-    source: 'gmail', emailRef: emailSubject || ''
+    source: 'gmail', emailRef: emailSubject || '', emailId: emailId || ''
   };
   tasks.unshift(task);
   if (task.dueDate && task.reminderTime) scheduleEmailReminder(task);
@@ -2166,7 +2169,7 @@ function showToast(msg) {
 // ════════════════════════════════
 // GMAIL AGENT
 // ════════════════════════════════
-var gmailMessages=[], gmailFilter='all', gmailActiveId=null;
+var gmailMessages=[], gmailFilter='all', gmailActiveId=null, replyTone='professional';
 
 function initGmailView() {
   var token=localStorage.getItem('flow_gcal_token');
@@ -2201,8 +2204,8 @@ function fetchGmailList(token) {
       .then(function(m){
         var h={};(m.payload&&m.payload.headers||[]).forEach(function(hh){h[hh.name]=hh.value;});
         gmailMessages.push({id:m.id,threadId:m.threadId,subject:h['Subject']||'(no subject)',from:h['From']||'Unknown',date:h['Date']||'',snippet:m.snippet||'',unread:(m.labelIds||[]).indexOf('UNREAD')>=0,important:(m.labelIds||[]).indexOf('IMPORTANT')>=0});
-        if(++loaded===msgs.length)renderGmailList();
-      }).catch(function(){if(++loaded===msgs.length)renderGmailList();});
+        if(++loaded===msgs.length){renderGmailList();autoScanInboxForTasks(token);}
+      }).catch(function(){if(++loaded===msgs.length){renderGmailList();autoScanInboxForTasks(token);}});
     });
   }).catch(function(){if(el)el.innerHTML='<div class="gmail-loading" style="color:var(--accent-red);">Network error</div>';});
 }
@@ -2293,12 +2296,18 @@ function renderGmailDetail(id,h,body,msg){
     '</div>'+
     '<div class="gmail-reply-area">'+
       '<h4>\u270d\ufe0f Draft Reply \u2014 type your points below</h4>'+
+      '<div class="gmail-tone-bar">'+
+        '<button class="gmail-filter-btn'+(replyTone==='professional'?' active':'')+'" id="tone-prof-'+safeId+'" onclick="setReplyTone(\'professional\',\''+safeId+'\')">Professional</button>'+
+        '<button class="gmail-filter-btn'+(replyTone==='concise'?' active':'')+'" id="tone-conc-'+safeId+'" onclick="setReplyTone(\'concise\',\''+safeId+'\')">Concise</button>'+
+        '<button class="gmail-filter-btn'+(replyTone==='friendly'?' active':'')+'" id="tone-frie-'+safeId+'" onclick="setReplyTone(\'friendly\',\''+safeId+'\')">Friendly</button>'+
+      '</div>'+
       '<textarea class="gmail-points-input" id="rp-'+safeId+'" placeholder="e.g.&#10;- Thanks for reaching out&#10;- Happy to meet Thursday 3pm&#10;- Please send the proposal first"></textarea>'+
       '<div class="gmail-reply-actions">'+
-        '<button class="btn-gold" onclick="draftGmailReply(\''+safeId+'\',\''+escHtml(h['From']||'')+'\',\''+escHtml(h['Subject']||'')+'\')">\u2728 Draft Reply</button>'+
+        '<button class="btn-gold" onclick="draftGmailReply(\''+safeId+'\',\''+escHtml(h['From']||'')+'\',\''+escHtml(h['Subject']||'')+'\')">\u2728 Generate Draft</button>'+
+        '<button class="btn btn-ghost" onclick="draftGmailReply(\''+safeId+'\',\''+escHtml(h['From']||'')+'\',\''+escHtml(h['Subject']||'\'')+'\')">&#8635; Regenerate</button>'+
         '<button class="btn btn-ghost" onclick="sendGmailReply(\''+id+'\',\''+safeId+'\',\''+escHtml(h['From']||'')+'\',\''+escHtml(h['Subject']||'')+'\')">\U0001f4e4 Send</button>'+
       '</div>'+
-      '<div class="gmail-draft-box" id="db-'+safeId+'"></div>'+
+      '<textarea class="gmail-draft-box" id="db-'+safeId+'" placeholder="Draft will appear here \u2014 edit freely before sending\u2026"></textarea>'+
     '</div>';
 }
 
@@ -2327,32 +2336,90 @@ function draftGmailReply(safeId,from,subject){
   if(!pts.value.trim()){showToast('Enter your reply points first');return;}
   var key=localStorage.getItem('flow_claude_key');
   if(!key){showToast('Add Claude API key in Integrations');return;}
-  db.style.display='block';db.textContent='\u2728 Drafting\u2026';
+  db.style.display='block';db.value='\u2728 Drafting\u2026';
   var userName=(window._flowUser&&window._flowUser.name)||'Markus';
-  var prompt='Draft a professional email reply based on these points.\n\nReply to: '+from+'\nRe: '+subject+'\n\nMy points:\n'+pts.value+'\n\nWrite ONLY the email body. Professional, warm, concise. Sign as '+userName+'.';
+  var toneInstr=replyTone==='concise'?'Concise and direct — short paragraphs, no fluff.':replyTone==='friendly'?'Warm and friendly — conversational but professional.':'Professional and polished — clear, warm, business-appropriate.';
+  var prompt='Draft an email reply based on these points.\n\nTone: '+toneInstr+'\nReply to: '+from+'\nRe: '+subject+'\n\nMy points:\n'+pts.value+'\n\nWrite ONLY the email body. Sign as '+userName+'.';
   fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})})
   .then(function(r){return r.json();})
-  .then(function(data){var t=data.content&&data.content[0]?data.content[0].text:'Could not draft.';var db2=document.getElementById('db-'+safeId);if(db2)db2.textContent=t;showToast('\u2705 Draft ready \u2014 review and send!');})
-  .catch(function(){var db2=document.getElementById('db-'+safeId);if(db2)db2.textContent='Error drafting. Check your API key.';});
+  .then(function(data){var t=data.content&&data.content[0]?data.content[0].text:'Could not draft.';var db2=document.getElementById('db-'+safeId);if(db2)db2.value=t;showToast('\u2705 Draft ready \u2014 edit and send!');})
+  .catch(function(){var db2=document.getElementById('db-'+safeId);if(db2)db2.value='Error drafting. Check your API key.';});
 }
 
 function sendGmailReply(threadId,safeId,to,subject){
   var db=document.getElementById('db-'+safeId);
-  if(!db||db.style.display==='none'||!db.textContent||db.textContent.includes('Drafting')){showToast('Draft a reply first');return;}
+  if(!db||!db.value||db.value.includes('Drafting')){showToast('Draft a reply first');return;}
   var token=localStorage.getItem('flow_gcal_token');
   if(!token){showToast('Not connected to Google');return;}
   var sub=subject.startsWith('Re:')?subject:'Re: '+subject;
-  var raw='To: '+to+'\r\nSubject: '+sub+'\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n'+db.textContent;
+  var raw='To: '+to+'\r\nSubject: '+sub+'\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n'+db.value;
   var enc=btoa(unescape(encodeURIComponent(raw))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({raw:enc,threadId:threadId})})
   .then(function(r){return r.json();})
-  .then(function(d){if(d.id){showToast('\u2705 Email sent!');db.style.display='none';}else{showToast('\u26a0\ufe0f Send failed: '+(d.error&&d.error.message||'Unknown'));}})
+  .then(function(d){if(d.id){showToast('\u2705 Email sent!');db.value='';db.style.display='none';}else{showToast('\u26a0\ufe0f Send failed: '+(d.error&&d.error.message||'Unknown'));}})
   .catch(function(){showToast('Network error sending email');});
 }
 
 function markAsRead(id,token){
   fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+id+'/modify',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({removeLabelIds:['UNREAD']})})
   .then(function(){var m=gmailMessages.find(function(x){return x.id===id;});if(m){m.unread=false;renderGmailList();}}).catch(function(){});
+}
+
+function setReplyTone(tone, safeId) {
+  replyTone = tone;
+  ['prof','conc','frie'].forEach(function(t){ var el=document.getElementById('tone-'+t+'-'+safeId); if(el)el.classList.remove('active'); });
+  var map={professional:'prof',concise:'conc',friendly:'frie'};
+  var active=document.getElementById('tone-'+map[tone]+'-'+safeId);
+  if(active)active.classList.add('active');
+}
+
+async function autoScanInboxForTasks(token) {
+  var key = localStorage.getItem('flow_claude_key');
+  if (!key || !gmailMessages.length) return;
+  // Load already-processed email IDs (dedup)
+  var processed = userLoad('flow_gmail_processed', []);
+  var toScan = gmailMessages.filter(function(m){ return processed.indexOf(m.id) < 0; });
+  if (!toScan.length) return;
+  // Build compact email list for Claude
+  var emailList = toScan.slice(0, 12).map(function(m, i){
+    var fromName = m.from.replace(/<[^>]+>/,'').replace(/"/g,'').trim();
+    return (i+1)+'. ID:'+m.id+' | From: '+fromName+' | Subject: '+m.subject+' | Snippet: '+m.snippet.substring(0,100);
+  }).join('\n');
+  var today = new Date().toISOString().split('T')[0];
+  var prompt = 'You are an assistant helping classify emails that require action.\n\nToday is '+today+'. Review these emails and return ONLY a JSON array of objects for emails that genuinely need a response or action. Skip newsletters, receipts, automated notifications, and FYI-only emails.\n\nFor each actionable email return: {"id":"<email_id>","action":"<short task description, max 70 chars>","priority":"high|med|low","dueDate":"YYYY-MM-DD or null"}\n\nEmails:\n'+emailList+'\n\nReturn [] if none need action.';
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})});
+    var data = await res.json();
+    var text = data.content && data.content[0] ? data.content[0].text : '[]';
+    var items = [];
+    try { items = JSON.parse(text.replace(/```json|```/g,'').trim()); } catch(e){}
+    if (!Array.isArray(items)) items = [];
+    var added = 0;
+    items.forEach(function(item){
+      var msg = gmailMessages.find(function(m){ return m.id === item.id; });
+      if (!msg) return;
+      var fromName = msg.from.replace(/<[^>]+>/,'').replace(/"/g,'').trim();
+      addTaskFromGmail(item.action || msg.subject, item.priority || 'med', item.dueDate || '', '', msg.subject, msg.id);
+      added++;
+    });
+    // Mark all scanned emails as processed (whether actionable or not)
+    var newProcessed = processed.concat(toScan.map(function(m){return m.id;}));
+    userStore('flow_gmail_processed', newProcessed.slice(-200)); // keep last 200
+    if (added > 0) {
+      var banner = document.getElementById('gmail-auto-tasks-banner');
+      if (!banner) {
+        var toolbar = document.querySelector('.gmail-toolbar');
+        if (toolbar) {
+          var div = document.createElement('div');
+          div.id = 'gmail-auto-tasks-banner';
+          div.className = 'gmail-auto-tasks-banner';
+          toolbar.insertAdjacentElement('afterend', div);
+        }
+      }
+      var b = document.getElementById('gmail-auto-tasks-banner');
+      if (b) b.innerHTML = '\u2728 Found '+added+' email'+(added>1?'s':'')+' needing action \u2014 tasks added automatically. <a href="#" onclick="showView(\'tasks\');return false;" style="color:var(--accent-gold);text-decoration:underline;">View tasks \u2192</a>';
+    }
+  } catch(e) {}
 }
 
 // ════════════════════════════════
