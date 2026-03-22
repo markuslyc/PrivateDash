@@ -138,7 +138,7 @@ Check `https://maspaceship.netlify.app` after 90s. Login with Google to verify a
 | 1 | **Calendar: Add & Edit Events (Google Calendar sync)** | Done | Deployed March 2026 |
 | 2 | **Gmail: Auto-pull tasks + AI reply drafting** | Done | Deployed March 2026 |
 | 3 | **Tasks: Attention & Approval queue view** | Done | Deployed March 2026 |
-| 4 | **GO-GENIE Email Agent (Full Inbox Command Centre)** | Pending | See spec below |
+| 4 | **GO-GENIE Email Agent (Full Inbox Command Centre)** | Done | Deployed March 2026 |
 
 ---
 
@@ -298,5 +298,4 @@ Each expanded email shows four smart action buttons:
 
 ---
 
-*Last updated: March 2026 — v1.3 P1/P2/P3 done, P4 GO-GENIE Email Agent added*
-*Next update due: After P4 Email Agent is complete*
+*Last updated: March 2026 — v1.4 P1/P2/P3/P4 all done*
