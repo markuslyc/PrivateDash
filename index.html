@@ -3036,6 +3036,28 @@ function fetchEaMessages() {
   if (listEl) listEl.innerHTML = '<div class="ea-loading">Fetching emails…</div>';
   var countEl = document.getElementById('ea-count');
   if (countEl) countEl.textContent = 'Loading…';
+  // First check what scopes this token actually has
+  fetch('https://oauth2.googleapis.com/tokeninfo?access_token=' + token)
+  .then(function(r) { return r.json(); })
+  .then(function(info) {
+    var grantedScopes = info.scope || '';
+    var hasGmail = grantedScopes.indexOf('gmail') > -1 || grantedScopes.indexOf('mail.google') > -1;
+    if (!hasGmail) {
+      var listEl2 = document.getElementById('ea-email-list');
+      if (listEl2) listEl2.innerHTML = '<div class="ea-loading" style="color:var(--accent-red);">⚠️ Gmail scope not in token.<br>' +
+        '<small style="display:block;margin:8px 0 4px;color:var(--text-muted);">Token has: ' + escHtml(grantedScopes || 'none') + '</small>' +
+        '<small style="display:block;margin:0 0 10px;">To fix: go to <strong>console.cloud.google.com</strong> → your project → APIs &amp; Services → OAuth consent screen → Add Gmail scopes (gmail.readonly, gmail.send, gmail.modify). Then click below.</small>' +
+        '<button class="btn btn-gold" style="margin-top:6px;" onclick="connectGoogleCalendar(true)">🔗 Re-connect Google</button></div>';
+      return;
+    }
+    doFetchEaMessages(token);
+  })
+  .catch(function() { doFetchEaMessages(token); });
+}
+
+function doFetchEaMessages(token) {
+  var listEl = document.getElementById('ea-email-list');
+  if (listEl) listEl.innerHTML = '<div class="ea-loading">Fetching emails…</div>';
   fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=50&q=in:inbox', {
     headers: { 'Authorization': 'Bearer ' + token }
   })
@@ -3043,7 +3065,7 @@ function fetchEaMessages() {
   .then(function(data) {
     if (data.error) {
       var listEl2 = document.getElementById('ea-email-list');
-      if (listEl2) listEl2.innerHTML = '<div class="ea-loading" style="color:var(--accent-red);">⚠️ Gmail scope missing.<br><small style="display:block;margin:8px 0;">Your Google token needs Gmail access. Click below to re-authorise.</small><button class="btn btn-gold" style="margin-top:6px;" onclick="connectGoogleCalendar(true)">🔗 Re-connect Google (grant Gmail access)</button></div>';
+      if (listEl2) listEl2.innerHTML = '<div class="ea-loading" style="color:var(--accent-red);">⚠️ ' + escHtml(data.error.message || 'Gmail access denied') + '<br><small style="display:block;margin:8px 0;">Enable Gmail API at console.cloud.google.com and add gmail scopes to the OAuth consent screen.</small><button class="btn btn-gold" style="margin-top:6px;" onclick="connectGoogleCalendar(true)">🔗 Re-connect Google</button></div>';
       return;
     }
     var ids = (data.messages || []).map(function(m) { return m.id; });
