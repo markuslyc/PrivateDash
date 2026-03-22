@@ -121,8 +121,8 @@ Work top-to-bottom unless Markus specifies otherwise.
 After completing each item, update this file and mark it done.
 
 P1 — Calendar: Add & Edit Events (Google Calendar sync) — DONE
-P2 — Gmail: Auto-pull tasks + AI reply drafting — PENDING
-P3 — Tasks: Attention & Approval queue view — PENDING
+P2 — Gmail: Auto-pull tasks + AI reply drafting — DONE
+P3 — Tasks: Attention & Approval queue view — DONE
 
 ---
 
@@ -197,5 +197,5 @@ Requirements:
 
 ---
 
-Last updated: March 2026 — v1.2
-Next update: After P2 Gmail auto-pull tasks is complete
+Last updated: March 2026 — v1.3
+Next update: P1–P3 all complete. Awaiting new backlog from Markus.
