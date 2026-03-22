@@ -1637,14 +1637,14 @@ function initGoogleCalendar() {
   setTimeout(tryInit, 800);
 }
 
-function connectGoogleCalendar() {
+function connectGoogleCalendar(forceConsent) {
   if (!googleTokenClient) {
     showToast('Still loading Google… please wait a moment and try again');
     initGoogleCalendar();
     return;
   }
   try {
-    googleTokenClient.requestAccessToken();
+    googleTokenClient.requestAccessToken(forceConsent ? { prompt: 'consent' } : {});
   } catch(e) {
     showToast('Google error: ' + e.message);
   }
@@ -2519,7 +2519,7 @@ function fetchGmailList(token) {
   .then(function(r){return r.json();})
   .then(function(data){
     if(data.error){
-      el.innerHTML='<div class="gmail-loading" style="color:var(--accent-red);">\u26a0\ufe0f Gmail scope missing.<br><small style="display:block;margin:8px 0;">Your Google token needs Gmail access.</small><button class="btn btn-gold" style="margin-top:6px;" onclick="connectGoogleCalendar()">🔗 Re-connect Google (grant Gmail access)</button></div>';
+      el.innerHTML='<div class="gmail-loading" style="color:var(--accent-red);">\u26a0\ufe0f Gmail scope missing.<br><small style="display:block;margin:8px 0;">Your Google token needs Gmail access.</small><button class="btn btn-gold" style="margin-top:6px;" onclick="connectGoogleCalendar(true)">🔗 Re-connect Google (grant Gmail access)</button></div>';
       return;
     }
     var msgs=data.messages||[];
@@ -3033,7 +3033,7 @@ function fetchEaMessages() {
   .then(function(data) {
     if (data.error) {
       var listEl2 = document.getElementById('ea-email-list');
-      if (listEl2) listEl2.innerHTML = '<div class="ea-loading" style="color:var(--accent-red);">⚠️ Gmail scope missing.<br><small style="display:block;margin:8px 0;">Your Google token needs Gmail access. Click below to re-authorise.</small><button class="btn btn-gold" style="margin-top:6px;" onclick="connectGoogleCalendar()">🔗 Re-connect Google (grant Gmail access)</button></div>';
+      if (listEl2) listEl2.innerHTML = '<div class="ea-loading" style="color:var(--accent-red);">⚠️ Gmail scope missing.<br><small style="display:block;margin:8px 0;">Your Google token needs Gmail access. Click below to re-authorise.</small><button class="btn btn-gold" style="margin-top:6px;" onclick="connectGoogleCalendar(true)">🔗 Re-connect Google (grant Gmail access)</button></div>';
       return;
     }
     var ids = (data.messages || []).map(function(m) { return m.id; });
