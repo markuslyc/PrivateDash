@@ -3121,44 +3121,61 @@ function doFetchEaMessages(token) {
   });
 }
 
+var eaTriageHeaders = {
+  'Content-Type': 'application/json',
+  'x-api-key': '',
+  'anthropic-version': '2023-06-01',
+  'anthropic-dangerous-direct-browser-access': 'true'
+};
+
+function claudeHeaders() {
+  var key = localStorage.getItem('flow_claude_key') || '';
+  return { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' };
+}
+
 function triageEaMessages() {
   var key = localStorage.getItem('flow_claude_key');
-  if (!key || eaMessages.length === 0) {
-    renderEaList();
-    return;
+  if (!key || eaMessages.length === 0) { renderEaList(); return; }
+  // Process all emails in batches of 8, render list after first batch
+  var batchSize = 8;
+  var total = eaMessages.length;
+  var batchIndex = 0;
+  function runBatch() {
+    if (batchIndex * batchSize >= total) { updateEaApprovalBadge(); return; }
+    var start = batchIndex * batchSize;
+    var batch = eaMessages.slice(start, start + batchSize);
+    var emailsText = batch.map(function(m, i) {
+      return (i + 1) + '. Subject: ' + m.subject + '\nFrom: ' + m.from + '\nSnippet: ' + m.snippet.substring(0, 100);
+    }).join('\n\n');
+    var prompt = 'Triage these emails. Return a JSON array with one object per email: {index, triage, summary}\n' +
+      'triage: exactly one of: action, approval, fyi, calendar\n' +
+      'summary: 1 sentence plain English summary\n' +
+      'Return ONLY the JSON array, no markdown, no explanation.\n\nEmails:\n' + emailsText;
+    fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: claudeHeaders(),
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var text = data.content && data.content[0] ? data.content[0].text : '[]';
+      try {
+        var match = text.match(/\[[\s\S]*\]/);
+        var results = match ? JSON.parse(match[0]) : [];
+        results.forEach(function(r) {
+          var msg = eaMessages[start + r.index - 1];
+          if (msg) { msg.triage = r.triage || 'fyi'; msg.summary = r.summary || ''; }
+        });
+      } catch(e) {}
+      batchIndex++;
+      renderEaList();
+      updateEaApprovalBadge();
+      // Small delay between batches to avoid rate limiting
+      setTimeout(runBatch, 600);
+    })
+    .catch(function() { batchIndex++; renderEaList(); setTimeout(runBatch, 600); });
   }
-  // Triage in batches of 10
-  var batch = eaMessages.slice(0, 10);
-  var emailsText = batch.map(function(m, i) {
-    return (i + 1) + '. Subject: ' + m.subject + '\nFrom: ' + m.from + '\nSnippet: ' + m.snippet.substring(0, 120);
-  }).join('\n\n');
-  var prompt = 'Triage these emails. For each, return JSON array with: {index, triage, summary}\n' +
-    'triage must be exactly one of: action, approval, fyi, calendar\n' +
-    'summary: 1-2 sentence plain English summary\n' +
-    'Return ONLY a JSON array, no markdown.\n\nEmails:\n' + emailsText;
-  fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    var text = data.content && data.content[0] ? data.content[0].text : '[]';
-    try {
-      var match = text.match(/\[[\s\S]*\]/);
-      var results = match ? JSON.parse(match[0]) : [];
-      results.forEach(function(r) {
-        var idx = r.index - 1;
-        if (eaMessages[idx]) {
-          eaMessages[idx].triage = r.triage || 'fyi';
-          eaMessages[idx].summary = r.summary || '';
-        }
-      });
-    } catch(e) {}
-    renderEaList();
-    updateEaApprovalBadge();
-  })
-  .catch(function() { renderEaList(); });
+  runBatch();
 }
 
 function renderEaList() {
@@ -3200,6 +3217,44 @@ function openEaEmail(id) {
   var m = eaMessages.find(function(x) { return x.id === id; });
   if (!m) return;
   renderEaDetail(m);
+  if (!m.summary || !m.triage) { fetchEaEmailSummary(m); }
+}
+
+function fetchEaEmailSummary(m) {
+  var key = localStorage.getItem('flow_claude_key');
+  if (!key) return;
+  var safeId = m.id.replace(/[^a-z0-9]/gi, '');
+  var prompt = 'Triage and summarise this email. Return JSON: {triage, summary}\n' +
+    'triage: exactly one of: action, approval, fyi, calendar\n' +
+    'summary: 1-2 sentence plain English summary of what the email is about and what (if anything) is needed\n' +
+    'Return ONLY JSON, no markdown.\n\nSubject: ' + m.subject + '\nFrom: ' + m.from + '\n\n' + m.body.substring(0, 800);
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: claudeHeaders(),
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 200, messages: [{ role: 'user', content: prompt }] })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var text = data.content && data.content[0] ? data.content[0].text : '{}';
+    try {
+      var match = text.match(/\{[\s\S]*\}/);
+      var result = match ? JSON.parse(match[0]) : {};
+      if (result.triage) m.triage = result.triage;
+      if (result.summary) m.summary = result.summary;
+    } catch(e) {}
+    // Update the summary box if this email is still open
+    if (eaActiveId === m.id) {
+      var sumEl = document.getElementById('ea-sum-' + safeId);
+      if (sumEl && m.summary) {
+        sumEl.innerHTML = '<h4>✨ AI Summary</h4><p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">' + escHtml(m.summary) + '</p>';
+      }
+      // Update badge in header
+      renderEaDetail(m);
+    }
+    renderEaList();
+    updateEaApprovalBadge();
+  })
+  .catch(function() {});
 }
 
 function renderEaDetail(m) {
@@ -3260,7 +3315,7 @@ function eaCreateTask(id) {
   var prompt = 'Extract the main action item from this email as a short task title (max 80 chars). Return ONLY the task title.\n\nSubject: ' + m.subject + '\nFrom: ' + m.from + '\n\n' + m.body.substring(0, 600);
   fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 100, messages: [{ role: 'user', content: prompt }] })
   })
   .then(function(r) { return r.json(); })
@@ -3322,7 +3377,7 @@ function eaGenerateDraft() {
   var prompt = 'Write a ' + toneDesc + ' email reply.\n\nOriginal email:\nSubject: ' + m.subject + '\nFrom: ' + m.from + '\n\n' + m.body.substring(0, 600) + '\n\nKey points to address:\n' + notes + '\n\nWrite only the reply body (no Subject line, no "Dear..." header needed — start directly). Be ' + toneDesc + '.';
   fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, messages: [{ role: 'user', content: prompt }] })
   })
   .then(function(r) { return r.json(); })
@@ -3427,7 +3482,7 @@ function eaAddToCalendar(id) {
   var prompt = 'Extract calendar event details from this email. Return JSON: {title, date (YYYY-MM-DD), startTime (HH:MM), endTime (HH:MM), location}. If unsure, use empty string. Return ONLY JSON.\n\nSubject: ' + m.subject + '\n' + m.body.substring(0, 500);
   fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 200, messages: [{ role: 'user', content: prompt }] })
   })
   .then(function(r) { return r.json(); })
@@ -3480,7 +3535,7 @@ function extractMeetingSummary(m) {
   var prompt = 'Extract action items from this meeting summary or follow-up email. Return JSON array of objects: [{action, suggestedDue (YYYY-MM-DD or ""), priority (high/med/low)}]. Max 6 items. Return ONLY JSON array.\n\nSubject: ' + m.subject + '\n' + m.body.substring(0, 800);
   fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    headers: claudeHeaders(),
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 400, messages: [{ role: 'user', content: prompt }] })
   })
   .then(function(r) { return r.json(); })
