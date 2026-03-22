@@ -1231,7 +1231,7 @@ What would you like to work on?</div></div>
 
 
 const GOOGLE_CLIENT_ID = '387362798277-hljh6f7alu3tf85dpee6pvn4c2c3klk6.apps.googleusercontent.com';
-const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar';
+const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.modify';
 
 let tasks = [];
 let nextTaskId = 1;
@@ -3017,11 +3017,16 @@ function fetchEaMessages() {
   if (listEl) listEl.innerHTML = '<div class="ea-loading">Fetching emails…</div>';
   var countEl = document.getElementById('ea-count');
   if (countEl) countEl.textContent = 'Loading…';
-  fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=50&q=is:unread', {
+  fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=50&q=in:inbox', {
     headers: { 'Authorization': 'Bearer ' + token }
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
+    if (data.error) {
+      var listEl2 = document.getElementById('ea-email-list');
+      if (listEl2) listEl2.innerHTML = '<div class="ea-loading" style="color:var(--accent-red);">⚠️ ' + escHtml(data.error.message || 'Gmail access denied') + '<br><small>Click Connect Google in Settings → Integrations to re-authorise with Gmail scope.</small></div>';
+      return;
+    }
     var ids = (data.messages || []).map(function(m) { return m.id; });
     if (ids.length === 0) {
       eaMessages = [];
@@ -3166,7 +3171,7 @@ function renderEaDetail(m) {
   else if (m.triage === 'approval') badge = '<span class="ea-badge ea-badge-approval">🟡 Approval Needed</span>';
   else if (m.triage === 'fyi') badge = '<span class="ea-badge ea-badge-fyi">🟢 FYI</span>';
   else if (m.triage === 'calendar') badge = '<span class="ea-badge ea-badge-calendar">📅 Calendar</span>';
-  var safeId = id.replace ? id.replace(/[^a-z0-9]/gi, '') : '';
+  var safeId = m.id.replace(/[^a-z0-9]/gi, '');
   var meetingHtml = '';
   if (m.triage === 'calendar' && !m.meetingItems) {
     meetingHtml = '<div class="ea-meeting-panel" id="ea-meeting-' + safeId + '"><h4>📅 Meeting / Action Items</h4><div style="font-size:12px;color:var(--text-muted);">Extracting action items…</div></div>';
