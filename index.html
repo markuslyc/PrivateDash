@@ -495,6 +495,84 @@
   /* Dyslexia-friendly selection highlight */
   ::selection { background: rgba(56,189,198,0.25); color: var(--text-primary); }
 
+  /* ── EMAIL AGENT (P4) ── */
+  .ea-header{margin-bottom:20px;}
+  .ea-title{font-family:var(--font-display);font-size:18px;letter-spacing:0.06em;margin-bottom:4px;}
+  .ea-sub{font-size:13px;color:var(--text-muted);}
+  .ea-subtab-bar{display:flex;gap:8px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px;}
+  .ea-subtab{padding:7px 18px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-2);font-size:13px;font-weight:500;cursor:pointer;color:var(--text-secondary);transition:var(--transition);}
+  .ea-subtab.active{background:var(--accent-gold);border-color:var(--accent-gold);color:white;}
+  .ea-subtab-badge{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:99px;font-size:10px;font-weight:700;background:rgba(224,92,92,0.2);color:var(--accent-red);}
+  .ea-toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+  .ea-filter{padding:6px 14px;border-radius:99px;border:1px solid var(--border);background:var(--bg-2);font-size:12px;cursor:pointer;color:var(--text-secondary);transition:var(--transition);}
+  .ea-filter.active{background:var(--accent-gold);border-color:var(--accent-gold);color:white;}
+  .ea-layout{display:grid;grid-template-columns:360px 1fr;gap:16px;height:calc(100vh - 200px);}
+  .ea-list{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow-y:auto;}
+  .ea-list-header{padding:12px 16px;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:600;display:flex;justify-content:space-between;align-items:center;}
+  .ea-card{padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:var(--transition);}
+  .ea-card:hover{background:var(--bg-card-hover);}
+  .ea-card.active{background:rgba(56,189,198,0.07);border-left:3px solid var(--accent-teal);}
+  .ea-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .ea-sender{font-size:12px;font-weight:600;color:var(--text-primary);}
+  .ea-time{font-size:10px;color:var(--text-muted);font-family:var(--font-mono);}
+  .ea-subject{font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;font-weight:600;}
+  .ea-summary-snippet{font-size:11px;color:var(--text-muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .ea-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:600;margin-top:5px;}
+  .ea-badge-action{background:rgba(224,92,92,0.15);color:var(--accent-red);}
+  .ea-badge-approval{background:rgba(245,200,66,0.15);color:var(--accent-amber);}
+  .ea-badge-fyi{background:rgba(52,201,122,0.15);color:var(--accent-green);}
+  .ea-badge-calendar{background:rgba(74,144,217,0.15);color:var(--accent-blue);}
+  .ea-detail{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);display:flex;flex-direction:column;overflow:hidden;}
+  .ea-detail-header{padding:18px 20px;border-bottom:1px solid var(--border);}
+  .ea-detail-subject{font-size:16px;font-weight:600;margin-bottom:6px;line-height:1.3;}
+  .ea-detail-meta{font-size:12px;color:var(--text-muted);display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+  .ea-detail-body{flex:1;overflow-y:auto;padding:16px 20px;}
+  .ea-ai-summary{padding:14px 16px;background:rgba(56,189,198,0.07);border:1px solid rgba(56,189,198,0.2);border-radius:var(--radius-md);margin-bottom:14px;}
+  .ea-ai-summary h4{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-teal);margin-bottom:10px;font-weight:600;}
+  .ea-ai-summary ul{list-style:none;padding:0;}
+  .ea-ai-summary li{font-size:13px;color:var(--text-secondary);padding:3px 0 3px 16px;position:relative;line-height:1.5;}
+  .ea-ai-summary li::before{content:"•";position:absolute;left:0;color:var(--accent-teal);}
+  .ea-body-raw{padding:14px;background:var(--bg-2);border-radius:var(--radius-md);font-size:12px;color:var(--text-secondary);line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:200px;overflow-y:auto;margin-bottom:14px;}
+  .ea-actions{display:flex;gap:8px;padding:14px 16px;border-top:1px solid var(--border);background:var(--bg-2);flex-wrap:wrap;}
+  .ea-meeting-panel{padding:14px 16px;background:rgba(74,144,217,0.07);border:1px solid rgba(74,144,217,0.2);border-radius:var(--radius-md);margin-bottom:14px;}
+  .ea-meeting-panel h4{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-blue);margin-bottom:12px;font-weight:600;}
+  .ea-action-item-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-subtle);font-size:13px;}
+  .ea-action-item-row:last-child{border-bottom:none;}
+  .ea-action-item-text{flex:1;}
+  .ea-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);gap:10px;text-align:center;}
+  .ea-loading{text-align:center;padding:24px;color:var(--text-muted);font-size:13px;}
+  /* Email Agent approval queue */
+  .ea-approval-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:12px;}
+  .ea-approval-item-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
+  .ea-approval-badge{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:rgba(245,200,66,0.15);}
+  .ea-approval-info{flex:1;}
+  .ea-approval-subject{font-size:14px;font-weight:600;margin-bottom:3px;}
+  .ea-approval-from{font-size:12px;color:var(--text-muted);}
+  .ea-approval-summary{font-size:13px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6;}
+  .ea-approval-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  /* EA Modals */
+  .ea-modal{position:fixed;inset:0;background:rgba(10,20,40,0.75);backdrop-filter:blur(4px);z-index:1100;display:none;align-items:center;justify-content:center;}
+  .ea-modal.open{display:flex;}
+  .ea-modal-card{background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;width:580px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,0.5);}
+  .ea-modal-title{font-size:16px;font-weight:600;margin-bottom:4px;}
+  .ea-modal-sub{font-size:12px;color:var(--text-muted);margin-bottom:18px;}
+  .ea-thread-box{background:var(--bg-2);border-radius:var(--radius-md);padding:12px 14px;font-size:12px;color:var(--text-secondary);line-height:1.7;max-height:140px;overflow-y:auto;margin-bottom:14px;white-space:pre-wrap;word-break:break-word;}
+  .ea-field{margin-bottom:14px;}
+  .ea-field label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:600;display:block;margin-bottom:5px;}
+  .ea-field textarea,.ea-field input,.ea-field select{width:100%;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text-primary);font-family:var(--font-main);font-size:13px;outline:none;resize:none;transition:border-color 0.2s;}
+  .ea-field textarea:focus,.ea-field input:focus,.ea-field select:focus{border-color:var(--accent-teal);}
+  .ea-draft-box{width:100%;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;font-size:13px;color:var(--text-primary);line-height:1.7;font-family:var(--font-main);resize:vertical;min-height:140px;outline:none;display:none;}
+  .ea-draft-box:focus{border-color:var(--accent-teal);}
+  .ea-tone-bar{display:flex;gap:6px;margin-bottom:10px;}
+  .ea-tone-btn{padding:5px 14px;border-radius:99px;border:1px solid var(--border);background:var(--bg-2);font-size:12px;cursor:pointer;color:var(--text-secondary);transition:var(--transition);}
+  .ea-tone-btn.active{background:var(--accent-teal);border-color:var(--accent-teal);color:white;}
+  .ea-modal-actions{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;}
+  /* Preview modal */
+  .ea-preview-box{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;margin-bottom:14px;}
+  .ea-preview-row{display:flex;gap:10px;margin-bottom:8px;font-size:13px;}
+  .ea-preview-label{font-weight:600;color:var(--text-muted);width:60px;flex-shrink:0;}
+  .ea-preview-body{margin-top:12px;white-space:pre-wrap;font-size:13px;color:var(--text-secondary);line-height:1.7;}
+
 </style>
 </head>
 <body>
@@ -549,6 +627,7 @@
     <button class="nav-btn" onclick="showView('ai')" id="nav-ai">🤖<span class="tooltip">AI Assistant</span></button>
     <button class="nav-btn" onclick="showView('integrations')" id="nav-integrations">🔌<span class="tooltip">Integrations</span></button>
     <button class="nav-btn" onclick="showView('gmail')" id="nav-gmail">✉️<span class="tooltip">Gmail</span></button>
+    <button class="nav-btn" onclick="showView('emailagent')" id="nav-emailagent">🏢<span class="nav-task-badge" id="nav-ea-badge" style="display:none;">0</span><span class="tooltip">Email Agent</span></button>
   <button class="nav-btn" onclick="showView('settings')" id="nav-settings">⚙️<span class="tooltip">Settings</span></button>
   <div class="sidebar-spacer"></div>
     <div class="pa-badge" onclick="togglePaPanel()" title="PA Access">PA</div>
@@ -892,6 +971,54 @@ What would you like to work on?</div></div>
       </div>
     </div>
 
+    <!-- EMAIL AGENT VIEW (P4) -->
+    <div class="view" id="view-emailagent">
+      <div class="ea-header">
+        <div class="ea-title">🏢 Email Agent</div>
+        <div class="ea-sub">GO-GENIE inbox command centre — triage, action, reply</div>
+      </div>
+      <div id="ea-connect-area" class="gmail-connect-box" style="display:none;">
+        <div class="big-icon">📬</div>
+        <h3>Gmail Access Needed</h3>
+        <p>Sign out and back in to grant Gmail scope.</p>
+        <button class="btn-gold" onclick="initEmailAgent()">Try Anyway</button>
+      </div>
+      <div id="ea-main-area" style="display:none;">
+        <div class="ea-subtab-bar">
+          <button class="ea-subtab active" onclick="eaSetSubTab('inbox',this)" id="ea-tab-inbox">📥 Inbox</button>
+          <button class="ea-subtab" onclick="eaSetSubTab('approval',this)" id="ea-tab-approval">🟡 Approval Queue<span class="ea-subtab-badge" id="ea-approval-count" style="display:none;">0</span></button>
+        </div>
+        <!-- INBOX SUB-TAB -->
+        <div id="ea-inbox-panel">
+          <div class="ea-toolbar">
+            <button class="ea-filter active" onclick="eaSetFilter('all',this)">All</button>
+            <button class="ea-filter" onclick="eaSetFilter('action',this)">🔴 Action</button>
+            <button class="ea-filter" onclick="eaSetFilter('approval',this)">🟡 Approval</button>
+            <button class="ea-filter" onclick="eaSetFilter('fyi',this)">🟢 FYI</button>
+            <button class="ea-filter" onclick="eaSetFilter('calendar',this)">📅 Calendar</button>
+            <button class="ea-filter" style="margin-left:auto;" onclick="fetchEaMessages()">🔄 Refresh</button>
+          </div>
+          <div class="ea-layout">
+            <div class="ea-list">
+              <div class="ea-list-header"><span id="ea-count">Inbox</span></div>
+              <div id="ea-email-list"><div class="ea-loading">Loading…</div></div>
+            </div>
+            <div class="ea-detail" id="ea-detail-panel">
+              <div class="ea-empty-state">
+                <div style="font-size:40px;">🏢</div>
+                <div style="font-size:14px;font-weight:500;">Select an email to read</div>
+                <div style="font-size:12px;color:var(--text-muted);">AI triage & actions appear here</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- APPROVAL QUEUE SUB-TAB -->
+        <div id="ea-approval-panel" style="display:none;">
+          <div id="ea-approval-list"><div class="ea-loading">Loading…</div></div>
+        </div>
+      </div>
+    </div>
+
     <!-- SETTINGS VIEW -->
     <div class="view" id="view-settings">
       <div style="margin-bottom:20px;">
@@ -1040,6 +1167,49 @@ What would you like to work on?</div></div>
     <div class="confirm-actions">
       <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
       <button class="btn" style="background:var(--accent-red);color:white;" onclick="confirmDeleteAction()">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- EA REPLY MODAL -->
+<div class="ea-modal" id="eaReplyModal">
+  <div class="ea-modal-card">
+    <div class="ea-modal-title">✍️ Draft Reply</div>
+    <div class="ea-modal-sub" id="ea-reply-sub">Drafting reply to email</div>
+    <div class="ea-thread-box" id="ea-reply-thread"></div>
+    <div class="ea-tone-bar">
+      <button class="ea-tone-btn active" onclick="eaSetTone('professional',this)">Professional</button>
+      <button class="ea-tone-btn" onclick="eaSetTone('concise',this)">Concise</button>
+      <button class="ea-tone-btn" onclick="eaSetTone('friendly',this)">Friendly</button>
+    </div>
+    <div class="ea-field">
+      <label>What do you want to say? (bullet points OK)</label>
+      <textarea class="ea-field textarea" id="ea-reply-notes" rows="4" placeholder="e.g. Confirm meeting, ask about budget, say we'll follow up Thursday…"></textarea>
+    </div>
+    <textarea class="ea-draft-box" id="ea-reply-draft"></textarea>
+    <div class="ea-modal-actions">
+      <button class="btn btn-gold" onclick="eaGenerateDraft()">✨ Generate Draft</button>
+      <button class="btn btn-ghost" id="ea-regenerate-btn" onclick="eaGenerateDraft()" style="display:none;">🔄 Regenerate</button>
+      <button class="btn" style="background:var(--accent-green);color:white;" id="ea-send-approval-btn" onclick="eaSendForApproval()" style="display:none;">📤 Review &amp; Send</button>
+      <button class="btn btn-ghost" onclick="eaCloseReplyModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EA PREVIEW/CONFIRM MODAL -->
+<div class="ea-modal" id="eaPreviewModal">
+  <div class="ea-modal-card">
+    <div class="ea-modal-title">📤 Confirm &amp; Send</div>
+    <div class="ea-modal-sub">Review before sending — nothing goes out without your approval</div>
+    <div class="ea-preview-box">
+      <div class="ea-preview-row"><span class="ea-preview-label">To:</span><span id="ea-preview-to"></span></div>
+      <div class="ea-preview-row"><span class="ea-preview-label">Subject:</span><span id="ea-preview-subject"></span></div>
+      <div class="ea-preview-body" id="ea-preview-body"></div>
+    </div>
+    <div class="ea-modal-actions">
+      <button class="btn" style="background:var(--accent-green);color:white;" onclick="eaConfirmSend()" id="ea-confirm-send-btn">✅ Confirm &amp; Send</button>
+      <button class="btn btn-ghost" onclick="eaBackToReply()">← Edit Draft</button>
+      <button class="btn btn-ghost" onclick="eaClosePreviewModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -2214,6 +2384,7 @@ async function confirmDeleteAction() {
 // ── VIEW SWITCHING ──
 function showView(name) {
   if (name === 'gmail') setTimeout(initGmailView, 50);
+  if (name === 'emailagent') setTimeout(initEmailAgent, 50);
   if (name === 'settings') setTimeout(initSettings, 50);
   document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
   document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
@@ -2807,6 +2978,590 @@ function userLoad(key, defaultVal) {
   } catch(e) { return defaultVal; }
 }
 
+
+// ══════════════════════════════════════════════════════════════
+// P4 — EMAIL AGENT (GO-GENIE INBOX COMMAND CENTRE)
+// ══════════════════════════════════════════════════════════════
+
+var eaMessages = [];
+var eaFilter = 'all';
+var eaActiveId = null;
+var eaSubTab = 'inbox';
+var eaTone = 'professional';
+var eaReplyContext = null; // {id, subject, from, body}
+
+function initEmailAgent() {
+  var token = localStorage.getItem('flow_gcal_token');
+  var expiry = localStorage.getItem('flow_gcal_expiry');
+  var connectArea = document.getElementById('ea-connect-area');
+  var mainArea = document.getElementById('ea-main-area');
+  if (!token || (expiry && Date.now() > parseInt(expiry))) {
+    if (connectArea) connectArea.style.display = 'block';
+    if (mainArea) mainArea.style.display = 'none';
+    return;
+  }
+  if (connectArea) connectArea.style.display = 'none';
+  if (mainArea) mainArea.style.display = 'block';
+  if (eaMessages.length === 0) {
+    fetchEaMessages();
+  } else {
+    renderEaList();
+    updateEaApprovalBadge();
+  }
+}
+
+function fetchEaMessages() {
+  var token = localStorage.getItem('flow_gcal_token');
+  if (!token) return;
+  var listEl = document.getElementById('ea-email-list');
+  if (listEl) listEl.innerHTML = '<div class="ea-loading">Fetching emails…</div>';
+  var countEl = document.getElementById('ea-count');
+  if (countEl) countEl.textContent = 'Loading…';
+  fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=50&q=is:unread', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var ids = (data.messages || []).map(function(m) { return m.id; });
+    if (ids.length === 0) {
+      eaMessages = [];
+      renderEaList();
+      return;
+    }
+    var fetched = 0;
+    var results = [];
+    ids.forEach(function(id) {
+      fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/' + id + '?format=full', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(msg) {
+        var headers = {};
+        (msg.payload && msg.payload.headers || []).forEach(function(h) { headers[h.name] = h.value; });
+        var body = extractGmailBody(msg.payload);
+        results.push({
+          id: id,
+          subject: headers['Subject'] || '(no subject)',
+          from: headers['From'] || '',
+          date: headers['Date'] || '',
+          body: body,
+          snippet: msg.snippet || '',
+          unread: (msg.labelIds || []).indexOf('UNREAD') > -1,
+          important: (msg.labelIds || []).indexOf('IMPORTANT') > -1,
+          triage: null,
+          summary: null,
+          meetingItems: null
+        });
+        fetched++;
+        if (fetched === ids.length) {
+          results.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+          eaMessages = results;
+          triageEaMessages();
+        }
+      })
+      .catch(function() {
+        fetched++;
+        if (fetched === ids.length) {
+          results.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+          eaMessages = results;
+          triageEaMessages();
+        }
+      });
+    });
+  })
+  .catch(function(e) {
+    var listEl = document.getElementById('ea-email-list');
+    if (listEl) listEl.innerHTML = '<div class="ea-loading">Failed to load emails. Check your connection.</div>';
+  });
+}
+
+function triageEaMessages() {
+  var key = localStorage.getItem('flow_claude_key');
+  if (!key || eaMessages.length === 0) {
+    renderEaList();
+    return;
+  }
+  // Triage in batches of 10
+  var batch = eaMessages.slice(0, 10);
+  var emailsText = batch.map(function(m, i) {
+    return (i + 1) + '. Subject: ' + m.subject + '\nFrom: ' + m.from + '\nSnippet: ' + m.snippet.substring(0, 120);
+  }).join('\n\n');
+  var prompt = 'Triage these emails. For each, return JSON array with: {index, triage, summary}\n' +
+    'triage must be exactly one of: action, approval, fyi, calendar\n' +
+    'summary: 1-2 sentence plain English summary\n' +
+    'Return ONLY a JSON array, no markdown.\n\nEmails:\n' + emailsText;
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var text = data.content && data.content[0] ? data.content[0].text : '[]';
+    try {
+      var match = text.match(/\[[\s\S]*\]/);
+      var results = match ? JSON.parse(match[0]) : [];
+      results.forEach(function(r) {
+        var idx = r.index - 1;
+        if (eaMessages[idx]) {
+          eaMessages[idx].triage = r.triage || 'fyi';
+          eaMessages[idx].summary = r.summary || '';
+        }
+      });
+    } catch(e) {}
+    renderEaList();
+    updateEaApprovalBadge();
+  })
+  .catch(function() { renderEaList(); });
+}
+
+function renderEaList() {
+  var listEl = document.getElementById('ea-email-list');
+  var countEl = document.getElementById('ea-count');
+  if (!listEl) return;
+  var filtered = eaMessages.filter(function(m) {
+    if (eaFilter === 'all') return true;
+    return m.triage === eaFilter;
+  });
+  if (countEl) countEl.textContent = filtered.length + ' email' + (filtered.length !== 1 ? 's' : '');
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<div class="ea-loading">No emails in this filter.</div>';
+    return;
+  }
+  listEl.innerHTML = filtered.map(function(m) { return eaCardHtml(m); }).join('');
+}
+
+function eaCardHtml(m) {
+  var fromName = m.from.replace(/<[^>]+>/, '').replace(/"/g, '').trim() || m.from;
+  var dateStr = m.date ? new Date(m.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'}) : '';
+  var badge = '';
+  if (m.triage === 'action') badge = '<span class="ea-badge ea-badge-action">🔴 Action Required</span>';
+  else if (m.triage === 'approval') badge = '<span class="ea-badge ea-badge-approval">🟡 Approval Needed</span>';
+  else if (m.triage === 'fyi') badge = '<span class="ea-badge ea-badge-fyi">🟢 FYI</span>';
+  else if (m.triage === 'calendar') badge = '<span class="ea-badge ea-badge-calendar">📅 Calendar</span>';
+  var isActive = m.id === eaActiveId ? ' active' : '';
+  return '<div class="ea-card' + isActive + '" onclick="openEaEmail(\'' + m.id + '\')">' +
+    '<div class="ea-card-top"><span class="ea-sender">' + escHtml(fromName.substring(0, 30)) + '</span><span class="ea-time">' + escHtml(dateStr) + '</span></div>' +
+    '<div class="ea-subject">' + escHtml(m.subject) + '</div>' +
+    '<div class="ea-summary-snippet">' + escHtml(m.summary || m.snippet.substring(0, 100)) + '</div>' +
+    badge +
+    '</div>';
+}
+
+function openEaEmail(id) {
+  eaActiveId = id;
+  renderEaList();
+  var m = eaMessages.find(function(x) { return x.id === id; });
+  if (!m) return;
+  renderEaDetail(m);
+}
+
+function renderEaDetail(m) {
+  var panel = document.getElementById('ea-detail-panel');
+  if (!panel) return;
+  var fromName = m.from.replace(/<[^>]+>/, '').replace(/"/g, '').trim() || m.from;
+  var dateStr = m.date ? new Date(m.date).toLocaleString('en-GB', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}) : '';
+  var badge = '';
+  if (m.triage === 'action') badge = '<span class="ea-badge ea-badge-action">🔴 Action Required</span>';
+  else if (m.triage === 'approval') badge = '<span class="ea-badge ea-badge-approval">🟡 Approval Needed</span>';
+  else if (m.triage === 'fyi') badge = '<span class="ea-badge ea-badge-fyi">🟢 FYI</span>';
+  else if (m.triage === 'calendar') badge = '<span class="ea-badge ea-badge-calendar">📅 Calendar</span>';
+  var safeId = id.replace ? id.replace(/[^a-z0-9]/gi, '') : '';
+  var meetingHtml = '';
+  if (m.triage === 'calendar' && !m.meetingItems) {
+    meetingHtml = '<div class="ea-meeting-panel" id="ea-meeting-' + safeId + '"><h4>📅 Meeting / Action Items</h4><div style="font-size:12px;color:var(--text-muted);">Extracting action items…</div></div>';
+    setTimeout(function() { extractMeetingSummary(m); }, 400);
+  } else if (m.meetingItems) {
+    meetingHtml = renderMeetingPanel(m);
+  }
+  panel.innerHTML =
+    '<div class="ea-detail-header">' +
+      '<div class="ea-detail-subject">' + escHtml(m.subject) + '</div>' +
+      '<div class="ea-detail-meta">' +
+        '<span>From: <strong>' + escHtml(fromName) + '</strong></span>' +
+        '<span>' + escHtml(dateStr) + '</span>' +
+        badge +
+      '</div>' +
+    '</div>' +
+    '<div class="ea-detail-body">' +
+      '<div class="ea-ai-summary" id="ea-sum-' + safeId + '">' +
+        '<h4>✨ AI Summary</h4>' +
+        (m.summary
+          ? '<p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">' + escHtml(m.summary) + '</p>'
+          : '<div style="color:var(--text-muted);font-size:12px;">Summarising…</div>') +
+      '</div>' +
+      meetingHtml +
+      '<div class="ea-body-raw">' + escHtml(m.body.substring(0, 600)) + (m.body.length > 600 ? '\n\n[…truncated]' : '') + '</div>' +
+    '</div>' +
+    '<div class="ea-actions">' +
+      '<button class="gmail-filter-btn" onclick="eaCreateTask(\'' + m.id + '\')">📋 Create Task</button>' +
+      '<button class="gmail-filter-btn" onclick="eaOpenReplyModal(\'' + m.id + '\')">✍️ Draft Reply</button>' +
+      '<button class="gmail-filter-btn" onclick="eaAddToCalendar(\'' + m.id + '\')">📅 Add to Calendar</button>' +
+      '<button class="gmail-filter-btn" onclick="eaArchive(\'' + m.id + '\')">✅ Archive</button>' +
+    '</div>';
+}
+
+function eaCreateTask(id) {
+  var m = eaMessages.find(function(x) { return x.id === id; });
+  if (!m) return;
+  var key = localStorage.getItem('flow_claude_key');
+  if (!key) {
+    // fallback: create task directly
+    addTaskFromGmail(m.subject, m.triage === 'action' ? 'high' : 'med', '', '', m.subject, m.id, m.triage === 'action' ? 'attention' : m.triage === 'approval' ? 'approval' : '');
+    return;
+  }
+  showToast('Extracting action items…');
+  var prompt = 'Extract the main action item from this email as a short task title (max 80 chars). Return ONLY the task title.\n\nSubject: ' + m.subject + '\nFrom: ' + m.from + '\n\n' + m.body.substring(0, 600);
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 100, messages: [{ role: 'user', content: prompt }] })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var title = data.content && data.content[0] ? data.content[0].text.trim().replace(/^["']|["']$/g, '') : m.subject;
+    var flag = m.triage === 'action' ? 'attention' : m.triage === 'approval' ? 'approval' : '';
+    var priority = m.triage === 'action' ? 'high' : 'med';
+    addTaskFromGmail(title, priority, '', '', m.subject, m.id, flag);
+  })
+  .catch(function() {
+    addTaskFromGmail(m.subject, 'med', '', '', m.subject, m.id, '');
+  });
+}
+
+function eaOpenReplyModal(id) {
+  var m = eaMessages.find(function(x) { return x.id === id; });
+  if (!m) return;
+  eaReplyContext = m;
+  var modal = document.getElementById('eaReplyModal');
+  var subEl = document.getElementById('ea-reply-sub');
+  var threadEl = document.getElementById('ea-reply-thread');
+  var notesEl = document.getElementById('ea-reply-notes');
+  var draftEl = document.getElementById('ea-reply-draft');
+  var regenBtn = document.getElementById('ea-regenerate-btn');
+  var sendBtn = document.getElementById('ea-send-approval-btn');
+  if (subEl) subEl.textContent = 'Reply to: ' + m.subject;
+  if (threadEl) threadEl.textContent = 'From: ' + m.from + '\n\n' + m.body.substring(0, 500);
+  if (notesEl) notesEl.value = '';
+  if (draftEl) { draftEl.value = ''; draftEl.style.display = 'none'; }
+  if (regenBtn) regenBtn.style.display = 'none';
+  if (sendBtn) sendBtn.style.display = 'none';
+  // Reset tone buttons
+  document.querySelectorAll('.ea-tone-btn').forEach(function(b) { b.classList.remove('active'); });
+  var firstToneBtn = document.querySelector('.ea-tone-btn');
+  if (firstToneBtn) firstToneBtn.classList.add('active');
+  eaTone = 'professional';
+  if (modal) modal.classList.add('open');
+}
+
+function eaSetTone(tone, btn) {
+  eaTone = tone;
+  document.querySelectorAll('.ea-tone-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+}
+
+function eaGenerateDraft() {
+  var m = eaReplyContext;
+  if (!m) return;
+  var key = localStorage.getItem('flow_claude_key');
+  if (!key) { showToast('Add Claude API key in Integrations first'); return; }
+  var notesEl = document.getElementById('ea-reply-notes');
+  var draftEl = document.getElementById('ea-reply-draft');
+  var regenBtn = document.getElementById('ea-regenerate-btn');
+  var sendBtn = document.getElementById('ea-send-approval-btn');
+  var notes = notesEl ? notesEl.value.trim() : '';
+  if (!notes) { showToast('Add some notes on what you want to say first'); return; }
+  if (draftEl) { draftEl.style.display = 'block'; draftEl.value = 'Generating…'; }
+  var toneDesc = { professional: 'professional and clear', concise: 'very concise and to the point', friendly: 'warm and friendly' }[eaTone] || 'professional';
+  var prompt = 'Write a ' + toneDesc + ' email reply.\n\nOriginal email:\nSubject: ' + m.subject + '\nFrom: ' + m.from + '\n\n' + m.body.substring(0, 600) + '\n\nKey points to address:\n' + notes + '\n\nWrite only the reply body (no Subject line, no "Dear..." header needed — start directly). Be ' + toneDesc + '.';
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, messages: [{ role: 'user', content: prompt }] })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var reply = data.content && data.content[0] ? data.content[0].text : '';
+    if (draftEl) draftEl.value = reply;
+    if (regenBtn) regenBtn.style.display = 'inline-flex';
+    if (sendBtn) sendBtn.style.display = 'inline-flex';
+  })
+  .catch(function() {
+    if (draftEl) draftEl.value = 'Failed to generate draft. Try again.';
+  });
+}
+
+function eaSendForApproval() {
+  var m = eaReplyContext;
+  if (!m) return;
+  var draftEl = document.getElementById('ea-reply-draft');
+  var draft = draftEl ? draftEl.value : '';
+  if (!draft || draft === 'Generating…') { showToast('Generate a draft first'); return; }
+  // Populate preview modal
+  var toEl = document.getElementById('ea-preview-to');
+  var subjectEl = document.getElementById('ea-preview-subject');
+  var bodyEl = document.getElementById('ea-preview-body');
+  var fromEmail = m.from.match(/<([^>]+)>/) ? m.from.match(/<([^>]+)>/)[1] : m.from;
+  if (toEl) toEl.textContent = fromEmail;
+  if (subjectEl) subjectEl.textContent = 'Re: ' + m.subject;
+  if (bodyEl) bodyEl.textContent = draft;
+  // Close reply, open preview
+  var replyModal = document.getElementById('eaReplyModal');
+  var previewModal = document.getElementById('eaPreviewModal');
+  if (replyModal) replyModal.classList.remove('open');
+  if (previewModal) previewModal.classList.add('open');
+}
+
+function eaConfirmSend() {
+  var m = eaReplyContext;
+  if (!m) return;
+  var token = localStorage.getItem('flow_gcal_token');
+  if (!token) { showToast('Not authenticated'); return; }
+  var bodyEl = document.getElementById('ea-preview-body');
+  var draft = bodyEl ? bodyEl.textContent : '';
+  var fromEmail = m.from.match(/<([^>]+)>/) ? m.from.match(/<([^>]+)>/)[1] : m.from;
+  var subject = 'Re: ' + m.subject;
+  var sendBtn = document.getElementById('ea-confirm-send-btn');
+  if (sendBtn) { sendBtn.textContent = 'Sending…'; sendBtn.disabled = true; }
+  // Compose RFC 2822 message
+  var raw = 'To: ' + fromEmail + '\r\nSubject: ' + subject + '\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n' + draft;
+  var encoded = btoa(unescape(encodeURIComponent(raw))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ raw: encoded, threadId: m.id })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.id) {
+      showToast('✅ Email sent!');
+      eaClosePreviewModal();
+      // Mark as processed
+      var processed = userLoad('ea_triage', []);
+      processed.push(m.id);
+      userStore('ea_triage', processed.slice(-300));
+    } else {
+      showToast('Send failed: ' + (data.error && data.error.message || 'Unknown error'));
+      if (sendBtn) { sendBtn.textContent = 'Confirm & Send'; sendBtn.disabled = false; }
+    }
+  })
+  .catch(function(e) {
+    showToast('Send failed: ' + e.message);
+    if (sendBtn) { sendBtn.textContent = 'Confirm & Send'; sendBtn.disabled = false; }
+  });
+}
+
+function eaBackToReply() {
+  var previewModal = document.getElementById('eaPreviewModal');
+  var replyModal = document.getElementById('eaReplyModal');
+  if (previewModal) previewModal.classList.remove('open');
+  if (replyModal) replyModal.classList.add('open');
+}
+
+function eaCloseReplyModal() {
+  var modal = document.getElementById('eaReplyModal');
+  if (modal) modal.classList.remove('open');
+  eaReplyContext = null;
+}
+
+function eaClosePreviewModal() {
+  var modal = document.getElementById('eaPreviewModal');
+  if (modal) modal.classList.remove('open');
+  var btn = document.getElementById('ea-confirm-send-btn');
+  if (btn) { btn.textContent = '✅ Confirm & Send'; btn.disabled = false; }
+  eaReplyContext = null;
+}
+
+function eaAddToCalendar(id) {
+  var m = eaMessages.find(function(x) { return x.id === id; });
+  if (!m) return;
+  var key = localStorage.getItem('flow_claude_key');
+  if (!key) { openCreatePanel(''); return; }
+  showToast('Extracting event details…');
+  var prompt = 'Extract calendar event details from this email. Return JSON: {title, date (YYYY-MM-DD), startTime (HH:MM), endTime (HH:MM), location}. If unsure, use empty string. Return ONLY JSON.\n\nSubject: ' + m.subject + '\n' + m.body.substring(0, 500);
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 200, messages: [{ role: 'user', content: prompt }] })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var text = data.content && data.content[0] ? data.content[0].text : '{}';
+    var match = text.match(/\{[\s\S]*\}/);
+    var ev = {};
+    try { ev = match ? JSON.parse(match[0]) : {}; } catch(e) {}
+    openCreatePanel(ev.date || '');
+    setTimeout(function() {
+      var titleEl = document.getElementById('new-ev-title');
+      var startEl = document.getElementById('new-ev-start');
+      var endEl = document.getElementById('new-ev-end');
+      var locEl = document.getElementById('new-ev-location');
+      if (titleEl && ev.title) titleEl.value = ev.title;
+      if (startEl && ev.startTime) startEl.value = ev.startTime;
+      if (endEl && ev.endTime) endEl.value = ev.endTime;
+      if (locEl && ev.location) locEl.value = ev.location;
+    }, 150);
+  })
+  .catch(function() { openCreatePanel(''); });
+}
+
+function eaArchive(id) {
+  var token = localStorage.getItem('flow_gcal_token');
+  if (!token) return;
+  fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/' + id + '/modify', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ removeLabelIds: ['UNREAD', 'INBOX'] })
+  })
+  .then(function() {
+    eaMessages = eaMessages.filter(function(m) { return m.id !== id; });
+    if (eaActiveId === id) {
+      eaActiveId = null;
+      var panel = document.getElementById('ea-detail-panel');
+      if (panel) panel.innerHTML = '<div class="ea-empty-state"><div style="font-size:40px;">🏢</div><div style="font-size:14px;font-weight:500;">Select an email to read</div></div>';
+    }
+    renderEaList();
+    updateEaApprovalBadge();
+    showToast('Archived ✓');
+  })
+  .catch(function() { showToast('Archive failed'); });
+}
+
+function extractMeetingSummary(m) {
+  var key = localStorage.getItem('flow_claude_key');
+  if (!key) return;
+  var safeId = m.id.replace(/[^a-z0-9]/gi, '');
+  var prompt = 'Extract action items from this meeting summary or follow-up email. Return JSON array of objects: [{action, suggestedDue (YYYY-MM-DD or ""), priority (high/med/low)}]. Max 6 items. Return ONLY JSON array.\n\nSubject: ' + m.subject + '\n' + m.body.substring(0, 800);
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 400, messages: [{ role: 'user', content: prompt }] })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var text = data.content && data.content[0] ? data.content[0].text : '[]';
+    var match = text.match(/\[[\s\S]*\]/);
+    var items = [];
+    try { items = match ? JSON.parse(match[0]) : []; } catch(e) {}
+    m.meetingItems = items;
+    var panelEl = document.getElementById('ea-meeting-' + safeId);
+    if (panelEl) panelEl.outerHTML = renderMeetingPanel(m);
+  })
+  .catch(function() {});
+}
+
+function renderMeetingPanel(m) {
+  var safeId = m.id.replace(/[^a-z0-9]/gi, '');
+  if (!m.meetingItems || m.meetingItems.length === 0) {
+    return '<div class="ea-meeting-panel"><h4>📅 Meeting / Action Items</h4><div style="font-size:12px;color:var(--text-muted);">No action items found.</div></div>';
+  }
+  var rows = m.meetingItems.map(function(item, i) {
+    return '<div class="ea-action-item-row">' +
+      '<span class="ea-action-item-text">' + escHtml(item.action) + (item.suggestedDue ? ' <span style="font-size:11px;color:var(--text-muted);">→ ' + item.suggestedDue + '</span>' : '') + '</span>' +
+      '<span style="font-size:10px;padding:2px 7px;border-radius:99px;background:rgba(0,0,0,0.06);color:var(--text-muted);">' + (item.priority || 'med').toUpperCase() + '</span>' +
+      '<button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;" onclick="eaMeetingAddTask(\'' + m.id + '\',' + i + ')">+ Task</button>' +
+      '<button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;" onclick="eaMeetingSchedule(\'' + m.id + '\',' + i + ')">📅</button>' +
+    '</div>';
+  }).join('');
+  return '<div class="ea-meeting-panel" id="ea-meeting-' + safeId + '"><h4>📅 What You Need To Do</h4>' + rows + '</div>';
+}
+
+function eaMeetingAddTask(emailId, itemIdx) {
+  var m = eaMessages.find(function(x) { return x.id === emailId; });
+  if (!m || !m.meetingItems || !m.meetingItems[itemIdx]) return;
+  var item = m.meetingItems[itemIdx];
+  addTaskFromGmail(item.action, item.priority || 'med', item.suggestedDue || '', '', m.subject, m.id, 'attention');
+}
+
+function eaMeetingSchedule(emailId, itemIdx) {
+  var m = eaMessages.find(function(x) { return x.id === emailId; });
+  if (!m || !m.meetingItems || !m.meetingItems[itemIdx]) return;
+  var item = m.meetingItems[itemIdx];
+  openCreatePanel(item.suggestedDue || '');
+  setTimeout(function() {
+    var titleEl = document.getElementById('new-ev-title');
+    if (titleEl) titleEl.value = 'Follow-up: ' + item.action.substring(0, 60);
+  }, 150);
+}
+
+function eaSetFilter(filter, btn) {
+  eaFilter = filter;
+  document.querySelectorAll('.ea-filter').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderEaList();
+}
+
+function eaSetSubTab(tab, btn) {
+  eaSubTab = tab;
+  document.querySelectorAll('.ea-subtab').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var inboxPanel = document.getElementById('ea-inbox-panel');
+  var approvalPanel = document.getElementById('ea-approval-panel');
+  if (inboxPanel) inboxPanel.style.display = tab === 'inbox' ? 'block' : 'none';
+  if (approvalPanel) approvalPanel.style.display = tab === 'approval' ? 'block' : 'none';
+  if (tab === 'approval') renderEaApprovalQueue();
+}
+
+function renderEaApprovalQueue() {
+  var listEl = document.getElementById('ea-approval-list');
+  if (!listEl) return;
+  var approvalItems = eaMessages.filter(function(m) { return m.triage === 'approval'; });
+  if (approvalItems.length === 0) {
+    listEl.innerHTML = '<div class="ea-loading">No items awaiting approval 🎉</div>';
+    return;
+  }
+  listEl.innerHTML = approvalItems.map(function(m) {
+    var fromName = m.from.replace(/<[^>]+>/, '').replace(/"/g, '').trim();
+    return '<div class="ea-approval-item">' +
+      '<div class="ea-approval-item-top">' +
+        '<div class="ea-approval-badge">🟡</div>' +
+        '<div class="ea-approval-info">' +
+          '<div class="ea-approval-subject">' + escHtml(m.subject) + '</div>' +
+          '<div class="ea-approval-from">From: ' + escHtml(fromName) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ea-approval-summary">' + escHtml(m.summary || m.snippet.substring(0, 180)) + '</div>' +
+      '<div class="ea-approval-actions">' +
+        '<button class="btn btn-green" onclick="eaApproveReject(\'' + m.id + '\',\'approve\')">✅ Approve</button>' +
+        '<button class="btn" style="background:var(--accent-red);color:white;" onclick="eaApproveReject(\'' + m.id + '\',\'reject\')">✗ Reject</button>' +
+        '<button class="btn btn-ghost" onclick="eaApproveReject(\'' + m.id + '\',\'delegate\')">↗ Delegate</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function eaApproveReject(id, action) {
+  var m = eaMessages.find(function(x) { return x.id === id; });
+  if (!m) return;
+  eaReplyContext = m;
+  var modal = document.getElementById('eaReplyModal');
+  var subEl = document.getElementById('ea-reply-sub');
+  var threadEl = document.getElementById('ea-reply-thread');
+  var notesEl = document.getElementById('ea-reply-notes');
+  var draftEl = document.getElementById('ea-reply-draft');
+  var regenBtn = document.getElementById('ea-regenerate-btn');
+  var sendBtn = document.getElementById('ea-send-approval-btn');
+  var prefix = action === 'approve' ? 'Approved. ' : action === 'reject' ? 'Declined. ' : 'Delegating — ';
+  if (subEl) subEl.textContent = (action === 'approve' ? '✅ Approve: ' : action === 'reject' ? '✗ Decline: ' : '↗ Delegate: ') + m.subject;
+  if (threadEl) threadEl.textContent = 'From: ' + m.from + '\n\n' + m.body.substring(0, 500);
+  if (notesEl) notesEl.value = prefix;
+  if (draftEl) { draftEl.value = ''; draftEl.style.display = 'none'; }
+  if (regenBtn) regenBtn.style.display = 'none';
+  if (sendBtn) sendBtn.style.display = 'none';
+  document.querySelectorAll('.ea-tone-btn').forEach(function(b) { b.classList.remove('active'); });
+  var firstToneBtn = document.querySelector('.ea-tone-btn');
+  if (firstToneBtn) firstToneBtn.classList.add('active');
+  eaTone = 'professional';
+  if (modal) modal.classList.add('open');
+}
+
+function updateEaApprovalBadge() {
+  var count = eaMessages.filter(function(m) { return m.triage === 'approval'; }).length;
+  var badge = document.getElementById('ea-approval-count');
+  var navBadge = document.getElementById('nav-ea-badge');
+  if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'inline-block' : 'none'; }
+  if (navBadge) { navBadge.textContent = count; navBadge.style.display = count > 0 ? 'inline-block' : 'none'; }
+}
 
 // ── HOME WIDGET HELPERS ──
 function renderHomeWidgets() {
