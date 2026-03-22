@@ -1177,11 +1177,6 @@ What would you like to work on?</div></div>
     <div class="ea-modal-title">✍️ Draft Reply</div>
     <div class="ea-modal-sub" id="ea-reply-sub">Drafting reply to email</div>
     <div class="ea-thread-box" id="ea-reply-thread"></div>
-    <div class="ea-tone-bar">
-      <button class="ea-tone-btn active" onclick="eaSetTone('professional',this)">Professional</button>
-      <button class="ea-tone-btn" onclick="eaSetTone('concise',this)">Concise</button>
-      <button class="ea-tone-btn" onclick="eaSetTone('friendly',this)">Friendly</button>
-    </div>
     <div class="ea-field">
       <label>What do you want to say? (bullet points OK)</label>
       <textarea class="ea-field textarea" id="ea-reply-notes" rows="4" placeholder="e.g. Confirm meeting, ask about budget, say we'll follow up Thursday…"></textarea>
@@ -3059,7 +3054,7 @@ function doFetchEaMessages(token) {
   var listEl = document.getElementById('ea-email-list');
   if (listEl) listEl.innerHTML = '<div class="ea-loading">📬 Scanning your inbox…</div>';
   var allIds = [];
-  var maxEmails = 200;
+  var maxEmails = 100;
 
   function collectIds(pageToken) {
     var url = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=50&q=in:inbox';
@@ -3395,8 +3390,7 @@ function eaGenerateDraft() {
   var notes = notesEl ? notesEl.value.trim() : '';
   if (!notes) { showToast('Add some notes on what you want to say first'); return; }
   if (draftEl) { draftEl.style.display = 'block'; draftEl.value = 'Generating…'; }
-  var toneDesc = { professional: 'professional and clear', concise: 'very concise and to the point', friendly: 'warm and friendly' }[eaTone] || 'professional';
-  var prompt = 'Write a ' + toneDesc + ' email reply.\n\nOriginal email:\nSubject: ' + m.subject + '\nFrom: ' + m.from + '\n\n' + m.body.substring(0, 600) + '\n\nKey points to address:\n' + notes + '\n\nWrite only the reply body (no Subject line, no "Dear..." header needed — start directly). Be ' + toneDesc + '.';
+  var prompt = 'Write an email reply in Markus\'s voice. Markus\'s writing style: direct, no fluff, concise but warm when needed, gets straight to the point, uses short sentences, professional but human. Never use filler phrases like "I hope this finds you well" or "please don\'t hesitate to reach out".\n\nOriginal email:\nSubject: ' + m.subject + '\nFrom: ' + m.from + '\n\n' + m.body.substring(0, 600) + '\n\nKey points to address:\n' + notes + '\n\nWrite only the reply body. Start directly — no subject line, no "Dear X" opener unless it feels natural.';
   fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: claudeHeaders(),
