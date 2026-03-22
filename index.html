@@ -984,6 +984,10 @@ What would you like to work on?</div></div>
         <button class="btn-gold" onclick="initEmailAgent()">Try Anyway</button>
       </div>
       <div id="ea-main-area" style="display:none;">
+        <div id="ea-claude-warning" style="display:none;margin-bottom:14px;padding:12px 16px;background:rgba(245,158,74,0.1);border:1px solid rgba(245,158,74,0.3);border-radius:var(--radius-md);font-size:13px;display:flex;align-items:center;gap:12px;">
+          <span>⚠️ Claude API key not set — AI triage and summaries won't work.</span>
+          <button class="btn btn-gold" style="padding:5px 14px;font-size:12px;flex-shrink:0;" onclick="showView('integrations')">Add Key in Integrations →</button>
+        </div>
         <div class="ea-subtab-bar">
           <button class="ea-subtab active" onclick="eaSetSubTab('inbox',this)" id="ea-tab-inbox">📥 Inbox</button>
           <button class="ea-subtab" onclick="eaSetSubTab('approval',this)" id="ea-tab-approval">🟡 Approval Queue<span class="ea-subtab-badge" id="ea-approval-count" style="display:none;">0</span></button>
@@ -3016,6 +3020,8 @@ function initEmailAgent() {
   }
   if (connectArea) connectArea.style.display = 'none';
   if (mainArea) mainArea.style.display = 'block';
+  var claudeWarning = document.getElementById('ea-claude-warning');
+  if (claudeWarning) claudeWarning.style.display = localStorage.getItem('flow_claude_key') ? 'none' : 'flex';
   if (eaMessages.length === 0) {
     fetchEaMessages();
   } else {
