@@ -3057,68 +3057,90 @@ function fetchEaMessages() {
 
 function doFetchEaMessages(token) {
   var listEl = document.getElementById('ea-email-list');
-  if (listEl) listEl.innerHTML = '<div class="ea-loading">Fetching emails…</div>';
-  fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=50&q=in:inbox', {
-    headers: { 'Authorization': 'Bearer ' + token }
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.error) {
-      var listEl2 = document.getElementById('ea-email-list');
-      if (listEl2) listEl2.innerHTML = '<div class="ea-loading" style="color:var(--accent-red);">⚠️ ' + escHtml(data.error.message || 'Gmail access denied') + '<br><small style="display:block;margin:8px 0;">Enable Gmail API at console.cloud.google.com and add gmail scopes to the OAuth consent screen.</small><button class="btn btn-gold" style="margin-top:6px;" onclick="connectGoogleCalendar(true)">🔗 Re-connect Google</button></div>';
-      return;
-    }
-    var ids = (data.messages || []).map(function(m) { return m.id; });
-    if (ids.length === 0) {
-      eaMessages = [];
+  if (listEl) listEl.innerHTML = '<div class="ea-loading">📬 Scanning your inbox…</div>';
+  var allIds = [];
+  var maxEmails = 200;
+
+  function collectIds(pageToken) {
+    var url = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=50&q=in:inbox';
+    if (pageToken) url += '&pageToken=' + pageToken;
+    fetch(url, { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        if (listEl) listEl.innerHTML = '<div class="ea-loading" style="color:var(--accent-red);">⚠️ ' + escHtml(data.error.message || 'Gmail access denied') + '<br><small style="display:block;margin:8px 0;">Enable Gmail API in Google Cloud Console and add Gmail scopes to the OAuth consent screen.</small><button class="btn btn-gold" style="margin-top:6px;" onclick="connectGoogleCalendar(true)">🔗 Re-connect Google</button></div>';
+        return;
+      }
+      var page = (data.messages || []).map(function(m) { return m.id; });
+      allIds = allIds.concat(page);
+      if (data.nextPageToken && allIds.length < maxEmails) {
+        collectIds(data.nextPageToken);
+      } else {
+        if (allIds.length === 0) { eaMessages = []; renderEaList(); return; }
+        fetchEmailDetails(token, allIds);
+      }
+    })
+    .catch(function() {
+      if (listEl) listEl.innerHTML = '<div class="ea-loading">Failed to load emails. Check your connection.</div>';
+    });
+  }
+
+  collectIds(null);
+}
+
+function fetchEmailDetails(token, ids) {
+  var listEl = document.getElementById('ea-email-list');
+  var batchSize = 10;
+  var batchIndex = 0;
+  eaMessages = [];
+
+  function fetchBatch() {
+    var batch = ids.slice(batchIndex * batchSize, (batchIndex + 1) * batchSize);
+    if (batch.length === 0) {
+      // All done — final sort and triage any untriaged
+      eaMessages.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
       renderEaList();
+      triageEaMessages();
       return;
     }
-    var fetched = 0;
-    var results = [];
-    ids.forEach(function(id) {
+    if (listEl) listEl.innerHTML = '<div class="ea-loading">📬 Reading emails… (' + eaMessages.length + ' of ' + ids.length + ')</div>';
+    var loaded = 0;
+    batch.forEach(function(id) {
       fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/' + id + '?format=full', {
         headers: { 'Authorization': 'Bearer ' + token }
       })
       .then(function(r) { return r.json(); })
       .then(function(msg) {
-        var headers = {};
-        (msg.payload && msg.payload.headers || []).forEach(function(h) { headers[h.name] = h.value; });
-        var body = extractGmailBody(msg.payload);
-        results.push({
+        var h = {};
+        (msg.payload && msg.payload.headers || []).forEach(function(hh) { h[hh.name] = hh.value; });
+        eaMessages.push({
           id: id,
-          subject: headers['Subject'] || '(no subject)',
-          from: headers['From'] || '',
-          date: headers['Date'] || '',
-          body: body,
+          subject: h['Subject'] || '(no subject)',
+          from: h['From'] || '',
+          date: h['Date'] || '',
+          body: extractGmailBody(msg.payload),
           snippet: msg.snippet || '',
           unread: (msg.labelIds || []).indexOf('UNREAD') > -1,
           important: (msg.labelIds || []).indexOf('IMPORTANT') > -1,
-          triage: null,
-          summary: null,
-          meetingItems: null
+          triage: null, summary: null, meetingItems: null
         });
-        fetched++;
-        if (fetched === ids.length) {
-          results.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
-          eaMessages = results;
-          triageEaMessages();
-        }
       })
-      .catch(function() {
-        fetched++;
-        if (fetched === ids.length) {
-          results.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
-          eaMessages = results;
-          triageEaMessages();
+      .catch(function() {})
+      .finally(function() {
+        loaded++;
+        if (loaded === batch.length) {
+          batchIndex++;
+          // Show what we have so far, sorted
+          eaMessages.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+          renderEaList();
+          // Small delay then next batch
+          setTimeout(fetchBatch, 200);
         }
       });
     });
-  })
-  .catch(function(e) {
-    var listEl = document.getElementById('ea-email-list');
-    if (listEl) listEl.innerHTML = '<div class="ea-loading">Failed to load emails. Check your connection.</div>';
-  });
+  }
+
+  fetchBatch();
 }
 
 var eaTriageHeaders = {
