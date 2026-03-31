@@ -13,7 +13,7 @@
   @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
   :root {
-    /* Base palette — soft sky gradient world *
+    /* Base palette — soft sky gradient world */
     --bg-base: #e8f4f8;
     --bg-gradient: linear-gradient(135deg, #dff0f7 0%, #e8f0ff 40%, #f0eeff 70%, #e0f5ee 100%);
     --bg-card: rgba(255,255,255,0.55);
@@ -683,10 +683,10 @@
 
       <div class="widget-bar">
         <span style="font-size:12px;color:var(--text-muted);line-height:30px;">Show:</span>
-        <button class="widget-toggle on" onclick="toggleWidget('tasks-widget',this)">📋 Tasks</button>
-        <button class="widget-toggle on" onclick="toggleWidget('cal-widget',this)">📅 Calendar</button>
-        <button class="widget-toggle on" onclick="toggleWidget('ai-widget',this)">🤖 AI Quick Ask</button>
-        <button class="widget-toggle on" onclick="toggleWidget('notes-widget',this)">📝 Notes</button>
+        <button class="widget-toggle on" onclick="toggleHomeWidget('tasks-widget',this)">📋 Tasks</button>
+        <button class="widget-toggle on" onclick="toggleHomeWidget('cal-widget',this)">📅 Calendar</button>
+        <button class="widget-toggle on" onclick="toggleHomeWidget('ai-widget',this)">🤖 AI Quick Ask</button>
+        <button class="widget-toggle on" onclick="toggleHomeWidget('notes-widget',this)">📝 Notes</button>
       </div>
 
       <div class="grid-area cols-3">
@@ -2077,8 +2077,8 @@ function saveNotes() {
   }, 600);
 }
 
-// ── WIDGET TOGGLES ──
-function toggleWidget(id, btn) {
+// ── HOME VIEW WIDGET TOGGLES ──
+function toggleHomeWidget(id, btn) {
   var el = document.getElementById(id);
   if (!el) return;
   el.classList.toggle('hidden');
@@ -2631,7 +2631,7 @@ function renderGmailDetail(id,h,body,msg){
       '<div class="gmail-body-raw">'+escHtml(body.substring(0,500))+(body.length>500?'\n\n[\u2026truncated]':'')+'</div>'+
     '</div>'+
     '<div style="padding:10px 16px;border-top:1px solid var(--border);background:var(--bg-2);display:flex;gap:8px;">'+
-      '<button class="gmail-filter-btn" onclick="openAddTaskFromEmail(\'' + id + '\',\'' + (h['Subject']||'').replace(/'/g,'') + '\',\'' + (h['From']||'').replace(/'/g,'') + '\')">\U0001f4cb Add as Task</button>'+
+      '<button class="gmail-filter-btn" onclick="openAddTaskFromEmail(\'' + id + '\',\'' + (h['Subject']||'').replace(/'/g,'') + '\',\'' + (h['From']||'').replace(/'/g,'') + '\')">📋 Add as Task</button>'+
       '<button class="gmail-filter-btn" onclick="autoExtractAndAddAllTasks(\'' + id + '\',\'' + (h['Subject']||'').replace(/'/g,'') + '\')">✨ Extract All Tasks</button>'+
     '</div>'+
     '<div class="gmail-reply-area">'+
@@ -2645,7 +2645,7 @@ function renderGmailDetail(id,h,body,msg){
       '<div class="gmail-reply-actions">'+
         '<button class="btn-gold" onclick="draftGmailReply(\''+safeId+'\',\''+escHtml(h['From']||'')+'\',\''+escHtml(h['Subject']||'')+'\')">\u2728 Generate Draft</button>'+
         '<button class="btn btn-ghost" onclick="draftGmailReply(\''+safeId+'\',\''+escHtml(h['From']||'')+'\',\''+escHtml(h['Subject']||'\'')+'\')">&#8635; Regenerate</button>'+
-        '<button class="btn btn-ghost" onclick="sendGmailReply(\''+id+'\',\''+safeId+'\',\''+escHtml(h['From']||'')+'\',\''+escHtml(h['Subject']||'')+'\')">\U0001f4e4 Send</button>'+
+        '<button class="btn btn-ghost" onclick="sendGmailReply(\''+id+'\',\''+safeId+'\',\''+escHtml(h['From']||'')+'\',\''+escHtml(h['Subject']||'')+'\')">📤 Send</button>'+
       '</div>'+
       '<textarea class="gmail-draft-box" id="db-'+safeId+'" placeholder="Draft will appear here \u2014 edit freely before sending\u2026"></textarea>'+
     '</div>';
@@ -2774,7 +2774,7 @@ function initSettings(){
   });
   var u=window._flowUser||{};
   var pi=document.getElementById('profile-info');
-  if(pi)pi.innerHTML='<div>\U0001f464 <strong>'+escHtml(u.name||'\u2014')+'</strong></div><div>\U0001f4e7 '+escHtml(u.email||'\u2014')+'</div><div>\U0001f511 Role: <span style="color:var(--accent-gold)">'+escHtml(u.role||'user')+'</span></div>';
+  if(pi)pi.innerHTML='<div>👤 <strong>'+escHtml(u.name||'\u2014')+'</strong></div><div>📧 '+escHtml(u.email||'\u2014')+'</div><div>🔑 Role: <span style="color:var(--accent-gold)">'+escHtml(u.role||'user')+'</span></div>';
   var accent=localStorage.getItem('flow_accent')||'#f5c842';
   document.querySelectorAll('.color-swatch').forEach(function(sw){
     var bg=sw.getAttribute('onclick')||'';sw.classList.toggle('active',bg.includes("'"+accent+"'"));
@@ -2787,7 +2787,7 @@ function toggleWidget(name,el){
   var prefs=userLoad('flow_widget_prefs',{});
   prefs[name]=on;userStore('flow_widget_prefs',prefs);
   var nb=document.getElementById('nav-'+name);if(nb)nb.style.display=on?'':'none';
-  showToast((on?'\u2705 ':'\U0001f6ab ')+name.charAt(0).toUpperCase()+name.slice(1)+' '+(on?'enabled':'hidden'));
+  showToast((on?'\u2705 ':'🚫 ')+name.charAt(0).toUpperCase()+name.slice(1)+' '+(on?'enabled':'hidden'));
 }
 
 function setAccent(color,dim,el){
@@ -2796,7 +2796,7 @@ function setAccent(color,dim,el){
   document.documentElement.style.setProperty('--accent-gold',color);
   document.documentElement.style.setProperty('--accent-gold-dim',dim);
   localStorage.setItem('flow_accent',color);localStorage.setItem('flow_accent_dim',dim);
-  showToast('\U0001f3a8 Accent colour updated');
+  showToast('🎨 Accent colour updated');
 }
 
 function setDensity(mode,el){
@@ -2804,7 +2804,7 @@ function setDensity(mode,el){
   el.classList.add('active');
   var s={compact:'14px',normal:'18px',comfortable:'20px'};
   document.documentElement.style.fontSize=s[mode]||'18px';
-  localStorage.setItem('flow_density',mode);showToast('\U0001f4d0 Layout: '+mode);
+  localStorage.setItem('flow_density',mode);showToast('📐 Layout: '+mode);
 }
 
 function signOutFlow(){
@@ -2816,18 +2816,18 @@ function signOutFlow(){
 function exportData(){
   var d={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.startsWith('flow_'))d[k]=localStorage.getItem(k);}
   var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
-  a.download='flow-data-'+new Date().toISOString().slice(0,10)+'.json';a.click();showToast('\U0001f4e4 Data exported');
+  a.download='flow-data-'+new Date().toISOString().slice(0,10)+'.json';a.click();showToast('📤 Data exported');
 }
 
 function clearTasks(){
   if(!confirm('Clear completed tasks?'))return;
   var t=JSON.parse(localStorage.getItem('flow_tasks')||'[]').filter(function(x){return!x.done;});
-  localStorage.setItem('flow_tasks',JSON.stringify(t));loadTasksFromStorage();showToast('\U0001f5d1 Completed tasks cleared');
+  localStorage.setItem('flow_tasks',JSON.stringify(t));loadTasksFromStorage();showToast('🗑️ Completed tasks cleared');
 }
 
 function clearNotes(){
   if(!confirm('Clear all notes?'))return;
-  localStorage.removeItem('flow_notes');showToast('\U0001f5d1 Notes cleared');
+  localStorage.removeItem('flow_notes');showToast('🗑️ Notes cleared');
 }
 
 // Apply saved prefs on load
